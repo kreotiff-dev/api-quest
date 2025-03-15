@@ -29,11 +29,55 @@ const Workspace = (function() {
       // Настройка интерфейса API-клиента
       setupApiClientInterface(task);
       
+      // Обновляем информацию о доступных источниках API
+      updateApiSourcesInfo(task);
+      
       // Обновляем прогресс задания
       ProgressManager.updateTaskProgress(task.id);
       
       // Проверяем наличие сохраненного решения
       loadSavedSolution(task.id);
+  }
+  
+  // Обновление информации о доступных источниках API
+  function updateApiSourcesInfo(task) {
+      // Проверяем, есть ли у задания ограничения на источники API
+      if (task.apiSourceRestrictions) {
+          // Если есть ограничения, показываем соответствующее уведомление
+          const currentSource = ApiSourceManager.getCurrentSourceInfo();
+          
+          if (task.apiSourceRestrictions.includes(currentSource.key)) {
+              // Текущий источник разрешен, все в порядке
+          } else {
+              // Текущий источник не разрешен, переключаемся на подходящий
+              const allowedSources = task.apiSourceRestrictions.filter(source => 
+                  ApiSourceManager.getAvailableSources().some(s => s.key === source)
+              );
+              
+              if (allowedSources.length > 0) {
+                  ApiSourceManager.setApiSource(allowedSources[0]);
+                  UI.showNotification(`Для этого задания требуется использовать источник "${ApiSourceManager.getCurrentSourceInfo().name}"`, 'info');
+              } else {
+                  UI.showNotification('Внимание: для этого задания нет доступных API-источников. Используется симулятор.', 'warning');
+                  ApiSourceManager.setApiSource('mock');
+              }
+          }
+      }
+      
+      // Добавляем информацию о рекомендуемых источниках API в описание задания, если она указана
+      if (task.recommendedApiSource) {
+          const sourceInfo = task.recommendedApiSource;
+          const recommendationEl = document.createElement('div');
+          recommendationEl.className = 'api-source-recommendation';
+          recommendationEl.innerHTML = `
+              <p><i class="fas fa-info-circle"></i> <strong>Рекомендуемый источник API:</strong> ${sourceInfo.name}</p>
+              <p>${sourceInfo.description}</p>
+          `;
+          
+          // Добавляем рекомендацию после описания задания
+          const taskDescription = document.getElementById('task-description');
+          taskDescription.appendChild(recommendationEl);
+      }
   }
   
   // Настройка интерфейса API-клиента для задания
@@ -92,6 +136,19 @@ const Workspace = (function() {
       
       // Обновляем интерфейс в зависимости от метода запроса
       updateUIForMethod(task.solution?.method || 'GET');
+      
+      // Проверяем, есть ли ограничения на источники API для этого задания
+      if (task.apiSourceRestrictions) {
+          // Отключаем селектор источников, если для задания разрешен только один источник
+          const selector = document.getElementById('api-source-selector');
+          if (selector && task.apiSourceRestrictions.length === 1) {
+              selector.disabled = true;
+              selector.title = 'Для этого задания разрешен только этот источник API';
+          } else if (selector) {
+              selector.disabled = false;
+              selector.title = '';
+          }
+      }
   }
   
   // Обновление интерфейса в зависимости от метода запроса
@@ -198,38 +255,76 @@ const Workspace = (function() {
           }
       }
       
+      // Формируем запрос для проверки
+      const request = {
+          method,
+          url,
+          headers,
+          body: requestBody
+      };
+      
+      // Проверяем, было ли выполнено задание с использованием правильного источника API
+      const currentSource = ApiSourceManager.getCurrentSourceInfo();
+      
+      if (task.apiSourceRestrictions && !task.apiSourceRestrictions.includes(currentSource.key)) {
+          UI.showNotification(`Для этого задания требуется использовать определенный источник API: ${task.apiSourceRestrictions.join(' или ')}`, 'error');
+          return;
+      }
+      
       // Проверка правильности запроса
-      const isCorrect = checkRequestCorrectness(task, method, url, headers, requestBody);
+      const isCorrect = checkRequestCorrectness(task, request);
       
       if (isCorrect) {
-          // Обновление статуса задания на "выполнено"
-          ProgressManager.markTaskAsCompleted(task.id);
+          // Дополнительная проверка ответа сервера, если требуется
+          if (task.requiresServerResponse) {
+              // Отправляем запрос и проверяем ответ
+              UI.showNotification('Отправка запроса для проверки решения...', 'info');
+              
+              ApiSourceManager.sendRequest(request)
+                  .then(response => {
+                      // Проверяем ответ на соответствие ожидаемому
+                      const isResponseCorrect = checkResponseCorrectness(task, response);
+                      
+                      if (isResponseCorrect) {
+                          // Обновление статуса задания на "выполнено"
+                          ProgressManager.markTaskAsCompleted(task.id);
+                      } else {
+                          UI.showNotification('Ответ сервера не соответствует ожидаемому. Проверьте ваш запрос.', 'error');
+                      }
+                  })
+                  .catch(error => {
+                      UI.showNotification('Произошла ошибка при проверке решения: ' + error.message, 'error');
+                  });
+          } else {
+              // Обновление статуса задания на "выполнено" без проверки ответа
+              ProgressManager.markTaskAsCompleted(task.id);
+          }
       } else {
           UI.showNotification('Запрос не соответствует требованиям задания. Попробуйте еще раз.', 'error');
       }
   }
   
   // Проверка правильности запроса
-  function checkRequestCorrectness(task, method, url, headers, body) {
+  function checkRequestCorrectness(task, request) {
       // Проверка метода
-      if (task.solution && task.solution.method && method !== task.solution.method) {
+      if (task.solution && task.solution.method && request.method !== task.solution.method) {
           return false;
       }
       
       // Проверка URL
-      if (task.solution && task.solution.url && url !== task.solution.url) {
+      if (task.solution && task.solution.url && request.url !== task.solution.url) {
           return false;
       }
       
       // Проверка обязательных заголовков
       if (task.solution && task.solution.headers) {
           for (const [key, value] of Object.entries(task.solution.headers)) {
-              if (!headers[key]) {
+              if (!request.headers[key]) {
                   return false;
               }
               
               // Если для заголовка задано конкретное значение (не placeholder), проверяем его
-              if (value !== true && value !== '' && headers[key] !== value) {
+              if (value !== true && value !== '' && request.headers[key] !== value) {
                   return false;
               }
           }
@@ -237,14 +332,14 @@ const Workspace = (function() {
       
       // Проверка обязательных полей в теле запроса
       if (task.solution && task.solution.body && typeof task.solution.body === 'object' && 
-          ['POST', 'PUT', 'PATCH'].includes(method)) {
+          ['POST', 'PUT', 'PATCH'].includes(request.method)) {
           for (const [key, value] of Object.entries(task.solution.body)) {
-              if (!body || body[key] === undefined) {
+              if (!request.body || request.body[key] === undefined) {
                   return false;
               }
               
               // Если задано конкретное значение (не placeholder), проверяем его
-              if (value !== true && body[key] !== value) {
+              if (value !== true && request.body[key] !== value) {
                   return false;
               }
           }
@@ -257,6 +352,64 @@ const Workspace = (function() {
       }
       
       // Если все проверки пройдены, запрос считается правильным
+      return true;
+  }
+  
+  // Проверка правильности ответа сервера
+  function checkResponseCorrectness(task, response) {
+      // Если нет ожидаемого ответа, считаем любой ответ правильным
+      if (!task.expectedResponse) {
+          return true;
+      }
+      
+      // Проверка статус-кода
+      if (task.expectedResponse.status && response.status !== task.expectedResponse.status) {
+          return false;
+      }
+      
+      // Проверка заголовков
+      if (task.expectedResponse.headers) {
+          for (const [key, value] of Object.entries(task.expectedResponse.headers)) {
+              if (!response.headers[key] || response.headers[key] !== value) {
+                  return false;
+              }
+          }
+      }
+      
+      // Проверка тела ответа
+      if (task.expectedResponse.body) {
+          // Для простых проверок - полное соответствие
+          if (task.expectedResponse.exactMatch) {
+              return JSON.stringify(response.body) === JSON.stringify(task.expectedResponse.body);
+          }
+          
+          // Для проверки по ключам
+          if (typeof task.expectedResponse.body === 'object') {
+              for (const [key, value] of Object.entries(task.expectedResponse.body)) {
+                  // Рекурсивная проверка по вложенным путям, например 'user.name'
+                  const checkNestedValue = (obj, path, expectedValue) => {
+                      const keys = path.split('.');
+                      let current = obj;
+                      
+                      for (let i = 0; i < keys.length; i++) {
+                          if (current[keys[i]] === undefined) {
+                              return false;
+                          }
+                          current = current[keys[i]];
+                      }
+                      
+                      return current === expectedValue || 
+                             (expectedValue === true && current !== undefined);
+                  };
+                  
+                  if (!checkNestedValue(response.body, key, value)) {
+                      return false;
+                  }
+              }
+          }
+      }
+      
+      // Если все проверки пройдены, ответ считается правильным
       return true;
   }
   
@@ -305,6 +458,16 @@ const Workspace = (function() {
           }
       }
       
+      // Добавляем подсказку о выборе источника API, если есть ограничения
+      if (task.apiSourceRestrictions) {
+          const sourcesInfo = task.apiSourceRestrictions.map(sourceKey => {
+              const source = ApiSourceManager.getAvailableSources().find(s => s.key === sourceKey);
+              return source ? source.name : sourceKey;
+          }).join(' или ');
+          
+          hint += `<li>Для этого задания требуется использовать источник API: <strong>${sourcesInfo}</strong></li>`;
+      }
+      
       hint += '</ul><p>Внимательно прочитайте описание задания и требования.</p>';
       
       return hint;
@@ -316,7 +479,8 @@ const Workspace = (function() {
       setupApiClientInterface,
       checkTaskCompletion,
       getHint,
-      loadSavedSolution
+      loadSavedSolution,
+      updateApiSourcesInfo
   };
 })();
 

@@ -534,3 +534,243 @@ function getStatusClass(status) {
       default: return '';
   }
 }
+
+// Добавляем новые задания, демонстрирующие работу с разными источниками API
+const additionalTasks = [
+    {
+        id: 11,
+        title: "Работа с публичными API",
+        subtitle: "Использование реальных внешних API",
+        description: "Изучите, как работать с публичными API на примере запросов к популярному сервису JSONPlaceholder.",
+        category: "advanced",
+        difficulty: "medium",
+        status: "not_started",
+        tags: ["GET", "Публичные API", "REST"],
+        apiSourceRestrictions: ["public"], // Требуется публичный API
+        recommendedApiSource: {
+            name: "JSONPlaceholder API",
+            description: "Бесплатный публичный API для тестирования и прототипирования"
+        },
+        requirements: [
+            "Использовать метод GET",
+            "URL эндпоинта: /posts",
+            "Настроить заголовок Accept: application/json",
+            "Отправить запрос к публичному API JSONPlaceholder"
+        ],
+        expectedResult: "Успешный ответ будет иметь статус-код 200 OK и содержать массив постов в формате JSON.",
+        requiresServerResponse: true, // Требуется проверка ответа сервера
+        expectedResponse: {
+            status: 200,
+            body: {
+                "length": true, // Проверяем, что в ответе есть массив с элементами
+                "[0].id": true, // Проверяем наличие поля id в первом элементе
+                "[0].title": true // Проверяем наличие поля title в первом элементе
+            }
+        },
+        solution: {
+            url: "/posts",
+            method: "GET",
+            headers: {
+                "Accept": "application/json"
+            },
+            body: null
+        },
+        hints: [
+            "Публичные API позволяют практиковаться с реальными данными без необходимости создавать собственный бэкенд.",
+            "JSONPlaceholder предоставляет тестовые эндпоинты для имитации реальных API, которые вы можете встретить в работе.",
+            "Для этого задания убедитесь, что выбран источник 'Публичные API' в селекторе источников API."
+        ]
+    },
+    {
+        id: 12,
+        title: "Создание пользователя в учебном API",
+        subtitle: "Работа с защищенными API",
+        description: "Научитесь создавать ресурсы и работать с API, требующими аутентификации.",
+        category: "auth",
+        difficulty: "hard",
+        status: "not_started",
+        tags: ["POST", "Аутентификация", "REST"],
+        apiSourceRestrictions: ["custom"], // Требуется собственный API
+        requirements: [
+            "Использовать метод POST",
+            "URL эндпоинта: /api/protected/users",
+            "Настроить заголовок Content-Type: application/json",
+            "Настроить заголовок X-API-Quest-Auth с вашим токеном",
+            "Сформировать тело запроса с полями name, email и role"
+        ],
+        expectedResult: "Успешный ответ будет иметь статус-код 201 Created и содержать данные созданного пользователя.",
+        requiresServerResponse: true,
+        expectedResponse: {
+            status: 201,
+            body: {
+                "id": true,
+                "name": true,
+                "email": true,
+                "role": true,
+                "createdAt": true
+            }
+        },
+        solution: {
+            url: "/api/protected/users",
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "X-API-Quest-Auth": true
+            },
+            body: {
+                name: true,
+                email: true,
+                role: true
+            }
+        },
+        hints: [
+            "Для работы с защищенным API необходимо пройти аутентификацию и получить токен.",
+            "В учебном API платформы токен автоматически предоставляется авторизованным пользователям.",
+            "Для этого задания необходимо использовать источник 'Учебный API' в селекторе источников."
+        ]
+    },
+    {
+        id: 13,
+        title: "Сравнение ответов разных API-источников",
+        subtitle: "Анализ различий в API",
+        description: "Изучите, как одинаковые запросы могут давать разные результаты в зависимости от источника API. Сравните ответы моков, публичных API и учебного API.",
+        category: "advanced",
+        difficulty: "medium",
+        status: "not_started",
+        tags: ["GET", "Сравнение", "Анализ"],
+        apiSourceRestrictions: [], // Любой источник API
+        requirements: [
+            "Использовать метод GET",
+            "URL эндпоинта: /users",
+            "Отправить запрос ко всем трем источникам API",
+            "Сравнить полученные ответы и заполнить таблицу сравнения"
+        ],
+        expectedResult: "Успешное сравнение ответов от разных источников API с анализом различий в формате, содержании и структуре данных.",
+        solution: {
+            url: "/users",
+            method: "GET",
+            headers: {},
+            body: null,
+            compareTable: true // Признак того, что задание требует заполнения таблицы сравнения
+        },
+        hints: [
+            "Разные API могут использовать разные форматы данных и конвенции именования полей.",
+            "Обратите внимание на структуру ответов, наличие вложенных объектов и формат полей даты/времени.",
+            "Для полного сравнения переключайтесь между источниками API с помощью селектора."
+        ]
+    }
+  ];
+  
+  // Добавляем новые задания в общий массив
+  tasks.push(...additionalTasks);
+  
+  // Обновляем базовые URL для разных API источников
+  const apiSourceConfig = {
+      mock: {
+          name: "Симулятор API",
+          description: "Локальные моки для обучения без внешних зависимостей",
+          baseUrl: "" // Пустой URL для моков
+      },
+      public: {
+          name: "Публичные API",
+          description: "Набор бесплатных публичных API для практики",
+          baseUrl: "https://jsonplaceholder.typicode.com" // JSONPlaceholder API
+      },
+      custom: {
+          name: "Учебный API",
+          description: "Собственный API платформы с расширенными возможностями",
+          baseUrl: "https://api-quest.example.com/api"
+      }
+  };
+  
+  // Добавляем моки для новых ответов API
+  const additionalApiResponses = {
+      // Мок для публичного API с постами
+      "GET:/posts": {
+          status: 200,
+          statusText: "OK",
+          headers: {
+              "Content-Type": "application/json",
+              "Server": "API Simulator",
+              "Cache-Control": "no-cache"
+          },
+          body: [
+              {
+                  userId: 1,
+                  id: 1,
+                  title: "sunt aut facere repellat provident occaecati excepturi optio reprehenderit",
+                  body: "quia et suscipit\nsuscipit recusandae consequuntur expedita et cum\nreprehenderit molestiae ut ut quas totam\nnostrum rerum est autem sunt rem eveniet architecto"
+              },
+              {
+                  userId: 1,
+                  id: 2,
+                  title: "qui est esse",
+                  body: "est rerum tempore vitae\nsequi sint nihil reprehenderit dolor beatae ea dolores neque\nfugiat blanditiis voluptate porro vel nihil molestiae ut reiciendis\nqui aperiam non debitis possimus qui neque nisi nulla"
+              },
+              {
+                  userId: 1,
+                  id: 3,
+                  title: "ea molestias quasi exercitationem repellat qui ipsa sit aut",
+                  body: "et iusto sed quo iure\nvoluptatem occaecati omnis eligendi aut ad\nvoluptatem doloribus vel accusantium quis pariatur\nmolestiae porro eius odio et labore et velit aut"
+              }
+          ]
+      },
+      
+      // Мок для сравнения API с разными источниками
+      "GET:/users": {
+          status: 200,
+          statusText: "OK",
+          headers: {
+              "Content-Type": "application/json",
+              "Server": "API Simulator",
+              "Cache-Control": "no-cache"
+          },
+          body: [
+              {
+                  id: 1,
+                  name: "Иван Петров",
+                  email: "ivan@example.com",
+                  role: "admin",
+                  registeredAt: "2023-01-15T10:30:00Z"
+              },
+              {
+                  id: 2,
+                  name: "Мария Сидорова",
+                  email: "maria@example.com",
+                  role: "user",
+                  registeredAt: "2023-02-20T14:15:00Z"
+              },
+              {
+                  id: 3,
+                  name: "Алексей Иванов",
+                  email: "alex@example.com",
+                  role: "user",
+                  registeredAt: "2023-03-05T09:45:00Z"
+              }
+          ]
+      },
+      
+      // Мок для создания пользователя в защищенном API
+      "POST:/api/protected/users": {
+          status: 201,
+          statusText: "Created",
+          headers: {
+              "Content-Type": "application/json",
+              "Server": "API Simulator",
+              "Location": "/api/protected/users/4"
+          },
+          body: {
+              id: 4,
+              name: "{name}",
+              email: "{email}",
+              role: "{role}",
+              createdAt: "{currentDate}"
+          }
+      }
+  };
+  
+  // Добавляем новые моки в общий объект ответов
+  Object.assign(apiResponses, additionalApiResponses);
+  
+  // Экспортируем конфигурацию API источников в глобальную область
+  window.apiSourceConfig = apiSourceConfig;

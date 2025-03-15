@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Документация по API-источникам - API Практикум</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        .docs-content {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+        
+        .docs-section {
+            margin-bottom: 2.5rem;
+        }
+        
+        .docs-section h2 {
+            margin-top: 0;
+            margin-bottom: 1.5rem;
+            padding-bottom: 0.8rem;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .api-source-card {
+            background-color: white;
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        
+        .api-source-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+        
+        .api-source-icon {
+            width: 40px;
+            height: 40px;
+            background-color: #f8f9fa;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 1rem;
+            font-size: 1.5rem;
+        }
+        
+        .api-source-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: #333;
+        }
+        
+        .api-source-description {
+            color: #666;
+            margin-bottom: 1rem;
+        }
+        
+        .features-list {
+            background-color: #f8f9fa;
+            border-radius: 8px;
+            padding: 1rem;
+        }
+        
+        .features-list ul {
+            margin: 0;
+            padding-left: 1.5rem;
+        }
+        
+        .features-list li {
+            margin-bottom: 0.5rem;
+        }
+        
+        .usage-example {
+            background-color: #f8f9fa;
+            border-radius: 8px;
+            padding: 1.5rem;
+            font-family: monospace;
+            white-space: pre-wrap;
+            margin-top: 1rem;
+        }
+        
+        .comparison-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 1rem;
+        }
+        
+        .comparison-table th,
+        .comparison-table td {
+            padding: 0.8rem;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+        
+        .comparison-table th {
+            background-color: #f8f9fa;
+            font-weight: 500;
+        }
+        
+        .comparison-table tr:last-child td {
+            border-bottom: none;
+        }
+        
+        .status-badge {
+            display: inline-block;
+            padding: 0.3rem 0.6rem;
+            border-radius: 4px;
+            font-size: 0.9rem;
+            margin-left: 0.5rem;
+        }
+        
+        .status-available {
+            background-color: #d4edda;
+            color: #155724;
+        }
+        
+        .status-limited {
+            background-color: #fff3cd;
+            color: #856404;
+        }
+        
+        .status-requires-auth {
+            background-color: #e2e3e5;
+            color: #383d41;
+        }
+        
+        .back-button {
+            display: inline-flex;
+            align-items: center;
+            padding: 0.5rem 1rem;
+            margin-bottom: 1.5rem;
+            background-color: #f8f9fa;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            color: #333;
+            text-decoration: none;
+            font-size: 0.9rem;
+        }
+        
+        .back-button i {
+            margin-right: 0.5rem;
+        }
+        
+        .back-button:hover {
+            background-color: #e9ecef;
+        }
+    </style>
+</head>
+<body>
+    <header class="main-header">
+        <div class="logo">
+            <h1>API Практикум</h1>
+        </div>
+        <div class="user-info">
+            <div class="user-profile">
+                <i class="fas fa-user-circle"></i>
+                <span>Студент</span>
+            </div>
+        </div>
+    </header>
+    
+    <div class="docs-content">
+        <a href="index.html" class="back-button">
+            <i class="fas fa-arrow-left"></i> Вернуться на главную
+        </a>
+        
+        <h1>Документация по API-источникам</h1>
+        <p>API Практикум предлагает несколько источников API для обучения и практики. Каждый источник имеет свои особенности, преимущества и ограничения.</p>
+        
+        <div class="docs-section">
+            <h2>Доступные источники API</h2>
+            
+            <div class="api-source-card">
+                <div class="api-source-header">
+                    <div class="api-source-icon">
+                        <i class="fas fa-server" style="color: #3498db;"></i>
+                    </div>
+                    <div class="api-source-title">
+                        Симулятор API
+                        <span class="status-badge status-available">Всегда доступен</span>
+                    </div>
+                </div>
+                <div class="api-source-description">
+                    Локальные моки для обучения без внешних зависимостей. Симулятор предоставляет предсказуемые ответы и не требует подключения к интернету.
+                </div>
+                <div class="features-list">
+                    <h4>Особенности:</h4>
+                    <ul>
+                        <li>Работает полностью в браузере, не требует подключения к интернету</li>
+                        <li>Предсказуемые ответы на запросы</li>
+                        <li>Поддержка всех HTTP методов и форматов данных</li>
+                        <li>Имитация задержек сети и ошибок</li>
+                        <li>Идеально подходит для начинающих</li>
+                    </ul>
+                </div>
+                <div class="usage-example">
+GET /api/users HTTP/1.1
+Host: api-quest-simulator
+Accept: application/json
+
+// Ответ
+{
+  "status": 200,
+  "body": [
+    {
+      "id": 1,
+      "name": "Иван Петров",
+      "email": "ivan@example.com",
+      "role": "admin"
+    },
+    {
+      "id": 2,
+      "name": "Мария Сидорова",
+      "email": "maria@example.com",
+      "role": "user"
+    }
+  ]
+}
+                </div>
+            </div>
+            
+            <div class="api-source-card">
+                <div class="api-source-header">
+                    <div class="api-source-icon">
+                        <i class="fas fa-globe" style="color: #2ecc71;"></i>
+                    </div>
+                    <div class="api-source-title">
+                        Публичные API
+                        <span class="status-badge status-limited">Лимиты запросов</span>
+                    </div>
+                </div>
+                <div class="api-source-description">
+                    Набор бесплатных публичных API для практики с реальными данными. Позволяет получить опыт работы с внешними сервисами.
+                </div>
+                <div class="features-list">
+                    <h4>Особенности:</h4>
+                    <ul>
+                        <li>Реальные данные и ответы от публичных сервисов</li>
+                        <li>Работа с внешними ограничениями и особенностями API</li>
+                        <li>Ознакомление с различными форматами данных и конвенциями именования</li>
+                        <li>Ограничения на количество запросов (обычно 60-100 запросов в час)</li>
+                        <li>Требуется подключение к интернету</li>
+                    </ul>
+                </div>
+                <div class="usage-example">
+GET /posts HTTP/1.1
+Host: jsonplaceholder.typicode.com
+Accept: application/json
+
+// Ответ
+[
+  {
+    "userId": 1,
+    "id": 1,
+    "title": "sunt aut facere repellat provident...",
+    "body": "quia et suscipit\nsuscipit recusandae..."
+  },
+  {
+    "userId": 1,
+    "id": 2,
+    "title": "qui est esse",
+    "body": "est rerum tempore vitae\nsequi sint..."
+  }
+]
+                </div>
+            </div>
+            
+            <div class="api-source-card">
+                <div class="api-source-header">
+                    <div class="api-source-icon">
+                        <i class="fas fa-graduation-cap" style="color: #9b59b6;"></i>
+                    </div>
+                    <div class="api-source-title">
+                        Учебный API
+                        <span class="status-badge status-requires-auth">Требуется авторизация</span>
+                    </div>
+                </div>
+                <div class="api-source-description">
+                    Собственный API платформы с расширенными возможностями для продвинутого обучения. Включает авторизацию, сложные сценарии и специализированные эндпоинты.
+                </div>
+                <div class="features-list">
+                    <h4>Особенности:</h4>
+                    <ul>
+                        <li>Полный спектр HTTP методов и возможностей REST API</li>
+                        <li>Аутентификация и авторизация (API ключи, токены, OAuth)</li>
+                        <li>Валидация данных и обработка ошибок</li>
+                        <li>Пагинация, фильтрация и сортировка</li>
+                        <li>Сложные сценарии использования API, приближенные к реальным</li>
+                        <li>Требуется регистрация и авторизация</li>
+                    </ul>
+                </div>
+                <div class="usage-example">
+POST /api/protected/users HTTP/1.1
+Host: api-quest.example.com
+Content-Type: application/json
+X-API-Quest-Auth: your_auth_token_123
+
+{
+  "name": "Новый Пользователь",
+  "email": "new@example.com",
+  "role": "user"
+}
+
+// Ответ
+{
+  "id": 4,
+  "name": "Новый Пользователь",
+  "email": "new@example.com",
+  "role": "user",
+  "createdAt": "2023-07-15T10:30:00Z"
+}
+                </div>
+            </div>
+        </div>
+        
+        <div class="docs-section">
+            <h2>Сравнение источников API</h2>
+            
+            <table class="comparison-table">
+                <thead>
+                    <tr>
+                        <th>Функция</th>
+                        <th>Симулятор API</th>
+                        <th>Публичные API</th>
+                        <th>Учебный API</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Доступность</td>
+                        <td>Всегда доступен</td>
+                        <td>Зависит от внешних сервисов</td>
+                        <td>Зависит от статуса сервера</td>
+                    </tr>
+                    <tr>
+                        <td>Требуется интернет</td>
+                        <td>Нет</td>
+                        <td>Да</td>
+                        <td>Да</td>
+                    </tr>
+                    <tr>
+                        <td>Ограничения запросов</td>
+                        <td>Нет</td>
+                        <td>Да (60-100 запросов/час)</td>
+                        <td>Умеренные</td>
+                    </tr>
+                    <tr>
+                        <td>Авторизация</td>
+                        <td>Симуляция</td>
+                        <td>Ограниченная</td>
+                        <td>Полная поддержка</td>
+                    </tr>
+                    <tr>
+                        <td>Предсказуемость</td>
+                        <td>Высокая</td>
+                        <td>Низкая</td>
+                        <td>Средняя</td>
+                    </tr>
+                    <tr>
+                        <td>Сложность сценариев</td>
+                        <td>Средняя</td>
+                        <td>Низкая</td>
+                        <td>Высокая</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        
+        <div class="docs-section">
+            <h2>Использование селектора источников API</h2>
+            
+            <p>Вы можете выбрать источник API для каждого задания с помощью селектора в верхней части экрана. Некоторые задания могут требовать использования конкретного источника API.</p>
+            
+            <div class="features-list">
+                <h4>Советы по выбору источника:</h4>
+                <ul>
+                    <li><strong>Для начинающих:</strong> Используйте Симулятор API, чтобы освоить основы без внешних зависимостей</li>
+                    <li><strong>Для изучения внешних API:</strong> Переключитесь на Публичные API, чтобы работать с реальными данными</li>
+                    <li><strong>Для продвинутых сценариев:</strong> Используйте Учебный API для изучения авторизации и сложных сценариев</li>
+                    <li><strong>При проблемах с подключением:</strong> Вернитесь к Симулятору API, если внешние источники недоступны</li>
+                </ul>
+            </div>
+        </div>
+        
+        <div class="docs-section">
+            <h2>Отказоустойчивость и переключение источников</h2>
+            
+            <p>API Практикум автоматически проверяет доступность выбранных источников API и предлагает альтернативы в случае недоступности.</p>
+            
+            <div class="features-list">
+                <h4>Механизмы отказоустойчивости:</h4>
+                <ul>
+                    <li>Автоматическая проверка доступности источников API при запуске и с интервалом в 60 секунд</li>
+                    <li>Автоматическое переключение на доступные источники по приоритету, если текущий источник недоступен</li>
+                    <li>Возможность ручного выбора источника API в любой момент</li>
+                    <li>Сохранение выбора источника между сессиями</li>
+                    <li>Предупреждения при недоступности требуемого для задания источника API</li>
+                </ul>
+            </div>
+        </div>
+        
+        <div class="docs-section">
+            <h2>Решение проблем</h2>
+            
+            <div class="features-list">
+                <h4>Если у вас возникли проблемы с источниками API:</h4>
+                <ul>
+                    <li>Проверьте подключение к интернету для Публичных и Учебных API</li>
+                    <li>Убедитесь, что вы авторизованы для доступа к Учебному API</li>
+                    <li>Временно переключитесь на Симулятор API, если внешние источники недоступны</li>
+                    <li>Обновите страницу, чтобы повторно проверить доступность источников</li>
+                    <li>Если проблемы сохраняются, обратитесь за помощью к AI-ассистенту</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+    
+    <script src="js/ui.js"></script>
+</body>
+</html>

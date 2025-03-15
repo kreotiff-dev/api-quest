@@ -950,3 +950,174 @@ ul {
         grid-template-columns: 1fr;
     }
 }
+/* Стили для селектора источников API */
+.api-source-selector-container {
+    display: flex;
+    align-items: center;
+    margin-left: 1rem;
+}
+
+.api-source-selector-container label {
+    margin-right: 0.5rem;
+    font-weight: 500;
+    white-space: nowrap;
+}
+
+.api-source-selector-container select {
+    padding: 0.4rem 0.8rem;
+    border-radius: 4px;
+    border: 1px solid #ddd;
+    font-size: 0.9rem;
+    min-width: 150px;
+}
+
+/* Индикатор источника API в ответе */
+.response-source {
+    display: inline-block;
+    padding: 0.3rem 0.6rem;
+    border-radius: 4px;
+    font-size: 0.9rem;
+    margin-left: 0.5rem;
+    background-color: #f0f0f0;
+    color: #666;
+}
+
+/* Выпадающий список источников API */
+.api-source-dropdown {
+    position: absolute;
+    z-index: 100;
+    background-color: white;
+    border-radius: 8px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+    width: 220px;
+    overflow: hidden;
+    display: none;
+    animation: dropdownOpen 0.2s ease;
+}
+
+.api-source-dropdown.show {
+    display: block;
+}
+
+@keyframes dropdownOpen {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.dropdown-header {
+    padding: 0.8rem 1rem;
+    background-color: #f8f9fa;
+    border-bottom: 1px solid #eee;
+    font-weight: 500;
+    font-size: 0.9rem;
+}
+
+.dropdown-item {
+    padding: 0.8rem 1rem;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.dropdown-item:hover {
+    background-color: #f5f5f5;
+}
+
+.dropdown-item.active {
+    background-color: #e8f4fd;
+    color: #3498db;
+    font-weight: 500;
+}
+
+/* Кнопка выбора источника API */
+.btn-source-selector {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.btn-source-selector i {
+    font-size: 0.9rem;
+}
+
+/* Индикаторы статуса источника API */
+.api-source-status {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    display: inline-block;
+    margin-right: 0.5rem;
+}
+
+.api-source-status.available {
+    background-color: #2ecc71;
+}
+
+.api-source-status.unavailable {
+    background-color: #e74c3c;
+}
+
+/* Состояния отклика API */
+.response-status-success {
+    background-color: #d4edda;
+    color: #155724;
+}
+
+.response-status-redirect {
+    background-color: #fff3cd;
+    color: #856404;
+}
+
+.response-status-error {
+    background-color: #f8d7da;
+    color: #721c24;
+}
+
+.response-status-unknown {
+    background-color: #e2e3e5;
+    color: #383d41;
+}
+
+/* Адаптивность для мобильных устройств */
+@media (max-width: 768px) {
+    .api-source-selector-container {
+        margin-left: 0;
+        margin-top: 0.5rem;
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    
+    .api-source-selector-container label {
+        margin-bottom: 0.3rem;
+    }
+    
+    .api-source-selector-container select {
+        width: 100%;
+    }
+}
+.header-actions {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+  }
+  
+  .source-selector {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  
+  .source-selector label {
+    white-space: nowrap;
+    font-weight: 500;
+    margin: 0;
+  }
+  
+  .source-selector select {
+    min-width: 150px;
+  }

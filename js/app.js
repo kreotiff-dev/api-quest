@@ -11,7 +11,7 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 // Основная функция инициализации приложения
-function initApp() {
+async function initApp() {
     // Загрузка пользовательского прогресса
     ProgressManager.loadUserProgress();
     
@@ -23,6 +23,30 @@ function initApp() {
     
     // Инициализация фильтров
     TaskList.initFilters();
+    
+    // Инициализация менеджера API источников
+    await ApiSourceManager.init();
+    
+    // Инициализация API клиента
+    ApiClient.init();
+    
+    // Отображаем информацию о приложении в консоли
+    console.log('API-Quest инициализирован', {
+        версия: '1.1.0',
+        режим: getAppMode(),
+        источникAPI: ApiSourceManager.getCurrentSourceInfo().name
+    });
+}
+
+// Определение режима работы приложения
+function getAppMode() {
+    if (location.hostname === 'localhost' || location.hostname === '127.0.0.1') {
+        return 'development';
+    } else if (location.hostname.includes('staging') || location.hostname.includes('test')) {
+        return 'staging';
+    } else {
+        return 'production';
+    }
 }
 
 // Настройка обработчиков событий
@@ -46,9 +70,7 @@ function setupEventListeners() {
     
     // Добавление нового заголовка в запрос
     document.getElementById('add-header').addEventListener('click', () => {
-        const headersContainer = document.getElementById('headers-container');
-        const newHeaderRow = ApiClient.createHeaderRow();
-        headersContainer.appendChild(newHeaderRow);
+        ApiClient.addHeaderRow();
     });
     
     // Переключение табов в API клиенте
@@ -81,6 +103,9 @@ function setupEventListeners() {
     // Кнопка сброса запроса
     document.getElementById('reset-request').addEventListener('click', ApiClient.resetRequest);
     
+    // Кнопка форматирования JSON
+    document.getElementById('format-json-btn')?.addEventListener('click', ApiClient.formatJsonBody);
+    
     // Обработчики для AI-ассистента
     document.getElementById('ai-help-btn').addEventListener('click', AiAssistant.askHelp);
     document.getElementById('ai-analyze-btn').addEventListener('click', AiAssistant.analyzeRequest);
@@ -109,10 +134,22 @@ function setupEventListeners() {
             }
         });
     });
+    
+    // Добавление обработчика для клавиши Escape, чтобы закрыть модальные окна
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') {
+            document.querySelectorAll('.modal').forEach(modal => {
+                if (modal.style.display === 'block') {
+                    modal.style.display = 'none';
+                }
+            });
+        }
+    });
 }
 
 // Экспортируем глобальные переменные и функции, которые должны быть доступны из других модулей
 window.AppMain = {
     getCurrentTask: () => currentTask,
-    setCurrentTask: (task) => { currentTask = task; }
+    setCurrentTask: (task) => { currentTask = task; },
+    getAppMode: getAppMode
 };

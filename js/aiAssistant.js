@@ -333,6 +333,189 @@ const AiAssistant = (function() {
 
 // Экспортируем модуль в глобальную область видимости
 window.AiAssistant = AiAssistant;
+(function() {
+  // Дополнительные ответы, связанные с источниками API
+  const additionalAiResponses = {
+      apiSources: {
+          mock: "Симулятор API предоставляет локальные моки для обучения без внешних зависимостей. Это самый надежный источник, так как не требует подключения к интернету и всегда доступен.",
+          public: "Публичные API позволяют практиковаться с реальными данными и изучать особенности работы с внешними сервисами. Однако они могут быть недоступны или иметь ограничения на количество запросов.",
+          custom: "Учебный API платформы предоставляет расширенные возможности для обучения, включая авторизацию, валидацию данных и более сложные сценарии использования API."
+      },
+      sourceSelection: "Для выбора источника API используйте селектор в верхней части экрана. Некоторые задания могут требовать использования конкретного источника API.",
+      sourceComparison: `<p>Разные источники API могут иметь особенности:</p>
+                        <ul>
+                          <li><strong>Симулятор API</strong>: Предсказуемые ответы, всегда доступен, идеален для начинающих</li>
+                          <li><strong>Публичные API</strong>: Реальные данные, могут быть ограничения, помогают понять особенности внешних сервисов</li>
+                          <li><strong>Учебный API</strong>: Продвинутые функции, требует авторизации, более сложные сценарии</li>
+                        </ul>`,
+      troubleshooting: `<p>Если у вас проблемы с источниками API:</p>
+                       <ol>
+                         <li>Проверьте подключение к интернету для публичных и учебных API</li>
+                         <li>Убедитесь, что вы авторизованы для доступа к учебному API</li>
+                         <li>Временно переключитесь на симулятор API, если внешние источники недоступны</li>
+                         <li>Проверьте, соответствует ли выбранный источник требованиям задания</li>
+                       </ol>`
+  };
+  
+  // Добавляем новые ответы в основной объект aiResponses
+  if (window.AiAssistant) {
+      // Расширяем возможности AI-ассистента
+      const originalSendQuestion = AiAssistant.sendQuestion;
+      
+      // Переопределяем метод для обработки вопросов о новых функциях
+      AiAssistant.sendQuestion = function() {
+          const inputField = document.getElementById('ai-question-input');
+          const question = inputField.value.trim();
+          
+          if (!question) return;
+          
+          // Добавляем вопрос пользователя в чат
+          AiAssistant.addUserMessage(question);
+          
+          // Очищаем поле ввода
+          inputField.value = '';
+          
+          // Проверяем наличие ключевых слов, связанных с API-источниками
+          const lowerQuestion = question.toLowerCase();
+          
+          let answer = null;
+          
+          if (lowerQuestion.includes('источник') || lowerQuestion.includes('api источник') || 
+              lowerQuestion.includes('source')) {
+              
+              if (lowerQuestion.includes('симулятор') || lowerQuestion.includes('мок') || 
+                  lowerQuestion.includes('mock')) {
+                  answer = additionalAiResponses.apiSources.mock;
+              }
+              else if (lowerQuestion.includes('публичн') || lowerQuestion.includes('public')) {
+                  answer = additionalAiResponses.apiSources.public;
+              }
+              else if (lowerQuestion.includes('учебн') || lowerQuestion.includes('custom')) {
+                  answer = additionalAiResponses.apiSources.custom;
+              }
+              else if (lowerQuestion.includes('выбра') || lowerQuestion.includes('переключ') || 
+                       lowerQuestion.includes('селектор')) {
+                  answer = additionalAiResponses.sourceSelection;
+              }
+              else if (lowerQuestion.includes('сравн') || lowerQuestion.includes('разниц') || 
+                       lowerQuestion.includes('различ')) {
+                  answer = additionalAiResponses.sourceComparison;
+              }
+              else if (lowerQuestion.includes('проблем') || lowerQuestion.includes('ошибк') || 
+                       lowerQuestion.includes('не работа')) {
+                  answer = additionalAiResponses.troubleshooting;
+              }
+              else {
+                  // Общая информация об источниках API
+                  answer = `<p>В API-Quest доступны три источника API:</p>
+                           <ul>
+                             <li><strong>Симулятор API</strong>: ${additionalAiResponses.apiSources.mock}</li>
+                             <li><strong>Публичные API</strong>: ${additionalAiResponses.apiSources.public}</li>
+                             <li><strong>Учебный API</strong>: ${additionalAiResponses.apiSources.custom}</li>
+                           </ul>
+                           <p>${additionalAiResponses.sourceSelection}</p>`;
+              }
+          }
+          
+          // Если нашли ответ о API-источниках, добавляем его
+          if (answer) {
+              setTimeout(() => {
+                  AiAssistant.addAiMessage(answer);
+              }, 500);
+              return;
+          }
+          
+          // Если не нашли специального ответа, вызываем оригинальный метод
+          originalSendQuestion.call(this);
+      };
+      
+      // Обновляем метод analyzeRequest для проверки соответствия источника API
+      const originalAnalyzeRequest = AiAssistant.analyzeRequest;
+      
+      AiAssistant.analyzeRequest = function() {
+          const task = AppMain.getCurrentTask();
+          if (!task) return;
+          
+          // Добавляем сообщение пользователя
+          AiAssistant.addUserMessage("Проанализируйте мой запрос, пожалуйста.");
+          
+          // Проверяем, есть ли ограничения на источники API для задания
+          if (task.apiSourceRestrictions && task.apiSourceRestrictions.length > 0) {
+              const currentSource = ApiSourceManager.getCurrentSourceInfo();
+              
+              if (!task.apiSourceRestrictions.includes(currentSource.key)) {
+                  // Задание требует другого источника API
+                  const sourcesInfo = task.apiSourceRestrictions.map(sourceKey => {
+                      const source = apiSourceConfig[sourceKey];
+                      return source ? source.name : sourceKey;
+                  }).join(' или ');
+                  
+                  const message = `<p>Обратите внимание: для этого задания требуется использовать следующий источник API: <strong>${sourcesInfo}</strong>.</p>
+                                  <p>Сейчас вы используете источник "${currentSource.name}". Пожалуйста, переключитесь на требуемый источник с помощью селектора источников API.</p>`;
+                  
+                  AiAssistant.addAiMessage(message);
+                  
+                  // Не продолжаем анализ, так как источник API неправильный
+                  return;
+              }
+          }
+          
+          // Продолжаем с оригинальным методом анализа
+          originalAnalyzeRequest.call(this);
+      };
+      
+      // Расширяем метод askHelp для включения информации об источниках API
+      const originalAskHelp = AiAssistant.askHelp;
+      
+      AiAssistant.askHelp = function() {
+          const task = AppMain.getCurrentTask();
+          if (!task) return;
+          
+          // Добавляем сообщение пользователя
+          AiAssistant.addUserMessage("Помогите мне с этим заданием, пожалуйста.");
+          
+          // Если у задания есть ограничения или рекомендации по источникам API, добавляем информацию
+          let apiSourceInfo = '';
+          
+          if (task.apiSourceRestrictions && task.apiSourceRestrictions.length > 0) {
+              const sourcesInfo = task.apiSourceRestrictions.map(sourceKey => {
+                  const source = apiSourceConfig[sourceKey];
+                  return source ? source.name : sourceKey;
+              }).join(' или ');
+              
+              apiSourceInfo += `<p><strong>Требуемый источник API:</strong> ${sourcesInfo}</p>`;
+          } else if (task.recommendedApiSource) {
+              apiSourceInfo += `<p><strong>Рекомендуемый источник API:</strong> ${task.recommendedApiSource.name}</p>
+                              <p>${task.recommendedApiSource.description}</p>`;
+          }
+          
+          if (apiSourceInfo) {
+              // Получаем информацию о текущем источнике API
+              const currentSource = ApiSourceManager.getCurrentSourceInfo();
+              
+              apiSourceInfo += `<p><strong>Текущий источник API:</strong> ${currentSource.name}</p>`;
+              
+              // Проверяем, соответствует ли текущий источник требованиям задания
+              if (task.apiSourceRestrictions && !task.apiSourceRestrictions.includes(currentSource.key)) {
+                  apiSourceInfo += `<p><strong>Внимание!</strong> Текущий источник API не соответствует требованиям задания. Пожалуйста, переключитесь на требуемый источник.</p>`;
+              }
+              
+              // Добавляем сообщение с информацией об источниках API
+              AiAssistant.addAiMessage(apiSourceInfo);
+              
+              // Делаем небольшую паузу перед основной подсказкой
+              setTimeout(() => {
+                  originalAskHelp.call(this);
+              }, 800);
+              
+              return;
+          }
+          
+          // Если нет специальной информации об источниках API, вызываем оригинальный метод
+          originalAskHelp.call(this);
+      };
+  }
+})();
 
 // Инициализация AI-ассистента при загрузке страницы
 document.addEventListener('DOMContentLoaded', () => {

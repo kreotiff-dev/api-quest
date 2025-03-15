@@ -4,7 +4,7 @@ const ApiClient = (function() {
   // Приватные переменные и функции
   
   // Отправка API-запроса
-  function sendApiRequest() {
+  async function sendApiRequest() {
       const task = AppMain.getCurrentTask();
       if (!task) return;
       
@@ -33,85 +33,46 @@ const ApiClient = (function() {
               }
           } catch (e) {
               showApiResponse({
-                  status: 0,
+                  status: 400,
                   statusText: 'Error parsing request body',
-                  headers: {},
+                  headers: {'Content-Type': 'application/json'},
                   body: { error: 'Invalid JSON in request body' }
               });
               return;
           }
       }
       
-      // Создаем ключ запроса для поиска в моках
-      let requestKey = `${method}:${url}`;
-      
-      // Для запросов к защищенным ресурсам добавляем API-ключ
-      if (url.includes('/api/secure-data') && headers['X-API-Key']) {
-          requestKey += `/${headers['X-API-Key']}`;
-      }
-      
-      // Специальная обработка для запросов с пустым телом
-      if (['POST', 'PUT', 'PATCH'].includes(method) && (!requestBody || Object.keys(requestBody).length === 0)) {
-          requestKey += '/empty';
-      }
+      // Формируем объект запроса
+      const request = {
+          method,
+          url,
+          headers,
+          body: requestBody
+      };
       
       // Добавляем индикатор загрузки
       document.getElementById('response-meta').innerHTML = '<div class="loading-spinner"></div>';
       document.getElementById('response-body').textContent = 'Загрузка...';
       document.getElementById('response-headers').textContent = '';
       
-      // Эмуляция задержки сети
-      setTimeout(() => {
-          // Проверяем наличие мока для данного запроса
-          if (apiResponses[requestKey]) {
-              let response = apiResponses[requestKey];
-              
-              // Для POST/PUT запросов подставляем данные из тела запроса
-              if (['POST', 'PUT', 'PATCH'].includes(method) && requestBody && response.body) {
-                  response = JSON.parse(JSON.stringify(response)); // Клонируем объект ответа
-                  
-                  // Заменяем плейсхолдеры на значения из запроса
-                  if (typeof response.body === 'object') {
-                      for (const key in response.body) {
-                          if (typeof response.body[key] === 'string' && response.body[key].startsWith('{') && response.body[key].endsWith('}')) {
-                              const placeholder = response.body[key].substring(1, response.body[key].length - 1);
-                              
-                              if (placeholder === 'currentDate') {
-                                  response.body[key] = new Date().toISOString();
-                              } else if (requestBody[placeholder] !== undefined) {
-                                  response.body[key] = requestBody[placeholder];
-                              }
-                          }
-                      }
-                  }
+      try {
+          // Отправляем запрос через ApiSourceManager
+          const response = await ApiSourceManager.sendRequest(request);
+          
+          // Отображаем ответ
+          showApiResponse(response);
+      } catch (error) {
+          // Обработка ошибок при отправке запроса
+          showApiResponse({
+              status: 500,
+              statusText: 'Error',
+              headers: {'Content-Type': 'application/json'},
+              body: {
+                  error: 'Ошибка при отправке запроса',
+                  message: error.message
               }
-              
-              // Отображаем ответ
-              showApiResponse(response);
-              
-              // Сохраняем решение
-              ProgressManager.saveCurrentSolution();
-              
-              // Обновляем прогресс задания
-              ProgressManager.updateTaskAttempt(task.id);
-              
-          } else {
-              // Если мок не найден, возвращаем ошибку 404
-              showApiResponse({
-                  status: 404,
-                  statusText: 'Not Found',
-                  headers: {
-                      'Content-Type': 'application/json',
-                      'Server': 'API Simulator'
-                  },
-                  body: {
-                      error: 'Not Found',
-                      message: 'Запрашиваемый ресурс не найден',
-                      requestKey: requestKey
-                  }
-              });
-          }
-      }, 800); // Эмуляция задержки сети
+          });
+      }
   }
   
   // Отображение ответа
@@ -120,9 +81,13 @@ const ApiClient = (function() {
       const responseStatus = `${response.status} ${response.statusText}`;
       const statusClass = getStatusClass(response.status);
       
+      // Получаем информацию о текущем источнике API
+      const sourceInfo = ApiSourceManager.getCurrentSourceInfo();
+      
       document.getElementById('response-meta').innerHTML = `
           <span class="response-status ${statusClass}">${responseStatus}</span>
           <span class="response-time">Время: ${Math.floor(Math.random() * 200 + 100)} мс</span>
+          <span class="response-source" title="${sourceInfo.description}">Источник: ${sourceInfo.name}</span>
       `;
       
       // Заголовки ответа
@@ -156,15 +121,15 @@ const ApiClient = (function() {
   // Получение класса для статус-кода
   function getStatusClass(status) {
       if (status >= 200 && status < 300) {
-          return 'status-success';
+          return 'response-status-success';
       } else if (status >= 300 && status < 400) {
-          return 'status-redirect';
+          return 'response-status-redirect';
       } else if (status >= 400 && status < 500) {
-          return 'status-client-error';
+          return 'response-status-error';
       } else if (status >= 500) {
-          return 'status-server-error';
+          return 'response-status-error';
       } else {
-          return 'status-unknown';
+          return 'response-status-unknown';
       }
   }
   
@@ -318,13 +283,109 @@ const ApiClient = (function() {
       }
   }
   
+  // Переключение источника API
+  function switchApiSource(sourceKey) {
+      if (ApiSourceManager.setApiSource(sourceKey)) {
+          UI.showNotification(`Источник API переключен на ${ApiSourceManager.getCurrentSourceInfo().name}`, 'info');
+      } else {
+          UI.showNotification('Не удалось переключить источник API', 'error');
+      }
+  }
+  
+  // Инициализация модуля
+  function init() {
+      // Добавляем кнопку для быстрого переключения источника API в панель инструментов
+      const actionsContainer = document.querySelector('.content-header .actions');
+      if (actionsContainer) {
+          const sourceButton = document.createElement('button');
+          sourceButton.className = 'btn btn-source-selector';
+          sourceButton.innerHTML = '<i class="fas fa-server"></i> Источник API';
+          sourceButton.addEventListener('click', toggleSourceSelector);
+          
+          actionsContainer.appendChild(sourceButton);
+      }
+  }
+  
+  // Показать/скрыть выпадающий список источников API
+  function toggleSourceSelector() {
+      let sourceDropdown = document.getElementById('api-source-dropdown');
+      
+      if (sourceDropdown) {
+          sourceDropdown.classList.toggle('show');
+      } else {
+          createSourceDropdown();
+      }
+  }
+  
+  // Создание выпадающего списка источников API
+  function createSourceDropdown() {
+      const dropdown = document.createElement('div');
+      dropdown.id = 'api-source-dropdown';
+      dropdown.className = 'api-source-dropdown';
+      
+      const sources = ApiSourceManager.getAvailableSources();
+      const currentSource = ApiSourceManager.getCurrentSourceInfo();
+      
+      // Заголовок выпадающего списка
+      const dropdownHeader = document.createElement('div');
+      dropdownHeader.className = 'dropdown-header';
+      dropdownHeader.textContent = 'Выберите источник API';
+      dropdown.appendChild(dropdownHeader);
+      
+      // Список источников
+      sources.forEach(source => {
+          const sourceItem = document.createElement('div');
+          sourceItem.className = 'dropdown-item';
+          
+          if (source.key === currentSource.key) {
+              sourceItem.classList.add('active');
+          }
+          
+          sourceItem.textContent = source.name;
+          sourceItem.title = source.description;
+          
+          sourceItem.addEventListener('click', function() {
+              switchApiSource(source.key);
+              dropdown.classList.remove('show');
+          });
+          
+          dropdown.appendChild(sourceItem);
+      });
+      
+      // Добавляем выпадающий список на страницу
+      document.body.appendChild(dropdown);
+      
+      // Показываем список
+      dropdown.classList.add('show');
+      
+      // Закрытие списка при клике вне его
+      document.addEventListener('click', function closeDropdown(e) {
+          if (!dropdown.contains(e.target) && e.target.className !== 'btn-source-selector' && 
+              !e.target.closest('.btn-source-selector')) {
+              dropdown.classList.remove('show');
+              document.removeEventListener('click', closeDropdown);
+          }
+      });
+      
+      // Позиционирование списка
+      const buttonRect = document.querySelector('.btn-source-selector').getBoundingClientRect();
+      dropdown.style.top = `${buttonRect.bottom + window.scrollY + 5}px`;
+      dropdown.style.left = `${buttonRect.left + window.scrollX}px`;
+  }
+  
   // Публичное API модуля
   return {
       sendApiRequest,
       showApiResponse,
       addHeaderRow,
       resetRequest,
-      formatJsonBody
+      formatJsonBody,
+      switchApiSource,
+      init,
+      resetRequest,
+      formatJsonBody,
+      switchApiSource,
+      init
   };
 })();
 
