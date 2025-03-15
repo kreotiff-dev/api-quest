@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>API Практикум - Платформа для обучения тестированию API</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <!-- Экран выбора заданий -->
+    <div id="tasks-screen" class="screen active">
+        <header class="main-header">
+            <div class="logo">
+                <h1>API Практикум</h1>
+            </div>
+            <div class="user-info">
+                <div class="user-profile">
+                    <i class="fas fa-user-circle"></i>
+                    <span>Студент</span>
+                </div>
+            </div>
+        </header>
+
+        <div class="dashboard-container">
+            <aside class="sidebar">
+                <div class="sidebar-header">
+                    <div class="user-progress">
+                        <div class="progress-info">
+                            <span>Прогресс курса:</span>
+                            <span class="progress-percentage">35%</span>
+                        </div>
+                        <div class="progress-bar">
+                            <div class="progress-fill" style="width: 35%;"></div>
+                        </div>
+                    </div>
+                </div>
+                <nav class="main-nav">
+                    <ul>
+                        <li class="active"><a href="#"><i class="fas fa-tasks"></i> Задания</a></li>
+                        <li><a href="#"><i class="fas fa-chart-line"></i> Мой прогресс</a></li>
+                        <li><a href="#"><i class="fas fa-book"></i> Теория</a></li>
+                        <li><a href="#"><i class="fas fa-question-circle"></i> Помощь</a></li>
+                    </ul>
+                </nav>
+            </aside>
+
+            <main class="main-content">
+                <div class="content-header">
+                    <h2>Задания по API</h2>
+                    <div class="actions">
+                        <button class="btn" id="open-api-docs"><i class="fas fa-book"></i> Документация API</button>
+                    </div>
+                </div>
+
+                <!-- Фильтры -->
+                <div class="filters-panel">
+                    <div class="filters-header">
+                        <h3>Фильтры</h3>
+                        <button class="btn btn-text" id="reset-filters">Сбросить</button>
+                    </div>
+                    <div class="filters-body">
+                        <div class="filter-group">
+                            <div class="filter-label">Категория:</div>
+                            <div class="filter-options" data-filter="category">
+                                <div class="filter-option active" data-value="all">Все</div>
+                                <div class="filter-option" data-value="basics">Основы API</div>
+                                <div class="filter-option" data-value="http">Методы HTTP</div>
+                                <div class="filter-option" data-value="auth">Аутентификация</div>
+                                <div class="filter-option" data-value="testing">Тестирование</div>
+                            </div>
+                        </div>
+                        <div class="filter-group">
+                            <div class="filter-label">Сложность:</div>
+                            <div class="filter-options" data-filter="difficulty">
+                                <div class="filter-option active" data-value="all">Все</div>
+                                <div class="filter-option" data-value="easy">Начальный</div>
+                                <div class="filter-option" data-value="medium">Средний</div>
+                                <div class="filter-option" data-value="hard">Продвинутый</div>
+                            </div>
+                        </div>
+                        <div class="filter-group">
+                            <div class="filter-label">Статус:</div>
+                            <div class="filter-options" data-filter="status">
+                                <div class="filter-option active" data-value="all">Все</div>
+                                <div class="filter-option" data-value="not_started">Не начато</div>
+                                <div class="filter-option" data-value="in_progress">В процессе</div>
+                                <div class="filter-option" data-value="completed">Завершено</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Список заданий -->
+                <div class="tasks-grid" id="tasks-container">
+                    <!-- Задания будут добавлены через JavaScript -->
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <!-- Экран с рабочей областью задания -->
+    <div id="workspace-screen" class="screen">
+        <header class="main-header">
+            <div class="logo">
+                <h1>API Практикум</h1>
+            </div>
+            <div class="user-info">
+                <div class="user-profile">
+                    <i class="fas fa-user-circle"></i>
+                    <span>Студент</span>
+                </div>
+            </div>
+        </header>
+
+        <div class="dashboard-container">
+            <aside class="sidebar">
+                <div class="sidebar-header">
+                    <div class="user-progress">
+                        <div class="progress-info">
+                            <span>Прогресс задания:</span>
+                            <span class="progress-percentage" id="task-progress">0%</span>
+                        </div>
+                        <div class="progress-bar">
+                            <div class="progress-fill" id="task-progress-bar" style="width: 0%;"></div>
+                        </div>
+                    </div>
+                </div>
+                <nav class="main-nav">
+                    <ul>
+                        <li><a href="#" id="back-to-tasks"><i class="fas fa-arrow-left"></i> К списку заданий</a></li>
+                        <li class="active"><a href="#"><i class="fas fa-code"></i> Текущее задание</a></li>
+                        <li><a href="#" id="open-docs-sidebar"><i class="fas fa-book"></i> Документация API</a></li>
+                        <li><a href="#" id="open-hints"><i class="fas fa-lightbulb"></i> Подсказки</a></li>
+                    </ul>
+                </nav>
+            </aside>
+
+            <main class="main-content">
+                <div class="content-header">
+                    <h2 id="task-title">Название задания</h2>
+                    <div class="actions">
+                        <button class="btn btn-success" id="check-solution"><i class="fas fa-check"></i> Проверить решение</button>
+                    </div>
+                </div>
+
+                <div class="workspace-container">
+                    <div class="task-details-panel">
+                        <div class="task-info">
+                            <div class="task-subtitle" id="task-subtitle">Подзаголовок задания</div>
+                            <div class="task-meta">
+                                <div class="task-category" id="task-category">Категория: <strong>Основы API</strong></div>
+                                <div class="task-difficulty" id="task-difficulty">Сложность: <strong>Начальный</strong></div>
+                            </div>
+                        </div>
+                        
+                        <div class="task-description" id="task-description">
+                            <h3>Описание задания</h3>
+                            <p>Здесь будет отображаться описание задания.</p>
+                        </div>
+                        
+                        <div class="task-requirements" id="task-requirements">
+                            <h3>Требования</h3>
+                            <div class="requirements-list">
+                                <!-- Требования будут добавлены через JavaScript -->
+                            </div>
+                        </div>
+                        
+                        <div class="task-expected-result" id="task-expected-result">
+                            <h3>Ожидаемый результат</h3>
+                            <p>Здесь будет отображаться ожидаемый результат.</p>
+                        </div>
+                    </div>
+                    
+                    <div class="api-client-panel">
+                        <div class="api-client-tabs">
+                            <div class="api-tab active" data-tab="request">Запрос</div>
+                            <div class="api-tab" data-tab="collection">Коллекция</div>
+                            <div class="api-tab" data-tab="tests">Тесты</div>
+                        </div>
+                        
+                        <div class="api-client-tab-content active" id="request-tab">
+                            <div class="form-group">
+                                <label for="request-url">URL</label>
+                                <input type="text" id="request-url" class="form-control" placeholder="https://api.example.com/endpoint">
+                            </div>
+                            
+                            <div class="form-row">
+                                <div class="form-group half">
+                                    <label for="request-method">Метод</label>
+                                    <select id="request-method" class="form-control">
+                                        <option value="GET">GET</option>
+                                        <option value="POST">POST</option>
+                                        <option value="PUT">PUT</option>
+                                        <option value="DELETE">DELETE</option>
+                                        <option value="PATCH">PATCH</option>
+                                    </select>
+                                </div>
+                                <div class="form-group half">
+                                    <label for="request-content-type">Content-Type</label>
+                                    <select id="request-content-type" class="form-control">
+                                        <option value="application/json">application/json</option>
+                                        <option value="application/x-www-form-urlencoded">application/x-www-form-urlencoded</option>
+                                        <option value="multipart/form-data">multipart/form-data</option>
+                                        <option value="text/plain">text/plain</option>
+                                    </select>
+                                </div>
+                            </div>
+                            
+                            <div class="form-panel" id="headers-panel">
+                                <div class="form-panel-header">
+                                    <label>Заголовки</label>
+                                    <button class="btn btn-small btn-success" id="add-header"><i class="fas fa-plus"></i></button>
+                                </div>
+                                <div class="form-panel-body" id="headers-container">
+                                    <div class="header-row">
+                                        <input type="text" class="form-control header-key" placeholder="Ключ">
+                                        <input type="text" class="form-control header-value" placeholder="Значение">
+                                        <button class="btn btn-small btn-danger remove-btn"><i class="fas fa-times"></i></button>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="request-body">Тело запроса</label>
+                                <textarea id="request-body" class="form-control code-editor" rows="6" placeholder='{"key": "value"}'></textarea>
+                            </div>
+                            
+                            <div class="form-actions">
+                                <button class="btn btn-primary" id="send-request"><i class="fas fa-paper-plane"></i> Отправить запрос</button>
+                                <button class="btn" id="reset-request"><i class="fas fa-undo"></i> Сбросить</button>
+                            </div>
+                        </div>
+                        
+                        <div class="api-client-tab-content" id="collection-tab">
+                            <div class="collection-placeholder">
+                                <i class="fas fa-folder-open placeholder-icon"></i>
+                                <p>Здесь будет отображаться ваша коллекция запросов</p>
+                            </div>
+                        </div>
+                        
+                        <div class="api-client-tab-content" id="tests-tab">
+                            <div class="form-group">
+                                <label for="test-code">Код тестов</label>
+                                <textarea id="test-code" class="form-control code-editor" rows="10">// Пример теста
+pm.test("Статус-код должен быть 200", function () {
+    pm.response.to.have.status(200);
+});
+
+pm.test("Ответ должен содержать данные", function () {
+    var jsonData = pm.response.json();
+    pm.expect(jsonData).to.be.an('object');
+});</textarea>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="response-panel" id="response-panel">
+                    <div class="response-header">
+                        <h3>Ответ</h3>
+                        <div class="response-meta" id="response-meta"></div>
+                    </div>
+                    <div class="response-tabs">
+                        <div class="response-tab active" data-tab="body">Тело</div>
+                        <div class="response-tab" data-tab="headers">Заголовки</div>
+                    </div>
+                    <div class="response-content">
+                        <div class="response-tab-content active" id="body-response-tab">
+                            <pre id="response-body" class="response-body">Отправьте запрос, чтобы увидеть ответ</pre>
+                        </div>
+                        <div class="response-tab-content" id="headers-response-tab">
+                            <pre id="response-headers" class="response-headers"></pre>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="ai-feedback-panel" id="ai-feedback-panel">
+                    <div class="ai-feedback-header">
+                        <h3><i class="fas fa-robot"></i> AI Ассистент</h3>
+                        <div class="ai-feedback-actions">
+                            <button class="btn btn-small" id="ai-help-btn" title="Попросить помощь у AI"><i class="fas fa-question"></i></button>
+                            <button class="btn btn-small" id="ai-analyze-btn" title="Проанализировать решение"><i class="fas fa-search"></i></button>
+                        </div>
+                    </div>
+                    <div class="ai-feedback-content" id="ai-feedback-content">
+                        <div class="ai-message">
+                            <p>Здравствуйте! Я ваш AI-ассистент. Готов помочь с выполнением задания. Вы можете попросить помощь или анализ вашего решения в любой момент.</p>
+                        </div>
+                    </div>
+                    <div class="ai-input-container">
+                        <input type="text" id="ai-question-input" class="form-control" placeholder="Задайте вопрос ассистенту...">
+                        <button class="btn btn-primary" id="ai-question-send"><i class="fas fa-paper-plane"></i></button>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+    
+    <!-- Модальное окно документации API -->
+    <div id="api-docs-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Документация API</h2>
+                <span class="modal-close">&times;</span>
+            </div>
+            <div class="modal-body">
+                <div class="api-docs-section">
+                    <h3>Пользователи</h3>
+                    
+                    <div class="endpoint">
+                        <div class="endpoint-title">
+                            <span class="method get">GET</span>
+                            <span class="endpoint-path">/api/users</span>
+                        </div>
+                        <div class="endpoint-description">
+                            <p>Получить список всех пользователей</p>
+                            <div class="params-section">
+                                <h4>Параметры запроса:</h4>
+                                <table class="params-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Имя</th>
+                                            <th>Тип</th>
+                                            <th>Описание</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td>limit</td>
+                                            <td>number</td>
+                                            <td>Максимальное количество пользователей в ответе (по умолчанию 10)</td>
+                                        </tr>
+                                        <tr>
+                                            <td>role</td>
+                                            <td>string</td>
+                                            <td>Фильтр по роли пользователя (admin, user)</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                            <div class="responses-section">
+                                <h4>Ответы:</h4>
+                                <div class="response-code">
+                                    <span class="status-code success">200</span> Успешный ответ
+                                </div>
+                                <pre class="response-example">[
+  {
+    "id": 1,
+    "name": "Иван Петров",
+    "email": "ivan@example.com",
+    "role": "admin"
+  },
+  {
+    "id": 2,
+    "name": "Мария Сидорова",
+    "email": "maria@example.com",
+    "role": "user"
+  }
+]</pre>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="endpoint">
+                        <div class="endpoint-title">
+                            <span class="method post">POST</span>
+                            <span class="endpoint-path">/api/users</span>
+                        </div>
+                        <div class="endpoint-description">
+                            <p>Создать нового пользователя</p>
+                            <div class="request-body-section">
+                                <h4>Тело запроса:</h4>
+                                <pre class="request-example">{
+  "name": "string",
+  "email": "string",
+  "role": "string"
+}</pre>
+                            </div>
+                            <div class="responses-section">
+                                <h4>Ответы:</h4>
+                                <div class="response-code">
+                                    <span class="status-code success">201</span> Пользователь создан
+                                </div>
+                                <pre class="response-example">{
+  "id": 3,
+  "name": "Новый Пользователь",
+  "email": "new@example.com",
+  "role": "user",
+  "createdAt": "2023-07-15T10:30:00Z"
+}</pre>
+                                <div class="response-code">
+                                    <span class="status-code error">400</span> Ошибка валидации
+                                </div>
+                                <pre class="response-example">{
+  "error": "Validation error",
+  "details": "Email is required"
+}</pre>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="api-docs-section">
+                    <h3>Продукты</h3>
+                    
+                    <div class="endpoint">
+                        <div class="endpoint-title">
+                            <span class="method get">GET</span>
+                            <span class="endpoint-path">/api/products</span>
+                        </div>
+                        <div class="endpoint-description">
+                            <p>Получить список всех продуктов</p>
+                            <!-- Дополнительная документация по API продуктов -->
+                        </div>
+                    </div>
+                    
+                    <!-- Другие эндпоинты API -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Подключение скриптов -->
+    <script src="js/data.js"></script>
+    <script src="js/ui.js"></script>
+    <script src="js/progress.js"></script>
+    <script src="js/apiClient.js"></script>
+    <script src="js/taskList.js"></script>
+    <script src="js/workspace.js"></script>
+    <script src="js/aiAssistant.js"></script>
+    <script src="js/app.js"></script>
+</body>
+</html>
