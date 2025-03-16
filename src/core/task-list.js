@@ -7,6 +7,7 @@ import { getAllTasks, filterTasks, getStatusClass, getStatusText, getDifficultyT
 import { getUserProgress } from '../data/user-progress.js';
 import { emit } from './events.js';
 import { setCurrentTask, setCurrentScreen } from '../app.js';
+import { switchScreen } from '../ui/index.js';
 
 /**
  * Отрисовка списка заданий
@@ -137,6 +138,7 @@ export function createTaskCard(task) {
  * @param {number} taskId - ID задания
  */
 export function loadTask(taskId) {
+    console.log('Вызвана loadTask с ID:', taskId);
     const tasks = getAllTasks();
     const task = tasks.find(t => t.id === parseInt(taskId));
     
@@ -145,13 +147,43 @@ export function loadTask(taskId) {
         return;
     }
     
+    console.log('Задание найдено:', task);
+    
     // Устанавливаем текущую задачу в глобальном контексте
     setCurrentTask(task);
+    
+    // Заполнение рабочей области содержимым
+    const workspaceContainer = document.getElementById('workspace-container');
+    if (workspaceContainer) {
+        console.log('Заполнение рабочей области содержимым');
+        workspaceContainer.innerHTML = `
+            <div class="workspace-header">
+                <h2>${task.title}</h2>
+                <div class="task-meta">
+                    <span class="category">${getCategoryText(task.category)}</span>
+                    <span class="difficulty">${getDifficultyText(task.difficulty)}</span>
+                </div>
+            </div>
+            <div class="task-description">
+                <p>${task.description}</p>
+            </div>
+            <div class="task-instructions">
+                <h3>Инструкции:</h3>
+                <p>${task.instructions || 'Нет инструкций для этого задания.'}</p>
+            </div>
+        `;
+    } else {
+        console.error('Элемент workspace-container не найден');
+    }
     
     // Генерируем событие загрузки задания
     emit('taskLoaded', task);
     
-    // Переключаем экран на рабочую область
+    // Напрямую вызываем функцию переключения экрана
+    console.log('Прямой вызов switchScreen');
+    switchScreen('workspace');
+    
+    // Также вызываем setCurrentScreen для обратной совместимости
     setCurrentScreen('workspace');
 }
 

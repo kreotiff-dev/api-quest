@@ -82,7 +82,7 @@ function setupEventListeners() {
     document.getElementById('back-to-tasks')?.addEventListener('click', () => {
         ui.switchScreen('tasks');
     });
-    
+
     // Обработчик отправки запроса
     document.getElementById('send-request')?.addEventListener('click', apiClient.sendApiRequest);
     

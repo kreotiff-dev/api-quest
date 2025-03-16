@@ -12,16 +12,72 @@ import { emit } from '../core/events.js';
  * @param {string} screen - Экран для активации ('tasks' или 'workspace')
  */
 export function switchScreen(screen) {
+    console.log(`switchScreen вызвана с параметром ${screen}`);
+    
     const tasksScreen = document.getElementById('tasks-screen');
     const workspaceScreen = document.getElementById('workspace-screen');
     
+    console.log('Элементы экранов:', {
+        tasksScreen: tasksScreen ? 'найден' : 'не найден',
+        workspaceScreen: workspaceScreen ? 'найден' : 'не найден'
+    });
+    
     if (screen === 'tasks') {
-        tasksScreen?.classList.add('active');
-        workspaceScreen?.classList.remove('active');
+        console.log('Переключение на экран заданий');
+        // Показываем экран заданий
+        if (tasksScreen) {
+            tasksScreen.classList.add('active');
+            tasksScreen.style.display = 'block'; // Явное указание display
+        }
+        
+        // Скрываем рабочую область
+        if (workspaceScreen) {
+            workspaceScreen.classList.remove('active');
+            workspaceScreen.style.display = 'none';
+        }
+        
         emit('screenChanged', 'tasks');
     } else if (screen === 'workspace') {
-        tasksScreen?.classList.remove('active');
-        workspaceScreen?.classList.add('active');
+        console.log('Переключение на экран рабочей области');
+        
+        // Показываем рабочую область
+        if (workspaceScreen) {
+            workspaceScreen.classList.add('active');
+            workspaceScreen.style.display = 'block'; // Явное указание display
+            console.log('Стиль workspaceScreen после изменения:', workspaceScreen.style.display);
+            
+            // Для отладки - выведем текущие стили
+            const styles = window.getComputedStyle(workspaceScreen);
+            console.log('Текущие стили workspaceScreen:', {
+                display: styles.display,
+                visibility: styles.visibility,
+                opacity: styles.opacity,
+                position: styles.position,
+                zIndex: styles.zIndex
+            });
+            
+            // Принудительная видимость
+            workspaceScreen.setAttribute('style', 'display: block !important; visibility: visible !important; opacity: 1 !important;');
+            
+            // Проверка родительских элементов
+            let parent = workspaceScreen.parentElement;
+            while (parent) {
+                const parentStyle = window.getComputedStyle(parent);
+                if (parentStyle.display === 'none' || parentStyle.visibility === 'hidden') {
+                    console.log('Обнаружен скрытый родитель:', parent);
+                    parent.style.display = 'block';
+                    parent.style.visibility = 'visible';
+                }
+                parent = parent.parentElement;
+            }
+        }
+        
+        // Скрываем экран заданий
+        if (tasksScreen) {
+            tasksScreen.classList.remove('active');
+            tasksScreen.style.display = 'none';
+        }
+        
         emit('screenChanged', 'workspace');
     }
 }
