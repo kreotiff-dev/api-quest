@@ -4,6 +4,7 @@
  */
 
 import { getCurrentSourceInfo, getAvailableSources, setApiSource } from '../sources/index.js';
+import { apiSourceConfig } from '../sources/config.js';
 import { showNotification } from '../../ui/notifications.js';
 import { on, off } from '../../core/events.js';
 import { addIndicatorStyles } from './indicator-styles.js';
@@ -112,6 +113,9 @@ function updateIndicator() {
         indicator.className = `source-indicator ${state.available ? 'available' : 'unavailable'} ${sourceKey === currentSource.key ? 'active' : ''}`;
         indicator.title = `${config.name}: ${state.available ? 'Доступен' : 'Недоступен'}`;
         
+        // Задаем атрибут data-source для использования в updateTooltips
+        indicator.setAttribute('data-source', sourceKey);
+        
         // Задаем стиль в зависимости от состояния
         indicator.style.setProperty('--indicator-color', config.color);
         
@@ -166,7 +170,7 @@ function updateSourceState() {
     // Для оставшихся источников, которых нет в списке доступных
     for (const sourceKey in indicatorState) {
         if (!availableSources.some(s => s.key === sourceKey)) {
-            indicatorState[sourceKey].available = false;
+            indicatorState[sourceKey].available = sourceKey === 'mock' ? true : false; // Mock всегда доступен
             indicatorState[sourceKey].lastCheck = Date.now();
         }
     }
@@ -192,23 +196,53 @@ async function measureLatency(sourceKey) {
         return; // Пропускаем для mock или несуществующих источников
     }
     
+    // Получаем режим работы приложения
+    const isDevelopment = getAppMode() === 'development';
+    
+    // В режиме разработки не выполняем реальные запросы
+    if (isDevelopment) {
+        // Устанавливаем доступность согласно конфигурации
+        indicatorState[sourceKey].available = apiSourceConfig[sourceKey]?.alwaysAvailable || false;
+        indicatorState[sourceKey].latency = 0;
+        indicatorState[sourceKey].lastCheck = Date.now();
+        
+        // Обновляем индикатор
+        updateIndicator();
+        updateTooltips();
+        return;
+    }
+    
+    // Для рабочих режимов выполняем реальную проверку
+    
+    // Получаем конфигурацию для источника
+    const config = apiSourceConfig[sourceKey];
+    if (!config || !config.baseUrl) {
+        // Если нет URL или конфигурации, считаем недоступным
+        indicatorState[sourceKey].available = false;
+        indicatorState[sourceKey].lastCheck = Date.now();
+        return;
+    }
+    
     const startTime = performance.now();
     
     try {
-        let url;
-        if (sourceKey === 'public') {
-            url = 'https://jsonplaceholder.typicode.com/health';
-        } else if (sourceKey === 'custom') {
-            url = 'https://api-quest.example.com/api/health';
-        } else {
-            return;
-        }
+        // Формируем URL для проверки доступности
+        const healthEndpoint = config.healthEndpoint || '/health';
+        const url = `${config.baseUrl}${healthEndpoint}`;
+        
+        // Устанавливаем таймаут для запроса
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 5000); // 5 секунд таймаут
         
         const response = await fetch(url, {
             method: 'GET',
             headers: {'X-API-Quest-Client': 'Health-Check'},
-            cache: 'no-cache'
+            cache: 'no-cache',
+            signal: controller.signal
         });
+        
+        // Очищаем таймаут
+        clearTimeout(timeoutId);
         
         const endTime = performance.now();
         const latency = Math.round(endTime - startTime);
@@ -225,6 +259,8 @@ async function measureLatency(sourceKey) {
     } catch (error) {
         const endTime = performance.now();
         
+        console.log(`Ошибка при проверке источника ${sourceKey}:`, error.message);
+        
         // Обновляем состояние - недоступен
         indicatorState[sourceKey].available = false;
         indicatorState[sourceKey].latency = Math.round(endTime - startTime);
@@ -233,6 +269,26 @@ async function measureLatency(sourceKey) {
         // Обновляем индикатор
         updateIndicator();
         updateTooltips();
+    }
+}
+
+/**
+ * Получение режима работы приложения
+ * @returns {string} Режим работы (development, staging, production)
+ */
+function getAppMode() {
+    // Сначала проверяем, доступна ли функция в глобальном контексте
+    if (typeof window.AppMain?.getAppMode === 'function') {
+        return window.AppMain.getAppMode();
+    }
+    
+    // Если нет, определяем по хосту
+    if (location.hostname === 'localhost' || location.hostname === '127.0.0.1') {
+        return 'development';
+    } else if (location.hostname.includes('staging') || location.hostname.includes('test')) {
+        return 'staging';
+    } else {
+        return 'production';
     }
 }
 

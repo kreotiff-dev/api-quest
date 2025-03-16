@@ -52,30 +52,59 @@ export async function init() {
  */
 export async function checkApiAvailability() {
     try {
-        // Проверка публичного API
-        try {
-            const publicResponse = await fetch(`${apiSourceConfig.public.baseUrl}/health`, {
-                method: 'GET',
-                headers: {'X-API-Quest-Client': 'Health-Check'},
-                timeout: 5000 // Таймаут 5 секунд
-            });
-            sourceState.public.isAvailable = publicResponse.ok;
-        } catch (error) {
-            sourceState.public.isAvailable = false;
-            console.log('Публичный API недоступен:', error.message);
-        }
+        // В режиме разработки используем настройки доступности из конфигурации
+        const isDevelopment = getAppMode() === 'development';
         
-        try {
+        if (isDevelopment) {
+            // В режиме разработки определяем доступность на основе конфигурации
+            for (const sourceKey in apiSourceConfig) {
+                if (apiSourceConfig[sourceKey].alwaysAvailable !== undefined) {
+                    sourceState[sourceKey].isAvailable = apiSourceConfig[sourceKey].alwaysAvailable;
+                } else {
+                    // По умолчанию только mock доступен
+                    sourceState[sourceKey].isAvailable = sourceKey === 'mock';
+                }
+            }
+        } else {
+            // В рабочих режимах реально проверяем доступность API
+            // Мок всегда доступен
+            sourceState.mock.isAvailable = true;
+            
+            // Проверка публичного API
+            try {
+                if (apiSourceConfig.public.baseUrl) {
+                    const response = await fetch(`${apiSourceConfig.public.baseUrl}/health`, {
+                        method: 'GET',
+                        headers: {'X-API-Quest-Client': 'Health-Check'},
+                        // Добавляем сигнал для ограничения времени ожидания
+                        signal: AbortSignal.timeout(3000) // 3 секунды таймаут
+                    });
+                    sourceState.public.isAvailable = response.ok;
+                } else {
+                    sourceState.public.isAvailable = false;
+                }
+            } catch (error) {
+                sourceState.public.isAvailable = false;
+                console.log('Публичный API недоступен:', error.message);
+            }
+            
             // Проверка собственного API
-            const customResponse = await fetch(`${apiSourceConfig.custom.baseUrl}/health`, {
-                method: 'GET',
-                headers: {'X-API-Quest-Client': 'Health-Check'},
-                timeout: 5000 // Таймаут 5 секунд
-            });
-            sourceState.custom.isAvailable = customResponse.ok;
-        } catch (error) {
-            sourceState.custom.isAvailable = false;
-            console.log('Собственный API недоступен:', error.message);
+            try {
+                if (apiSourceConfig.custom.baseUrl) {
+                    const response = await fetch(`${apiSourceConfig.custom.baseUrl}/health`, {
+                        method: 'GET',
+                        headers: {'X-API-Quest-Client': 'Health-Check'},
+                        // Добавляем сигнал для ограничения времени ожидания
+                        signal: AbortSignal.timeout(3000) // 3 секунды таймаут
+                    });
+                    sourceState.custom.isAvailable = response.ok;
+                } else {
+                    sourceState.custom.isAvailable = false;
+                }
+            } catch (error) {
+                sourceState.custom.isAvailable = false;
+                console.log('Собственный API недоступен:', error.message);
+            }
         }
         
         // Обновляем селектор источников
@@ -89,6 +118,33 @@ export async function checkApiAvailability() {
         
     } catch (error) {
         console.error('Ошибка при проверке доступности API:', error);
+        // В случае любой ошибки, делаем доступным хотя бы мок-источник
+        sourceState.mock.isAvailable = true;
+        
+        // Если текущий источник - не мок, переключаемся на мок
+        if (currentSource !== 'mock') {
+            setApiSource('mock');
+        }
+    }
+}
+
+/**
+ * Получение режима работы приложения
+ * @returns {string} Режим работы (development, staging, production)
+ */
+function getAppMode() {
+    // Сначала проверяем, доступна ли функция в глобальном контексте
+    if (typeof window.AppMain?.getAppMode === 'function') {
+        return window.AppMain.getAppMode();
+    }
+    
+    // Если нет, определяем по хосту
+    if (location.hostname === 'localhost' || location.hostname === '127.0.0.1') {
+        return 'development';
+    } else if (location.hostname.includes('staging') || location.hostname.includes('test')) {
+        return 'staging';
+    } else {
+        return 'production';
     }
 }
 

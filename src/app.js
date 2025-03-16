@@ -17,6 +17,7 @@ import * as ui from './ui/index.js';
 import * as events from './core/events.js';
 import * as config from './core/config.js';
 import * as tasks from './core/tasks.js';
+import * as taskList from './core/task-list.js';
 
 // Переменные состояния приложения
 let currentTask = null;
@@ -182,6 +183,12 @@ export async function init() {
         
         // Инициализация UI
         ui.init();
+        
+        // Инициализация фильтров списка заданий
+        taskList.initFilters();
+        
+        // Ручной вызов отрисовки списка заданий
+        taskList.renderTaskList();
         
         // Отображаем информацию о приложении в консоли
         console.log('API-Quest инициализирован', {

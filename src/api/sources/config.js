@@ -4,45 +4,77 @@
  */
 
 /**
- * Конфигурация доступных API источников
+ * Ключ для хранения выбранного источника API в localStorage
+ * @type {string}
+ */
+export const STORAGE_KEY = 'api-quest-source';
+
+/**
+ * Определяем текущий хост
+ */
+const CURRENT_HOST = window.location.protocol + '//' + window.location.host;
+
+/**
+ * Конфигурация источников API
+ * @type {Object}
  */
 export const apiSourceConfig = {
-  mock: {
-      name: "Симулятор API",
-      description: "Локальные моки для обучения без внешних зависимостей",
-      baseUrl: "" // Пустой URL для моков
-  },
-  public: {
-      name: "Публичные API",
-      description: "Набор бесплатных публичных API для практики",
-      baseUrl: "https://jsonplaceholder.typicode.com" // JSONPlaceholder API
-  },
-  custom: {
-      name: "Учебный API",
-      description: "Собственный API платформы с расширенными возможностями",
-      baseUrl: "https://api-quest.example.com/api"
-  }
+    /**
+     * Мок-источник (симулятор)
+     */
+    mock: {
+        name: 'Симулятор API',
+        description: 'Локальный симулятор API для отработки запросов без внешних сервисов',
+        baseUrl: '',
+        needsAuth: false,
+        // Для режима разработки делаем мок всегда доступным
+        alwaysAvailable: true
+    },
+    
+    /**
+     * Публичный API
+     */
+    public: {
+        name: 'Публичный API',
+        description: 'Публичный учебный API с ограниченным функционалом',
+        // В режиме разработки указываем тот же хост
+        baseUrl: CURRENT_HOST + '/api',
+        needsAuth: false,
+        // Для режима разработки делаем публичный API недоступным 
+        // (не отправляем реальные запросы)
+        alwaysAvailable: false
+    },
+    
+    /**
+     * Собственное учебное API
+     */
+    custom: {
+        name: 'Учебное API',
+        description: 'Учебное API с полным функционалом и авторизацией',
+        // В режиме разработки указываем тот же хост
+        baseUrl: CURRENT_HOST + '/api',
+        needsAuth: true,
+        // Для режима разработки делаем учебное API недоступным
+        // (не отправляем реальные запросы)
+        alwaysAvailable: false
+    }
 };
 
 /**
-* Начальное состояние источников API
-*/
+ * Начальное состояние источников API
+ * @type {Object}
+ */
 export const defaultSourceState = {
-  mock: {
-      isAvailable: true, // Моки всегда доступны
-      priority: 1        // Высший приоритет для образовательных целей
-  },
-  public: {
-      isAvailable: false, // Будет проверено при инициализации
-      priority: 2         // Средний приоритет
-  },
-  custom: {
-      isAvailable: false, // Будет проверено при инициализации
-      priority: 3         // Низкий приоритет (используется при доступности)
-  }
+    mock: {
+        isAvailable: true,    // Мок всегда доступен
+        priority: 3           // Низкий приоритет
+    },
+    public: {
+        isAvailable: false,   // Изначально считаем недоступным
+        priority: 2           // Средний приоритет
+    },
+    custom: {
+        isAvailable: false,   // Изначально считаем недоступным
+        priority: 1           // Высокий приоритет
+    }
 };
-
-/**
-* Ключ для хранения выбранного источника API в localStorage
-*/
-export const STORAGE_KEY = 'apiQuestSelectedSource';
