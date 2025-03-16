@@ -156,6 +156,60 @@ export function loadTask(taskId) {
 }
 
 /**
+ * Создание HTML-структуры фильтров
+ */
+export function createFilters() {
+    const filtersPanel = document.getElementById('filters-panel');
+    if (!filtersPanel) return;
+    
+    // Очищаем панель фильтров
+    filtersPanel.innerHTML = '';
+    
+    // Создаем структуру фильтров
+    const filtersHTML = `
+        <div class="filters-header">
+            <h3>Фильтры</h3>
+            <button class="btn btn-text" id="reset-filters">Сбросить</button>
+        </div>
+        <div class="filters-body">
+            <div class="filter-group">
+                <div class="filter-label">Категория:</div>
+                <div class="filter-options" data-filter="category">
+                    <div class="filter-option active" data-value="all">Все</div>
+                    <div class="filter-option" data-value="basics">Основы API</div>
+                    <div class="filter-option" data-value="http">Методы HTTP</div>
+                    <div class="filter-option" data-value="auth">Аутентификация</div>
+                    <div class="filter-option" data-value="testing">Тестирование</div>
+                </div>
+            </div>
+            <div class="filter-group">
+                <div class="filter-label">Сложность:</div>
+                <div class="filter-options" data-filter="difficulty">
+                    <div class="filter-option active" data-value="all">Все</div>
+                    <div class="filter-option" data-value="easy">Начальный</div>
+                    <div class="filter-option" data-value="medium">Средний</div>
+                    <div class="filter-option" data-value="hard">Продвинутый</div>
+                </div>
+            </div>
+            <div class="filter-group">
+                <div class="filter-label">Статус:</div>
+                <div class="filter-options" data-filter="status">
+                    <div class="filter-option active" data-value="all">Все</div>
+                    <div class="filter-option" data-value="not_started">Не начато</div>
+                    <div class="filter-option" data-value="in_progress">В процессе</div>
+                    <div class="filter-option" data-value="completed">Завершено</div>
+                </div>
+            </div>
+        </div>
+    `;
+    
+    filtersPanel.innerHTML = filtersHTML;
+    
+    // После создания фильтров, инициализируем их обработчики
+    initFilters();
+}
+
+/**
  * Инициализация фильтров
  */
 export function initFilters() {
