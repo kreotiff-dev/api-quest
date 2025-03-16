@@ -204,15 +204,15 @@ export function createFilters() {
     `;
     
     filtersPanel.innerHTML = filtersHTML;
-    
-    // После создания фильтров, инициализируем их обработчики
-    initFilters();
 }
 
 /**
  * Инициализация фильтров
  */
 export function initFilters() {
+    // Создаем HTML-структуру фильтров
+    createFilters();
+    
     // Фильтр по категории
     const categoryOptions = document.querySelectorAll('[data-filter="category"] .filter-option');
     categoryOptions.forEach(option => {
@@ -248,6 +248,9 @@ export function initFilters() {
     
     // Сброс фильтров
     document.getElementById('reset-filters')?.addEventListener('click', resetFilters);
+    
+    // Применяем фильтры сразу после инициализации, чтобы показать все задания
+    applyFilters();
 }
 
 /**
@@ -293,5 +296,6 @@ export default {
     loadTask,
     initFilters,
     resetFilters,
-    applyFilters
+    applyFilters,
+    createFilters
 };
