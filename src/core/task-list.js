@@ -4,10 +4,13 @@
  */
 
 import { getAllTasks, filterTasks, getStatusClass, getStatusText, getDifficultyText, getCategoryText } from '../data/tasks.js';
+import { checkTaskCompletion } from '../core/tasks.js';
 import { getUserProgress } from '../data/user-progress.js';
 import { emit } from './events.js';
 import { setCurrentTask, setCurrentScreen } from '../app.js';
 import { switchScreen } from '../ui/index.js';
+import { setupTaskWorkspace } from '../core/workspace.js';
+import { sendApiRequest, resetRequest, formatJsonBody, addHeaderRow } from '../api/client/index.js';
 
 /**
  * Отрисовка списка заданий
@@ -152,39 +155,310 @@ export function loadTask(taskId) {
     // Устанавливаем текущую задачу в глобальном контексте
     setCurrentTask(task);
     
-    // Заполнение рабочей области содержимым
-    const workspaceContainer = document.getElementById('workspace-container');
-    if (workspaceContainer) {
-        console.log('Заполнение рабочей области содержимым');
-        workspaceContainer.innerHTML = `
-            <div class="workspace-header">
-                <h2>${task.title}</h2>
-                <div class="task-meta">
-                    <span class="category">${getCategoryText(task.category)}</span>
-                    <span class="difficulty">${getDifficultyText(task.difficulty)}</span>
-                </div>
-            </div>
-            <div class="task-description">
-                <p>${task.description}</p>
-            </div>
-            <div class="task-instructions">
-                <h3>Инструкции:</h3>
-                <p>${task.instructions || 'Нет инструкций для этого задания.'}</p>
-            </div>
-        `;
-    } else {
-        console.error('Элемент workspace-container не найден');
-    }
-    
-    // Генерируем событие загрузки задания
-    emit('taskLoaded', task);
-    
-    // Напрямую вызываем функцию переключения экрана
+    // Сначала переключаем экран
     console.log('Прямой вызов switchScreen');
     switchScreen('workspace');
-    
-    // Также вызываем setCurrentScreen для обратной совместимости
     setCurrentScreen('workspace');
+    
+    // Заполняем содержимым страницу
+    setTimeout(() => {
+        fillWorkspaceContent(task);
+    }, 50);
+}
+
+function fillWorkspaceContent(task) {
+    console.log('Заполнение содержимого рабочей области');
+    
+    // Находим workspaceScreen
+    const workspaceScreen = document.getElementById('workspace-screen');
+    if (!workspaceScreen) {
+        console.error('workspaceScreen не найден');
+        return;
+    }
+    
+    // Находим main-content внутри workspaceScreen
+    const mainContent = workspaceScreen.querySelector('.main-content');
+    if (!mainContent) {
+        console.error('main-content не найден внутри workspaceScreen');
+        return;
+    }
+    
+    // Очищаем main-content, сохраняя важные элементы
+    const existingElements = Array.from(mainContent.children);
+    existingElements.forEach(el => {
+        if (el.id === 'workspace-container' || 
+            el.classList.contains('content-header') || 
+            el.classList.contains('response-panel') || 
+            el.classList.contains('ai-feedback-panel')) {
+            mainContent.removeChild(el);
+        }
+    });
+    
+    // Добавляем полную структуру интерфейса
+    addContentHeader(mainContent, task);
+    addWorkspaceContainer(mainContent, task);
+    addResponsePanel(mainContent, task);
+    addAIFeedbackPanel(mainContent, task);
+    
+    // Добавляем обработчики событий
+    addEventHandlers();
+    
+    // Попытка настроить рабочую область
+    try {
+        setupTaskWorkspace(task);
+        console.log('setupTaskWorkspace выполнен успешно');
+    } catch (error) {
+        console.error('Ошибка при настройке рабочей области:', error);
+    }
+}
+
+// Функция для добавления заголовка и кнопки "Проверить решение"
+function addContentHeader(parentElement, task) {
+    const contentHeader = document.createElement('div');
+    contentHeader.className = 'content-header';
+    contentHeader.innerHTML = `
+        <h2 id="task-title">${task.title}</h2>
+        <div class="actions">
+            <button class="btn btn-success" id="check-solution">
+                <i class="fas fa-check"></i> Проверить решение
+            </button>
+        </div>
+    `;
+    parentElement.appendChild(contentHeader);
+    console.log('content-header добавлен');
+}
+
+// Функция для добавления рабочей области с панелями задания и API-клиента
+function addWorkspaceContainer(parentElement, task) {
+    const workspaceContainer = document.createElement('div');
+    workspaceContainer.id = 'workspace-container';
+    workspaceContainer.className = 'workspace-container';
+    
+    // Заполняем workspace-container полным содержимым
+    workspaceContainer.innerHTML = `
+        <!-- Панель деталей задания (левая колонка) -->
+        <div class="task-details-panel">
+            <div class="task-subtitle" id="task-subtitle">${task.subtitle}</div>
+            
+            <div class="task-meta">
+                <div id="task-category">Категория: <strong>${getCategoryText(task.category)}</strong></div>
+                <div id="task-difficulty">Сложность: <strong>${getDifficultyText(task.difficulty)}</strong></div>
+            </div>
+            
+            <div class="task-description" id="task-description">
+                <h3>Описание задания</h3>
+                <p>${task.description}</p>
+            </div>
+            
+            <div class="task-requirements">
+                <h3>Требования</h3>
+                <div class="requirements-list">
+                    <ul>
+                        ${task.requirements ? task.requirements.map(req => `<li><i class="fas fa-check-circle"></i> ${req}</li>`).join('') : '<li>Нет специальных требований для этого задания.</li>'}
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="task-expected-result" id="task-expected-result">
+                <h3>Ожидаемый результат</h3>
+                <p>${task.expectedResult || 'Выполните все требования задания.'}</p>
+            </div>
+        </div>
+        
+        <!-- API Клиент (правая колонка) -->
+        <div class="api-client-panel">
+            <div class="api-client-tabs">
+                <div class="api-tab active" data-tab="request">Запрос</div>
+                <div class="api-tab" data-tab="collection">Коллекция</div>
+                <div class="api-tab" data-tab="tests">Тесты</div>
+            </div>
+            
+            <div class="api-client-tab-content active" id="request-tab">
+                <div class="form-group">
+                    <label for="request-url">URL</label>
+                    <input type="text" id="request-url" class="form-control" placeholder="Введите URL запроса">
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group half">
+                        <label for="request-method">Метод</label>
+                        <select id="request-method" class="form-control">
+                            <option value="GET">GET</option>
+                            <option value="POST">POST</option>
+                            <option value="PUT">PUT</option>
+                            <option value="DELETE">DELETE</option>
+                            <option value="PATCH">PATCH</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group half">
+                        <label for="request-content-type">Content-Type</label>
+                        <select id="request-content-type" class="form-control">
+                            <option value="application/json">application/json</option>
+                            <option value="application/x-www-form-urlencoded">application/x-www-form-urlencoded</option>
+                            <option value="multipart/form-data">multipart/form-data</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <div class="header-section">
+                        <label>Заголовки</label>
+                        <button id="add-header" class="btn btn-sm"><i class="fas fa-plus"></i> Добавить</button>
+                    </div>
+                    <div id="headers-container" class="headers-container">
+                        <!-- Заголовки будут добавлены динамически -->
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="request-body">Тело запроса</label>
+                    <textarea id="request-body" class="form-control code-editor" rows="8" placeholder="{ }"></textarea>
+                </div>
+                
+                <div class="form-actions">
+                    <button id="send-request" class="btn btn-primary"><i class="fas fa-paper-plane"></i> Отправить запрос</button>
+                    <button id="reset-request" class="btn"><i class="fas fa-undo"></i> Сбросить</button>
+                    <button id="format-json-btn" class="btn"><i class="fas fa-align-left"></i> Форматировать JSON</button>
+                </div>
+            </div>
+            
+            <div class="api-client-tab-content" id="collection-tab">
+                <div class="collection-placeholder">
+                    <div class="placeholder-icon"><i class="fas fa-folder-open"></i></div>
+                    <p>Коллекции запросов будут доступны в будущих версиях.</p>
+                </div>
+            </div>
+            
+            <div class="api-client-tab-content" id="tests-tab">
+                <div class="collection-placeholder">
+                    <div class="placeholder-icon"><i class="fas fa-vial"></i></div>
+                    <p>Тесты будут доступны в будущих версиях.</p>
+                </div>
+            </div>
+        </div>
+    `;
+    
+    parentElement.appendChild(workspaceContainer);
+    console.log('workspace-container добавлен с полным содержимым');
+}
+
+// Функция для добавления панели ответа
+function addResponsePanel(parentElement, task) {
+    const responsePanel = document.createElement('div');
+    responsePanel.className = 'response-panel';
+    responsePanel.id = 'response-panel';
+    responsePanel.innerHTML = `
+        <div class="response-header">
+            <h3>Ответ</h3>
+            <div class="response-meta" id="response-meta">
+                <!-- Метаданные ответа будут добавлены динамически -->
+            </div>
+        </div>
+        
+        <div class="response-tabs">
+            <div class="response-tab active" data-tab="body">Тело</div>
+            <div class="response-tab" data-tab="headers">Заголовки</div>
+        </div>
+        
+        <div id="body-response-tab" class="response-tab-content active">
+            <pre id="response-body" class="response-body">Отправьте запрос, чтобы увидеть ответ</pre>
+        </div>
+        
+        <div id="headers-response-tab" class="response-tab-content">
+            <pre id="response-headers" class="response-headers"></pre>
+        </div>
+    `;
+    parentElement.appendChild(responsePanel);
+    console.log('response-panel добавлен');
+}
+
+// Функция для добавления панели AI-ассистента
+function addAIFeedbackPanel(parentElement, task) {
+    const aiFeedbackPanel = document.createElement('div');
+    aiFeedbackPanel.className = 'ai-feedback-panel';
+    aiFeedbackPanel.id = 'ai-feedback-panel';
+    aiFeedbackPanel.innerHTML = `
+        <div class="ai-feedback-header">
+            <h3><i class="fas fa-robot"></i> AI Ассистент</h3>
+            <div class="ai-feedback-actions">
+                <button class="btn btn-small"><i class="fas fa-question-circle"></i></button>
+                <button class="btn btn-small"><i class="fas fa-search"></i></button>
+            </div>
+        </div>
+        <div class="ai-feedback-content" id="ai-feedback-content">
+            <div class="ai-message">
+                <p>Здравствуйте! Я ваш AI-ассистент. Готов помочь с выполнением задания. Вы можете попросить помощь или анализ вашего решения в любой момент.</p>
+            </div>
+        </div>
+        <div class="ai-input-container">
+            <input type="text" class="form-control" placeholder="Задайте вопрос ассистенту...">
+            <button class="btn btn-primary"><i class="fas fa-paper-plane"></i></button>
+        </div>
+    `;
+    parentElement.appendChild(aiFeedbackPanel);
+    console.log('ai-feedback-panel добавлен');
+}
+
+// Функция для добавления обработчиков событий для всех элементов
+function addEventHandlers() {
+    // Обработчик для кнопки проверки решения
+    document.getElementById('check-solution')?.addEventListener('click', function() {
+        console.log('Проверка решения');
+        checkTaskCompletion();
+    });
+    
+    // Обработчик для кнопки отправки запроса
+    document.getElementById('send-request')?.addEventListener('click', function() {
+        console.log('Отправка запроса');
+        sendApiRequest(); // Вызываем настоящую функцию отправки запроса
+    });
+    
+    // Обработчик для кнопки сброса запроса
+    document.getElementById('reset-request')?.addEventListener('click', function() {
+        console.log('Сброс запроса');
+        resetRequest(); // Вызываем настоящую функцию сброса
+    });
+    
+    // Обработчик для кнопки форматирования JSON
+    document.getElementById('format-json-btn')?.addEventListener('click', function() {
+        console.log('Форматирование JSON');
+        formatJsonBody(); // Вызываем настоящую функцию форматирования
+    });
+    
+    // Обработчик для кнопки добавления заголовка
+    document.getElementById('add-header')?.addEventListener('click', function() {
+        console.log('Добавление заголовка');
+        addHeaderRow(); // Вызываем настоящую функцию добавления заголовка
+    });
+    
+    // Обработчики для табов API клиента
+    document.querySelectorAll('.api-tab').forEach(tab => {
+        tab.addEventListener('click', function() {
+            const tabGroup = this.closest('.api-client-tabs').parentElement;
+            tabGroup.querySelectorAll('.api-tab').forEach(t => t.classList.remove('active'));
+            tabGroup.querySelectorAll('.api-client-tab-content').forEach(c => c.classList.remove('active'));
+            
+            this.classList.add('active');
+            const tabId = `${this.dataset.tab}-tab`;
+            tabGroup.querySelector(`#${tabId}`)?.classList.add('active');
+        });
+    });
+    
+    // Обработчики для табов ответа
+    document.querySelectorAll('.response-tab').forEach(tab => {
+        tab.addEventListener('click', function() {
+            const tabGroup = this.closest('.response-tabs').parentElement;
+            tabGroup.querySelectorAll('.response-tab').forEach(t => t.classList.remove('active'));
+            tabGroup.querySelectorAll('.response-tab-content').forEach(c => c.classList.remove('active'));
+            
+            this.classList.add('active');
+            const tabId = `${this.dataset.tab}-response-tab`;
+            tabGroup.querySelector(`#${tabId}`)?.classList.add('active');
+        });
+    });
+    
+    console.log('Обработчики событий добавлены');
 }
 
 /**
