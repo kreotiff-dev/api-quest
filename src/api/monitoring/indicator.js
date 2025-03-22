@@ -139,12 +139,108 @@ function updateIndicator() {
         // Добавляем обработчик клика для быстрого переключения
         indicator.addEventListener('click', () => {
             if (sourceKey !== currentSource.key) {
-                setApiSource(sourceKey);
+                if (state.available) {
+                    setApiSource(sourceKey);
+                } else {
+                    // Показываем уведомление, если источник недоступен
+                    showNotification(`Источник "${config.name}" в настоящее время недоступен`, 'warning');
+                }
             }
         });
         
+        // Добавляем расширенные всплывающие подсказки
+        addEnhancedTooltip(indicator, sourceKey);
+        
         // Добавляем в контейнер
         indicatorContainer.appendChild(indicator);
+    }
+}
+
+/**
+ * Добавление расширенной всплывающей подсказки для индикатора
+ * @param {HTMLElement} indicator - Элемент индикатора
+ * @param {string} sourceKey - Ключ источника
+ * @private
+ */
+function addEnhancedTooltip(indicator, sourceKey) {
+    if (!indicator || !sourceKey) return;
+    
+    // Получаем состояние и конфигурацию источника
+    const state = indicatorState[sourceKey];
+    const config = sourceConfig[sourceKey] || { name: 'Неизвестный источник' };
+    
+    // Обработчик при наведении мыши
+    indicator.addEventListener('mouseenter', function(e) {
+        // Удаляем существующую подсказку, если есть
+        let tooltip = document.getElementById('source-tooltip');
+        if (tooltip) {
+            tooltip.remove();
+        }
+        
+        // Создаем новую подсказку
+        tooltip = document.createElement('div');
+        tooltip.id = 'source-tooltip';
+        tooltip.className = 'source-tooltip';
+        
+        // Формируем содержимое подсказки
+        const statusClass = state.available ? 'available' : 'unavailable';
+        const statusText = state.available ? 'Доступен' : 'Недоступен';
+        
+        tooltip.innerHTML = `
+            <div class="tooltip-header">${config.name}</div>
+            <div class="tooltip-content">
+                <div class="tooltip-status ${statusClass}">
+                    <span class="tooltip-status-dot"></span>
+                    ${statusText}
+                </div>
+                <p>Тип: ${getSourceTypeDescription(sourceKey)}</p>
+                ${state.latency ? `<p>Задержка: ${state.latency} мс</p>` : ''}
+                ${state.lastCheck ? `<p>Проверка: ${new Date(state.lastCheck).toLocaleTimeString()}</p>` : ''}
+                ${!state.available ? '<p><strong>Используется резервный источник</strong></p>' : ''}
+            </div>
+        `;
+        
+        // Добавляем подсказку на страницу
+        document.body.appendChild(tooltip);
+        
+        // Позиционируем подсказку относительно индикатора
+        const rect = indicator.getBoundingClientRect();
+        tooltip.style.top = `${rect.bottom + window.scrollY + 5}px`;
+        tooltip.style.left = `${rect.left + window.scrollX}px`;
+        tooltip.style.display = 'block';
+        
+        // Проверяем, не выходит ли подсказка за пределы окна
+        const tooltipRect = tooltip.getBoundingClientRect();
+        if (tooltipRect.right > window.innerWidth) {
+            tooltip.style.left = `${window.innerWidth - tooltipRect.width - 10}px`;
+        }
+    });
+    
+    // Обработчик при уходе курсора
+    indicator.addEventListener('mouseleave', function() {
+        const tooltip = document.getElementById('source-tooltip');
+        if (tooltip) {
+            tooltip.remove();
+        }
+    });
+}
+
+/**
+ * Получение описания типа источника API
+ * @param {string} sourceKey - Ключ источника
+ * @returns {string} Описание типа
+ * @private
+ */
+function getSourceTypeDescription(sourceKey) {
+    switch (sourceKey) {
+        case 'mock':
+            return 'Локальный симулятор для обучения';
+        case 'public':
+            return 'Внешние открытые API';
+        case 'custom':
+            return 'Образовательные примеры API';
+        default:
+            return 'Неизвестный тип источника';
     }
 }
 

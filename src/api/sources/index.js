@@ -44,6 +44,8 @@ export async function init() {
     
     // Устанавливаем интервал проверки доступности API
     setInterval(checkApiAvailability, 60000); // Каждую минуту
+
+    hideApiSourceDropdown();
 }
 
 /**
@@ -240,6 +242,48 @@ function createSourceSelector() {
     
     // Заполняем селектор и выбираем текущий источник
     updateSourceSelector();
+}
+
+/**
+ * Функция для скрытия выпадающего списка и оставления только иконок
+ * Добавьте эту функцию в файл src/api/sources/index.js или src/api/client/index.js
+ */
+function hideApiSourceDropdown() {
+    // Находим элементы выпадающего списка, которые нужно скрыть
+    const sourceSelector = document.querySelector('.api-source-selector-container');
+    const customSelector = document.querySelector('.api-source-custom-selector');
+    
+    // Скрываем элементы, если они существуют
+    if (sourceSelector) {
+        sourceSelector.style.display = 'none';
+    }
+    
+    if (customSelector) {
+        customSelector.style.display = 'none';
+    }
+    
+    // Также можно скрыть любые другие связанные элементы
+    const apiSourceDropdown = document.getElementById('api-source-dropdown');
+    if (apiSourceDropdown) {
+        apiSourceDropdown.style.display = 'none';
+    }
+    
+    // Добавляем CSS-правило, чтобы гарантировать скрытие при любых условиях
+    const style = document.createElement('style');
+    style.id = 'hide-source-dropdown-style';
+    style.textContent = `
+        .api-source-selector-container,
+        .api-source-custom-selector,
+        #api-source-dropdown {
+            display: none !important;
+        }
+        
+        /* Делаем акцент на индикаторах источников API */
+        #api-source-indicator {
+            margin-right: 0;
+        }
+    `;
+    document.head.appendChild(style);
 }
 
 /**

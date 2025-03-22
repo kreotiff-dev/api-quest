@@ -78,6 +78,12 @@ export function resetResponse() {
  * Создание выпадающего списка источников API
  */
 export function createSourceDropdown() {
+    // Удаляем существующий выпадающий список, если он есть
+    const existingDropdown = document.getElementById('api-source-dropdown');
+    if (existingDropdown) {
+        existingDropdown.remove();
+    }
+    
     const dropdown = document.createElement('div');
     dropdown.id = 'api-source-dropdown';
     dropdown.className = 'api-source-dropdown';
@@ -119,17 +125,29 @@ export function createSourceDropdown() {
     
     // Закрытие списка при клике вне его
     document.addEventListener('click', function closeDropdown(e) {
-        if (!dropdown.contains(e.target) && e.target.className !== 'btn-source-selector' && 
-            !e.target.closest('.btn-source-selector')) {
+        if (!dropdown.contains(e.target) && 
+            e.target.id !== 'api-source-selector' && 
+            !e.target.closest('.api-source-selector-container')) {
             dropdown.classList.remove('show');
             document.removeEventListener('click', closeDropdown);
         }
     });
     
-    // Позиционирование списка
-    const buttonRect = document.querySelector('.btn-source-selector').getBoundingClientRect();
-    dropdown.style.top = `${buttonRect.bottom + window.scrollY + 5}px`;
-    dropdown.style.left = `${buttonRect.left + window.scrollX}px`;
+    // Позиционирование списка относительно селектора источников API
+    const selector = document.getElementById('api-source-selector');
+    if (selector) {
+        const selectorRect = selector.getBoundingClientRect();
+        dropdown.style.top = `${selectorRect.bottom + window.scrollY + 5}px`;
+        dropdown.style.left = `${selectorRect.left + window.scrollX}px`;
+    } else {
+        // Запасной вариант - если селектор не найден
+        const container = document.querySelector('.api-source-selector-container');
+        if (container) {
+            const containerRect = container.getBoundingClientRect();
+            dropdown.style.top = `${containerRect.bottom + window.scrollY + 5}px`;
+            dropdown.style.left = `${containerRect.left + window.scrollX}px`;
+        }
+    }
     
     return dropdown;
 }
