@@ -1,0 +1,31 @@
+/* 
+ * API-Quest - Основной CSS-файл
+ * Импортирует все модули стилей
+ */
+
+/* Базовые стили */
+@import url('./base/variables.css');
+@import url('./base/reset.css');
+@import url('./base/typography.css');
+
+/* Компоненты интерфейса */
+@import url('./components/buttons.css');
+@import url('./components/cards.css');
+@import url('./components/forms.css');
+@import url('./components/modals.css');
+@import url('./components/notifications.css');
+
+/* Макеты и структура */
+@import url('./layout/header.css');
+@import url('./layout/sidebar.css');
+@import url('./layout/footer.css');
+@import url('./layout/grid.css');
+
+/* Экраны */
+@import url('./screens/tasks.css');
+@import url('./screens/workspace.css');
+
+/* Модули приложения */
+@import url('./modules/api-client.css');
+@import url('./modules/filters.css');
+@import url('./modules/api-sources.css');

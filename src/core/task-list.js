@@ -48,77 +48,69 @@ export function createTaskCard(task) {
     
     // Создаем карточку
     const card = document.createElement('div');
-    card.className = `task-card ${task.difficulty} ${taskStatus}`;
+    card.className = `task-card`;
     card.dataset.taskId = task.id;
     
-    // Метод и категория
-    const taskMeta = document.createElement('div');
-    taskMeta.className = 'task-meta';
-    
-    // Создаем метку метода, если он есть
+    // Получаем метод из решения или тегов
+    let method = 'GET';
     if (task.solution && task.solution.method) {
-        const methodBadge = document.createElement('div');
-        methodBadge.className = `method-badge ${task.solution.method.toLowerCase()}`;
-        methodBadge.textContent = task.solution.method;
-        taskMeta.appendChild(methodBadge);
+        method = task.solution.method;
+    } else if (task.tags && task.tags.length > 0) {
+        const methodTags = ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS', 'HEAD'];
+        for (const tag of task.tags) {
+            if (methodTags.includes(tag)) {
+                method = tag;
+                break;
+            }
+        }
     }
     
-    // Создаем метку категории
-    const categoryBadge = document.createElement('div');
-    categoryBadge.className = 'category-badge';
-    categoryBadge.textContent = getCategoryText(task.category);
-    taskMeta.appendChild(categoryBadge);
+    // Получаем техническую информацию
+    let techInfo = method;
+    const tagsTechnical = task.tags.filter(tag => !['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS', 'HEAD'].includes(tag));
+    if (tagsTechnical.length > 0) {
+        techInfo = `${method} ${tagsTechnical[0]}`;
+    } else if (task.solution && task.solution.url) {
+        const urlParts = task.solution.url.split('?');
+        techInfo = `${method} ${urlParts[0]}`;
+    }
     
-    // Заголовок задания
-    const title = document.createElement('div');
-    title.className = 'task-title';
-    title.textContent = task.title;
-    
-    // Подзаголовок задания
-    const subtitle = document.createElement('div');
-    subtitle.className = 'task-subtitle';
-    subtitle.textContent = task.subtitle;
-    
-    // Метки
-    const tags = document.createElement('div');
-    tags.className = 'task-tags';
-    
-    task.tags.forEach(tag => {
-        const tagSpan = document.createElement('span');
-        tagSpan.className = 'tag';
-        tagSpan.textContent = tag;
-        tags.appendChild(tagSpan);
-    });
-    
-    // Информация о прогрессе
-    const progress = document.createElement('div');
-    progress.className = 'task-completion-status';
-    
-    const statusIcon = document.createElement('i');
-    statusIcon.className = 'fas';
-    
+    // Определяем статус и иконку
+    let statusIcon = '';
     if (taskStatus === 'completed') {
-        statusIcon.className += ' fa-check-circle';
-        statusIcon.title = 'Выполнено';
+        statusIcon = '<i class="fas fa-check status-icon"></i>';
     } else if (taskStatus === 'in_progress') {
-        statusIcon.className += ' fa-spinner';
-        statusIcon.title = 'В процессе';
+        statusIcon = '<i class="fas fa-hourglass-start status-icon"></i>';
     } else if (taskStatus === 'locked') {
-        statusIcon.className += ' fa-lock';
-        statusIcon.title = 'Заблокировано';
+        statusIcon = '<i class="fas fa-lock status-icon"></i>';
     } else {
-        statusIcon.className += ' fa-circle';
-        statusIcon.title = 'Не начато';
+        // statusIcon = '<i class="far fa-circle status-icon"></i>'; // Пустой круг
+        // ИЛИ
+        // statusIcon = '<i class="fas fa-spinner status-icon"></i>'; // спиннер загрузки
+        // ИЛИ
+        statusIcon = '<i class="fas fa-play-circle status-icon"></i>'; // Значок "начать"
     }
     
-    progress.appendChild(statusIcon);
-    
-    // Сборка карточки
-    card.appendChild(taskMeta);
-    card.appendChild(title);
-    card.appendChild(subtitle);
-    card.appendChild(tags);
-    card.appendChild(progress);
+    // Формируем HTML карточки с современным дизайном
+    card.innerHTML = `
+        <div class="task-header">
+            <span class="task-method ${method.toLowerCase()}">${method}</span>
+            <span class="task-category">${getCategoryText(task.category)}</span>
+            <h3 class="task-title">${task.title}</h3>
+            <h4 class="task-subtitle">${task.subtitle}</h4>
+        </div>
+        <div class="task-content">
+            <div class="task-info">
+                <div class="task-tech-info">${techInfo}</div>
+                <div class="task-status ${taskStatus}">
+                    ${statusIcon}
+                </div>
+            </div>
+            <div class="task-actions">
+                <button class="task-btn primary">Начать</button>
+            </div>
+        </div>
+    `;
     
     // Добавление обработчика клика
     card.addEventListener('click', () => {

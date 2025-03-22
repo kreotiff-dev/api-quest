@@ -1,0 +1,206 @@
+/* 
+ * API-Quest - Стили для подвала
+ */
+
+/* Основной футер */
+.main-footer {
+  background-color: var(--color-card);
+  color: var(--color-text-secondary);
+  padding: var(--spacing-md) var(--spacing-lg);
+  border-top: 1px solid var(--color-border);
+  font-size: var(--font-size-sm);
+}
+
+/* Основное содержимое футера */
+.footer-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--spacing-md);
+}
+
+/* Авторские права */
+.footer-copyright {
+  flex-shrink: 0;
+}
+
+/* Навигация в футере */
+.footer-nav {
+  display: flex;
+  gap: var(--spacing-md);
+}
+
+.footer-nav a {
+  color: var(--color-text-secondary);
+  text-decoration: none;
+  transition: color var(--transition-fast);
+}
+
+.footer-nav a:hover {
+  color: var(--color-primary);
+}
+
+/* Социальные иконки */
+.footer-social {
+  display: flex;
+  gap: var(--spacing-sm);
+}
+
+.social-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: var(--radius-circular);
+  background-color: var(--color-background);
+  color: var(--color-text-secondary);
+  transition: all var(--transition-fast);
+}
+
+.social-icon:hover {
+  background-color: var(--color-primary);
+  color: white;
+  transform: translateY(-3px);
+}
+
+/* Расширенный футер с несколькими колонками */
+.footer-expanded {
+  padding: var(--spacing-xl) var(--spacing-lg);
+  background-color: #2c3e50;
+  color: white;
+}
+
+.footer-columns {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: var(--spacing-xl);
+  margin-bottom: var(--spacing-xl);
+}
+
+.footer-column h3 {
+  font-size: var(--font-size-md);
+  margin-bottom: var(--spacing-md);
+  color: white;
+  font-weight: 600;
+}
+
+.footer-column ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.footer-column ul li {
+  margin-bottom: var(--spacing-xs);
+}
+
+.footer-column ul li a {
+  color: rgba(255, 255, 255, 0.7);
+  text-decoration: none;
+  transition: color var(--transition-fast);
+}
+
+.footer-column ul li a:hover {
+  color: white;
+}
+
+.footer-column p {
+  color: rgba(255, 255, 255, 0.7);
+  margin-bottom: var(--spacing-sm);
+}
+
+/* Линия разделения в футере */
+.footer-divider {
+  height: 1px;
+  background-color: rgba(255, 255, 255, 0.1);
+  margin: var(--spacing-md) 0;
+}
+
+/* Нижняя часть футера */
+.footer-bottom {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-top: var(--spacing-sm);
+  color: rgba(255, 255, 255, 0.7);
+  font-size: var(--font-size-xs);
+}
+
+/* Логотип в футере */
+.footer-logo {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  margin-bottom: var(--spacing-md);
+}
+
+.footer-logo img {
+  height: 32px;
+}
+
+.footer-logo-text {
+  font-weight: 600;
+  font-size: var(--font-size-md);
+  color: white;
+}
+
+/* Форма подписки на новости */
+.subscribe-form {
+  display: flex;
+  margin-top: var(--spacing-sm);
+}
+
+.subscribe-input {
+  flex: 1;
+  padding: var(--spacing-sm);
+  border: none;
+  border-radius: var(--radius-md) 0 0 var(--radius-md);
+  font-size: var(--font-size-sm);
+}
+
+.subscribe-btn {
+  background-color: var(--color-primary);
+  color: white;
+  border: none;
+  padding: var(--spacing-sm) var(--spacing-md);
+  border-radius: 0 var(--radius-md) var(--radius-md) 0;
+  cursor: pointer;
+  transition: background-color var(--transition-fast);
+}
+
+.subscribe-btn:hover {
+  background-color: var(--color-primary-dark);
+}
+
+/* Адаптивность для мобильных устройств */
+@media (max-width: 768px) {
+  .footer-content {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+  }
+  
+  .footer-nav {
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+  
+  .footer-bottom {
+    flex-direction: column;
+    gap: var(--spacing-sm);
+    text-align: center;
+  }
+  
+  .subscribe-form {
+    flex-direction: column;
+    gap: var(--spacing-xs);
+  }
+  
+  .subscribe-input,
+  .subscribe-btn {
+    width: 100%;
+    border-radius: var(--radius-md);
+  }
+}

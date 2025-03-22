@@ -1,0 +1,222 @@
+/* 
+ * API-Quest - Стили для форм и элементов ввода
+ */
+
+/* Контейнеры форм */
+.form-group {
+  margin-bottom: var(--spacing-md);
+}
+
+.form-row {
+  display: flex;
+  gap: var(--spacing-md);
+  margin-bottom: var(--spacing-md);
+}
+
+@media (max-width: 768px) {
+  .form-row {
+    flex-direction: column;
+    gap: var(--spacing-sm);
+  }
+}
+
+.form-group.half {
+  flex: 1;
+}
+
+/* Метки */
+.form-label, label {
+  display: block;
+  margin-bottom: var(--spacing-xs);
+  font-weight: 500;
+  color: var(--color-text-secondary);
+}
+
+/* Элементы ввода */
+.form-control {
+  width: 100%;
+  padding: var(--spacing-sm) var(--spacing-md);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  font-size: var(--font-size-sm);
+  line-height: 1.5;
+  transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+  background-color: var(--color-card);
+  color: var(--color-text-primary);
+}
+
+.form-control:focus {
+  outline: none;
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px var(--color-primary-light);
+}
+
+.form-control::placeholder {
+  color: var(--color-text-hint);
+}
+
+.form-control:disabled,
+.form-control.disabled {
+  background-color: var(--color-background);
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+/* Валидация */
+.form-control.is-valid {
+  border-color: var(--color-success);
+}
+
+.form-control.is-invalid {
+  border-color: var(--color-danger);
+}
+
+.invalid-feedback {
+  display: block;
+  width: 100%;
+  margin-top: var(--spacing-xs);
+  font-size: var(--font-size-xs);
+  color: var(--color-danger);
+}
+
+/* Текстовые области */
+textarea.form-control {
+  min-height: 100px;
+  resize: vertical;
+}
+
+/* Редактор кода */
+.form-control.code-editor {
+  font-family: 'Courier New', Courier, monospace;
+  resize: vertical;
+  min-height: 150px;
+  white-space: pre;
+  tab-size: 4;
+}
+
+/* Селект */
+select.form-control {
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23333'%3E%3Cpath d='M7 10l5 5 5-5z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 10px center;
+  background-size: 20px;
+  padding-right: 30px;
+}
+
+/* Чекбоксы и радио */
+.form-check {
+  display: flex;
+  align-items: center;
+  margin-bottom: var(--spacing-xs);
+  cursor: pointer;
+}
+
+.form-check-input {
+  margin-right: var(--spacing-xs);
+  cursor: pointer;
+}
+
+.form-check-label {
+  margin-bottom: 0;
+  cursor: pointer;
+}
+
+/* Размеры элементов ввода */
+.form-control-sm {
+  padding: var(--spacing-xs) var(--spacing-sm);
+  font-size: calc(var(--font-size-sm) - 2px);
+}
+
+.form-control-lg {
+  padding: var(--spacing-md) var(--spacing-lg);
+  font-size: var(--font-size-md);
+}
+
+/* Горизонтальные формы */
+.form-horizontal .form-group {
+  display: flex;
+  align-items: center;
+}
+
+.form-horizontal .form-label {
+  flex: 0 0 25%;
+  max-width: 25%;
+  margin-bottom: 0;
+  margin-right: var(--spacing-md);
+}
+
+.form-horizontal .form-control {
+  flex: 1;
+}
+
+/* Файловый ввод */
+.form-file {
+  position: relative;
+}
+
+.form-file-input {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  cursor: pointer;
+  z-index: 10;
+}
+
+.form-file-label {
+  display: flex;
+  align-items: center;
+  padding: var(--spacing-sm) var(--spacing-md);
+  background-color: var(--color-background);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+}
+
+.form-file-button {
+  padding: var(--spacing-xs) var(--spacing-sm);
+  background-color: var(--color-primary);
+  color: white;
+  border-radius: var(--radius-sm);
+  margin-right: var(--spacing-sm);
+}
+
+.form-file-text {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--color-text-tertiary);
+}
+
+/* Панели формы */
+.form-panel {
+  margin-bottom: var(--spacing-md);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+}
+
+.form-panel-header {
+  padding: var(--spacing-sm) var(--spacing-md);
+  background-color: var(--color-background);
+  border-bottom: 1px solid var(--color-border);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.form-panel-body {
+  padding: var(--spacing-md);
+}
+
+/* Действия формы */
+.form-actions {
+  display: flex;
+  gap: var(--spacing-sm);
+  margin-top: var(--spacing-md);
+  justify-content: flex-end;
+}

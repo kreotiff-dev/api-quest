@@ -1,0 +1,271 @@
+/* 
+ * API-Quest - Стили для карточек
+ * Содержит стили для карточек заданий и других карточек
+ */
+
+/* Сетка карточек */
+.tasks-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(var(--card-min-width), 1fr));
+  gap: var(--spacing-lg);
+  margin-top: var(--spacing-lg);
+}
+
+/* Основные стили карточки */
+.task-card {
+  background-color: var(--color-card);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-lg);
+  transition: all var(--transition-normal);
+  overflow: hidden;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  cursor: pointer;
+}
+
+.task-card:hover {
+  transform: translateY(-8px);
+  box-shadow: var(--shadow-hover);
+}
+
+/* Заголовок карточки */
+.task-header {
+  padding: var(--spacing-lg) var(--spacing-lg) var(--spacing-md);
+  position: relative;
+  border-bottom: 1px solid var(--color-divider);
+}
+
+/* Метки HTTP-методов */
+.task-method {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+  padding: var(--spacing-xs) var(--spacing-sm);
+  border-radius: var(--radius-sm);
+  font-size: var(--font-size-sm);
+  color: white;
+  margin-right: var(--spacing-sm);
+  min-width: 60px;
+  text-align: center;
+}
+
+.task-method.get {
+  background: var(--gradient-get);
+}
+
+.task-method.post {
+  background: var(--gradient-post);
+}
+
+.task-method.put {
+  background: var(--gradient-put);
+}
+
+.task-method.delete {
+  background: var(--gradient-delete);
+}
+
+.task-method.patch {
+  background: linear-gradient(90deg, #50e3c2 0%, #4facfe 100%);
+}
+
+.task-method.options {
+  background: linear-gradient(90deg, #8980f5 0%, #a389f4 100%);
+}
+
+.task-method.head {
+  background: linear-gradient(90deg, #6a7985 0%, #8693a1 100%);
+}
+
+/* Категория задания */
+.task-category {
+  display: inline-block;
+  color: var(--color-text-tertiary);
+  font-size: var(--font-size-sm);
+  vertical-align: middle;
+}
+
+/* Заголовки */
+.task-title {
+  font-size: var(--font-size-lg);
+  font-weight: 700;
+  color: var(--color-text-primary);
+  margin: var(--spacing-md) 0 var(--spacing-xs);
+  line-height: 1.3;
+}
+
+.task-subtitle {
+  font-size: var(--font-size-md);
+  font-weight: 600;
+  color: var(--color-text-secondary);
+  margin: 0 0 var(--spacing-xs);
+  line-height: 1.3;
+}
+
+/* Основной контент */
+.task-content {
+  padding: var(--spacing-md) var(--spacing-lg);
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Информация и статусы */
+.task-info {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--spacing-md);
+}
+
+.task-tech-info {
+  color: var(--color-text-tertiary);
+  font-size: var(--font-size-sm);
+}
+
+/* Статусы заданий */
+.task-status {
+  width: 24px;
+  height: 24px;
+  border-radius: var(--radius-circular);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.task-status.completed {
+  background-color: var(--color-success-light);
+  color: var(--color-success-dark);
+}
+
+.task-status.in_progress {
+  background-color: var(--color-warning-light);
+  color: var(--color-warning-dark);
+}
+
+.task-status.not_started {
+  background-color: var(--color-background);
+  color: var(--color-text-hint);
+}
+
+.task-status.locked {
+  background-color: #eceff1;
+  color: #607d8b;
+}
+
+/* Область действий */
+.task-actions {
+  margin-top: auto;
+  padding-top: var(--spacing-md);
+  display: flex;
+  justify-content: flex-end;
+}
+
+/* Кнопка в карточке */
+.task-btn {
+  background-color: var(--color-background);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-xl);
+  padding: var(--spacing-sm) var(--spacing-lg);
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.task-btn:hover {
+  background-color: var(--color-border);
+}
+
+.task-btn.primary {
+  background-color: var(--color-primary);
+  color: white;
+  border: none;
+}
+
+.task-btn.primary:hover {
+  background-color: var(--color-primary-dark);
+}
+
+/* Иконки статуса */
+.status-icon {
+  font-size: var(--font-size-sm);
+}
+
+/* Дополнительные стили для карточек */
+.task-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--spacing-xs);
+  margin-top: var(--spacing-xs);
+}
+
+.task-tag {
+  background-color: var(--color-background);
+  padding: 2px var(--spacing-sm);
+  border-radius: var(--radius-xl);
+  font-size: var(--font-size-xs);
+  color: var(--color-text-tertiary);
+}
+
+/* Сообщение об отсутствии заданий */
+.no-tasks {
+  grid-column: 1 / -1;
+  padding: var(--spacing-xl);
+  text-align: center;
+  color: var(--color-text-hint);
+  font-size: var(--font-size-md);
+  background-color: var(--color-card);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-sm);
+}
+
+/* Адаптивность для маленьких экранов */
+@media (max-width: 768px) {
+  .tasks-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .task-header {
+    padding: var(--spacing-md);
+  }
+  
+  .task-content {
+    padding: var(--spacing-md);
+  }
+}
+
+/* Совместимость со старыми стилями карточек */
+.method-badge,
+.category-badge {
+  font-size: var(--font-size-sm);
+}
+
+.method-badge {
+  padding: 3px 8px;
+  border-radius: var(--radius-sm);
+  color: white;
+  font-weight: 600;
+}
+
+.method-badge.get { background: var(--gradient-get); }
+.method-badge.post { background: var(--gradient-post); }
+.method-badge.put { background: var(--gradient-put); }
+.method-badge.delete { background: var(--gradient-delete); }
+
+.category-badge {
+  color: var(--color-text-tertiary);
+  padding: 3px 0;
+}
+
+.task-completion-status {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  color: var(--color-text-tertiary);
+  font-size: var(--font-size-md);
+}

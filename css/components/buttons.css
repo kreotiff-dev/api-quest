@@ -1,0 +1,233 @@
+/* 
+ * API-Quest - Стили для кнопок
+ */
+
+/* Базовая кнопка */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--spacing-sm) var(--spacing-md);
+  border-radius: var(--radius-md);
+  border: none;
+  font-size: var(--font-size-sm);
+  font-weight: 500;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  background-color: var(--color-background);
+  color: var(--color-text-primary);
+  text-align: center;
+  line-height: 1.5;
+  text-decoration: none;
+  gap: var(--spacing-xs);
+}
+
+.btn:hover {
+  background-color: var(--color-border);
+}
+
+.btn:focus {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.3);
+}
+
+.btn:active {
+  transform: translateY(1px);
+}
+
+/* Иконки внутри кнопок */
+.btn i, .btn .icon {
+  font-size: 1em;
+  display: inline-block;
+  margin-right: var(--spacing-xs);
+}
+
+/* Размеры кнопок */
+.btn-small {
+  padding: var(--spacing-xs) var(--spacing-sm);
+  font-size: calc(var(--font-size-sm) - 2px);
+}
+
+.btn-large {
+  padding: var(--spacing-md) var(--spacing-lg);
+  font-size: var(--font-size-md);
+}
+
+/* Варианты кнопок */
+.btn-primary {
+  background-color: var(--color-primary);
+  color: white;
+}
+
+.btn-primary:hover {
+  background-color: var(--color-primary-dark);
+}
+
+.btn-success {
+  background-color: var(--color-success);
+  color: white;
+}
+
+.btn-success:hover {
+  background-color: var(--color-success-dark);
+}
+
+.btn-warning {
+  background-color: var(--color-warning);
+  color: white;
+}
+
+.btn-warning:hover {
+  background-color: var(--color-warning-dark);
+}
+
+.btn-danger {
+  background-color: var(--color-danger);
+  color: white;
+}
+
+.btn-danger:hover {
+  background-color: var(--color-danger-dark);
+}
+
+.btn-outline {
+  background-color: transparent;
+  border: 1px solid var(--color-border);
+}
+
+.btn-outline:hover {
+  background-color: var(--color-background);
+}
+
+.btn-outline-primary {
+  border-color: var(--color-primary);
+  color: var(--color-primary);
+}
+
+.btn-outline-primary:hover {
+  background-color: var(--color-primary-light);
+}
+
+.btn-outline-danger {
+  border-color: var(--color-danger);
+  color: var(--color-danger);
+}
+
+.btn-outline-danger:hover {
+  background-color: var(--color-danger-light);
+}
+
+.btn-text {
+  background: none;
+  padding: var(--spacing-xs);
+  color: var(--color-primary);
+}
+
+.btn-text:hover {
+  background: none;
+  text-decoration: underline;
+  color: var(--color-primary-dark);
+}
+
+/* Группы кнопок */
+.btn-group {
+  display: inline-flex;
+}
+
+.btn-group .btn {
+  border-radius: 0;
+}
+
+.btn-group .btn:first-child {
+  border-top-left-radius: var(--radius-md);
+  border-bottom-left-radius: var(--radius-md);
+}
+
+.btn-group .btn:last-child {
+  border-top-right-radius: var(--radius-md);
+  border-bottom-right-radius: var(--radius-md);
+}
+
+/* Кнопка-иконка */
+.btn-icon {
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  border-radius: var(--radius-circular);
+}
+
+.btn-icon i, .btn-icon .icon {
+  margin: 0;
+}
+
+/* Кнопка в виде чипа */
+.btn-chip {
+  border-radius: var(--radius-xl);
+  padding: var(--spacing-xs) var(--spacing-md);
+  font-size: var(--font-size-xs);
+}
+
+/* Состояния кнопок */
+.btn.disabled, .btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+/* Растянутая кнопка */
+.btn-block {
+  display: flex;
+  width: 100%;
+}
+
+/* Кнопка загрузки */
+.btn-loading {
+  position: relative;
+  pointer-events: none;
+}
+
+.btn-loading::after {
+  content: "";
+  position: absolute;
+  width: 16px;
+  height: 16px;
+  top: calc(50% - 8px);
+  left: calc(50% - 8px);
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-radius: 50%;
+  border-top-color: white;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* API метод кнопки */
+.btn-method {
+  font-weight: 600;
+  min-width: 60px;
+  text-align: center;
+}
+
+.btn-method.get {
+  background: var(--gradient-get);
+  color: white;
+}
+
+.btn-method.post {
+  background: var(--gradient-post);
+  color: white;
+}
+
+.btn-method.put {
+  background: var(--gradient-put);
+  color: white;
+}
+
+.btn-method.delete {
+  background: var(--gradient-delete);
+  color: white;
+}

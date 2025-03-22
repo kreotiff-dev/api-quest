@@ -1,0 +1,263 @@
+/* 
+ * API-Quest - Стили для уведомлений
+ */
+
+/* Контейнер уведомлений */
+#notifications-container {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  width: 350px;
+  max-width: 90%;
+  z-index: 1000;
+}
+
+/* Стиль отдельного уведомления */
+.notification {
+  padding: var(--spacing-md);
+  margin-bottom: var(--spacing-md);
+  border-radius: var(--radius-md);
+  background-color: var(--color-card);
+  box-shadow: var(--shadow-lg);
+  opacity: 0;
+  transform: translateX(50px);
+  transition: all var(--transition-normal);
+  overflow: hidden;
+  position: relative;
+  display: flex;
+  align-items: flex-start;
+  border-left: 4px solid var(--color-primary);
+}
+
+/* Анимация появления */
+.notification.show {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+/* Индикатор прогресса исчезновения */
+.notification .progress {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  height: 3px;
+  background-color: rgba(0, 0, 0, 0.1);
+  width: 100%;
+}
+
+.notification .progress-bar {
+  height: 100%;
+  background-color: var(--color-primary);
+  width: 100%;
+  transform-origin: left;
+  animation: notificationProgress linear forwards;
+}
+
+@keyframes notificationProgress {
+  from { transform: scaleX(1); }
+  to { transform: scaleX(0); }
+}
+
+/* Иконка уведомления */
+.notification-icon {
+  flex-shrink: 0;
+  margin-right: var(--spacing-sm);
+  font-size: 1.2rem;
+  color: var(--color-primary);
+}
+
+/* Содержимое уведомления */
+.notification-content {
+  flex: 1;
+}
+
+.notification-title {
+  font-weight: 600;
+  margin-bottom: var(--spacing-xs);
+  color: var(--color-text-primary);
+}
+
+.notification-message {
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-sm);
+}
+
+/* Кнопка закрытия */
+.notification-close {
+  margin-left: var(--spacing-sm);
+  color: var(--color-text-hint);
+  background: none;
+  border: none;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: color var(--transition-fast);
+  padding: 0;
+  opacity: 0.6;
+}
+
+.notification-close:hover {
+  color: var(--color-text-primary);
+  opacity: 1;
+}
+
+/* Типы уведомлений */
+.notification.success {
+  border-left-color: var(--color-success);
+}
+
+.notification.success .notification-icon {
+  color: var(--color-success);
+}
+
+.notification.success .progress-bar {
+  background-color: var(--color-success);
+}
+
+.notification.info {
+  border-left-color: var(--color-info);
+}
+
+.notification.info .notification-icon {
+  color: var(--color-info);
+}
+
+.notification.info .progress-bar {
+  background-color: var(--color-info);
+}
+
+.notification.warning {
+  border-left-color: var(--color-warning);
+}
+
+.notification.warning .notification-icon {
+  color: var(--color-warning);
+}
+
+.notification.warning .progress-bar {
+  background-color: var(--color-warning);
+}
+
+.notification.error {
+  border-left-color: var(--color-danger);
+}
+
+.notification.error .notification-icon {
+  color: var(--color-danger);
+}
+
+.notification.error .progress-bar {
+  background-color: var(--color-danger);
+}
+
+/* Действия для уведомлений */
+.notification-actions {
+  display: flex;
+  gap: var(--spacing-sm);
+  margin-top: var(--spacing-sm);
+}
+
+.notification-action {
+  padding: var(--spacing-xs) var(--spacing-sm);
+  font-size: var(--font-size-xs);
+  border-radius: var(--radius-sm);
+  background-color: var(--color-background);
+  color: var(--color-text-secondary);
+  border: none;
+  cursor: pointer;
+}
+
+.notification-action.primary {
+  background-color: var(--color-primary);
+  color: white;
+}
+
+/* Стили для мобильных устройств */
+@media (max-width: 576px) {
+  #notifications-container {
+    width: 100%;
+    right: 0;
+    top: 0;
+    padding: var(--spacing-xs);
+  }
+  
+  .notification {
+    margin-bottom: var(--spacing-xs);
+  }
+}
+
+/* Альтернативные типы уведомлений */
+
+/* Стиль уведомления с фоном */
+.notification.filled {
+  border: none;
+  color: white;
+}
+
+.notification.filled.success {
+  background-color: var(--color-success);
+}
+
+.notification.filled .notification-title,
+.notification.filled .notification-message,
+.notification.filled .notification-icon {
+  color: white;
+}
+
+.notification.filled .notification-close {
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.notification.filled .notification-close:hover {
+  color: white;
+}
+
+.notification.filled.success .progress-bar {
+  background-color: rgba(255, 255, 255, 0.3);
+}
+
+.notification.filled.info {
+  background-color: var(--color-info);
+}
+
+.notification.filled.info .progress-bar {
+  background-color: rgba(255, 255, 255, 0.3);
+}
+
+.notification.filled.warning {
+  background-color: var(--color-warning);
+}
+
+.notification.filled.warning .progress-bar {
+  background-color: rgba(255, 255, 255, 0.3);
+}
+
+.notification.filled.error {
+  background-color: var(--color-danger);
+}
+
+.notification.filled.error .progress-bar {
+  background-color: rgba(255, 255, 255, 0.3);
+}
+
+/* Стиль тонкой рамки */
+.notification.outlined {
+  background-color: transparent;
+  border: 1px solid var(--color-border);
+  border-left-width: 1px;
+}
+
+/* Тосты (маленькие уведомления) */
+.notification.toast {
+  padding: var(--spacing-xs) var(--spacing-sm);
+  border-radius: var(--radius-sm);
+  max-width: 250px;
+}
+
+.notification.toast .notification-title {
+  font-size: var(--font-size-sm);
+  margin-bottom: 0;
+}
+
+.notification.toast .notification-message {
+  font-size: var(--font-size-xs);
+}

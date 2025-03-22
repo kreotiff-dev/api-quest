@@ -1,0 +1,414 @@
+/* 
+ * API-Quest - Стили для API-клиента
+ */
+
+/* API методы */
+.method {
+  display: inline-block;
+  padding: var(--spacing-xs) var(--spacing-sm);
+  border-radius: var(--radius-sm);
+  font-weight: 600;
+  min-width: 60px;
+  text-align: center;
+  color: white;
+  text-transform: uppercase;
+  font-size: var(--font-size-sm);
+}
+
+.get {
+  background: var(--gradient-get);
+}
+
+.post {
+  background: var(--gradient-post);
+}
+
+.put {
+  background: var(--gradient-put);
+}
+
+.delete {
+  background: var(--gradient-delete);
+}
+
+.patch {
+  background-color: #50e3c2;
+}
+
+.options {
+  background-color: #8980F5;
+}
+
+.head {
+  background-color: #6A7985;
+}
+
+/* Форматированный код JSON */
+.json-formatter {
+  font-family: monospace;
+  font-size: var(--font-size-sm);
+  line-height: 1.5;
+  white-space: pre-wrap;
+}
+
+.json-string {
+  color: #388E3C;
+}
+
+.json-number {
+  color: #0277BD;
+}
+
+.json-boolean {
+  color: #0277BD;
+  font-weight: bold;
+}
+
+.json-null {
+  color: #757575;
+  font-style: italic;
+}
+
+.json-key {
+  color: #D81B60;
+}
+
+.json-bracket {
+  color: #555;
+}
+
+.json-comma {
+  color: #555;
+}
+
+/* Табличный вид ответа */
+.response-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: var(--spacing-md);
+}
+
+.response-table th,
+.response-table td {
+  padding: var(--spacing-sm);
+  text-align: left;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.response-table th {
+  background-color: var(--color-background);
+  font-weight: 600;
+  color: var(--color-text-secondary);
+}
+
+.response-table tr:nth-child(even) {
+  background-color: var(--color-background);
+}
+
+.response-table tr:hover {
+  background-color: var(--color-primary-light);
+}
+
+/* Панель статуса запроса */
+.request-status {
+  padding: var(--spacing-sm) var(--spacing-md);
+  border-radius: var(--radius-md);
+  margin-bottom: var(--spacing-md);
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+}
+
+.request-status-success {
+  background-color: var(--color-success-light);
+  color: var(--color-success-dark);
+}
+
+.request-status-error {
+  background-color: var(--color-danger-light);
+  color: var(--color-danger-dark);
+}
+
+.request-status-loading {
+  background-color: var(--color-info-light);
+  color: var(--color-info-dark);
+}
+
+.request-status-icon {
+  font-size: 1.2rem;
+}
+
+.request-status-text {
+  flex: 1;
+}
+
+.request-status-time {
+  font-size: var(--font-size-xs);
+  color: inherit;
+  opacity: 0.8;
+}
+
+/* Статусы HTTP кодов */
+.status-code {
+  display: inline-block;
+  padding: var(--spacing-xs) var(--spacing-sm);
+  border-radius: var(--radius-sm);
+  font-weight: 500;
+  margin-right: var(--spacing-xs);
+  font-size: var(--font-size-sm);
+}
+
+.status-code-100 { /* Informational */
+  background-color: var(--color-info-light);
+  color: var(--color-info-dark);
+}
+
+.status-code-200 { /* Success */
+  background-color: var(--color-success-light);
+  color: var(--color-success-dark);
+}
+
+.status-code-300 { /* Redirection */
+  background-color: var(--color-warning-light);
+  color: var(--color-warning-dark);
+}
+
+.status-code-400 { /* Client Error */
+  background-color: var(--color-danger-light);
+  color: var(--color-danger-dark);
+}
+
+.status-code-500 { /* Server Error */
+  background-color: #F9E4E8;
+  color: #9F2241;
+}
+
+/* Описание HTTP кодов */
+.status-description {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+  margin-left: var(--spacing-xs);
+}
+
+/* Панель логирования запросов */
+.request-logs {
+  background-color: var(--color-card);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-sm);
+  margin-top: var(--spacing-md);
+  overflow: hidden;
+}
+
+.logs-header {
+  padding: var(--spacing-md);
+  background-color: var(--color-background);
+  border-bottom: 1px solid var(--color-border);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.logs-header h3 {
+  font-size: var(--font-size-md);
+  margin: 0;
+  font-weight: 600;
+}
+
+.logs-actions {
+  display: flex;
+  gap: var(--spacing-sm);
+}
+
+.logs-container {
+  max-height: 300px;
+  overflow-y: auto;
+  padding: var(--spacing-md);
+}
+
+.log-entry {
+  padding: var(--spacing-sm);
+  border-bottom: 1px solid var(--color-border);
+  display: flex;
+  gap: var(--spacing-sm);
+  font-size: var(--font-size-sm);
+}
+
+.log-entry:last-child {
+  border-bottom: none;
+}
+
+.log-time {
+  color: var(--color-text-tertiary);
+  white-space: nowrap;
+}
+
+.log-method {
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.log-url {
+  flex: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: var(--color-text-secondary);
+}
+
+.log-status {
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.log-entry:hover {
+  background-color: var(--color-background);
+  cursor: pointer;
+}
+
+/* Панель истории запросов */
+.request-history {
+  margin-top: var(--spacing-md);
+}
+
+.history-entry {
+  padding: var(--spacing-sm);
+  border-bottom: 1px solid var(--color-border);
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  cursor: pointer;
+  transition: background-color var(--transition-fast);
+}
+
+.history-entry:hover {
+  background-color: var(--color-background);
+}
+
+.history-method {
+  width: 60px;
+  text-align: center;
+}
+
+.history-details {
+  flex: 1;
+}
+
+.history-url {
+  font-weight: 500;
+  margin-bottom: var(--spacing-xs);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.history-info {
+  display: flex;
+  gap: var(--spacing-md);
+  font-size: var(--font-size-xs);
+  color: var(--color-text-tertiary);
+}
+
+.history-actions {
+  display: flex;
+  gap: var(--spacing-xs);
+}
+
+.history-action-btn {
+  background: none;
+  border: none;
+  color: var(--color-text-hint);
+  cursor: pointer;
+  transition: color var(--transition-fast);
+}
+
+.history-action-btn:hover {
+  color: var(--color-primary);
+}
+
+/* Коллекции запросов */
+.request-collections {
+  margin-top: var(--spacing-md);
+}
+
+.collection-item {
+  padding: var(--spacing-sm);
+  border-bottom: 1px solid var(--color-border);
+  cursor: pointer;
+  transition: background-color var(--transition-fast);
+}
+
+.collection-item:hover {
+  background-color: var(--color-background);
+}
+
+.collection-name {
+  font-weight: 500;
+  margin-bottom: var(--spacing-xs);
+}
+
+.collection-requests {
+  padding-left: var(--spacing-md);
+}
+
+.collection-request {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  padding: var(--spacing-xs) 0;
+  font-size: var(--font-size-sm);
+}
+
+.collection-request .method {
+  font-size: var(--font-size-xs);
+  padding: 2px var(--spacing-xs);
+}
+
+.collection-description {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-tertiary);
+}
+
+/* Плейсхолдер для коллекций */
+.collection-placeholder {
+  text-align: center;
+  padding: var(--spacing-lg);
+  color: var(--color-text-hint);
+}
+
+.placeholder-icon {
+  font-size: 3rem;
+  margin-bottom: var(--spacing-md);
+  opacity: 0.3;
+}
+
+.placeholder-text {
+  margin-bottom: var(--spacing-md);
+}
+
+/* Адаптивность для мобильных устройств */
+@media (max-width: 768px) {
+  .log-entry {
+    flex-wrap: wrap;
+  }
+  
+  .log-url {
+    width: 100%;
+    order: 3;
+  }
+  
+  .history-entry {
+    flex-wrap: wrap;
+  }
+  
+  .history-details {
+    width: 100%;
+    order: 2;
+  }
+  
+  .history-actions {
+    width: 100%;
+    order: 3;
+    justify-content: flex-end;
+    margin-top: var(--spacing-xs);
+  }
+}

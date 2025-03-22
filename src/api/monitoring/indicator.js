@@ -7,7 +7,6 @@ import { getCurrentSourceInfo, getAvailableSources, setApiSource } from '../sour
 import { apiSourceConfig } from '../sources/config.js';
 import { showNotification } from '../../ui/notifications.js';
 import { on, off } from '../../core/events.js';
-import { addIndicatorStyles } from './indicator-styles.js';
 
 // Приватные переменные
 // Конфигурация индикаторов для разных источников
@@ -54,29 +53,38 @@ function createIndicator() {
         indicatorContainer.id = 'api-source-indicator';
         indicatorContainer.className = 'api-source-indicator';
         
-        // Находим место для добавления индикатора (рядом с источниками API)
+        // Находим место для добавления индикатора
         const headerActions = document.querySelector('.content-header .actions');
         
         if (headerActions) {
-            // Вставляем перед селектором источников, если он есть
-            const sourceSelector = headerActions.querySelector('.api-source-selector-container');
-            if (sourceSelector) {
-                headerActions.insertBefore(indicatorContainer, sourceSelector);
+            // Проверяем, есть ли кнопка HTTP логов, перед которой нужно вставить индикаторы
+            const httpLogsButton = headerActions.querySelector('#open-http-logs');
+            if (httpLogsButton) {
+                // Вставляем перед кнопкой HTTP логов
+                headerActions.insertBefore(indicatorContainer, httpLogsButton);
             } else {
+                // Если кнопки логов нет, добавляем в конец actions
                 headerActions.appendChild(indicatorContainer);
             }
         } else {
-            // Если не нашли нужный контейнер, добавляем в конец header
-            const header = document.querySelector('.main-header');
-            if (header) {
-                header.appendChild(indicatorContainer);
+            // Если не нашли контейнер actions, ищем content-header
+            const contentHeader = document.querySelector('.content-header');
+            if (contentHeader) {
+                // Создаем контейнер для actions, если его нет
+                const actionsDiv = document.createElement('div');
+                actionsDiv.className = 'actions';
+                actionsDiv.appendChild(indicatorContainer);
+                contentHeader.appendChild(actionsDiv);
             } else {
-                return null; // Не нашли подходящего места
+                // Если не нашли подходящего места, добавляем в конец header
+                const header = document.querySelector('.main-header');
+                if (header) {
+                    header.appendChild(indicatorContainer);
+                } else {
+                    return null; // Не нашли подходящего места
+                }
             }
         }
-        
-        // Добавляем стили
-        addIndicatorStyles();
     }
     
     // Обновляем содержимое индикатора
@@ -169,60 +177,45 @@ function addEnhancedTooltip(indicator, sourceKey) {
     const state = indicatorState[sourceKey];
     const config = sourceConfig[sourceKey] || { name: 'Неизвестный источник' };
     
-    // Обработчик при наведении мыши
-    indicator.addEventListener('mouseenter', function(e) {
-        // Удаляем существующую подсказку, если есть
-        let tooltip = document.getElementById('source-tooltip');
-        if (tooltip) {
-            tooltip.remove();
-        }
-        
-        // Создаем новую подсказку
-        tooltip = document.createElement('div');
-        tooltip.id = 'source-tooltip';
-        tooltip.className = 'source-tooltip';
-        
-        // Формируем содержимое подсказки
-        const statusClass = state.available ? 'available' : 'unavailable';
-        const statusText = state.available ? 'Доступен' : 'Недоступен';
-        
-        tooltip.innerHTML = `
-            <div class="tooltip-header">${config.name}</div>
-            <div class="tooltip-content">
-                <div class="tooltip-status ${statusClass}">
-                    <span class="tooltip-status-dot"></span>
-                    ${statusText}
-                </div>
-                <p>Тип: ${getSourceTypeDescription(sourceKey)}</p>
-                ${state.latency ? `<p>Задержка: ${state.latency} мс</p>` : ''}
-                ${state.lastCheck ? `<p>Проверка: ${new Date(state.lastCheck).toLocaleTimeString()}</p>` : ''}
-                ${!state.available ? '<p><strong>Используется резервный источник</strong></p>' : ''}
-            </div>
-        `;
-        
-        // Добавляем подсказку на страницу
-        document.body.appendChild(tooltip);
-        
-        // Позиционируем подсказку относительно индикатора
-        const rect = indicator.getBoundingClientRect();
-        tooltip.style.top = `${rect.bottom + window.scrollY + 5}px`;
-        tooltip.style.left = `${rect.left + window.scrollX}px`;
-        tooltip.style.display = 'block';
-        
-        // Проверяем, не выходит ли подсказка за пределы окна
-        const tooltipRect = tooltip.getBoundingClientRect();
-        if (tooltipRect.right > window.innerWidth) {
-            tooltip.style.left = `${window.innerWidth - tooltipRect.width - 10}px`;
-        }
-    });
+    // Создаем элемент подсказки (вместо динамического создания при наведении)
+    const tooltip = document.createElement('div');
+    tooltip.className = 'source-tooltip';
     
-    // Обработчик при уходе курсора
-    indicator.addEventListener('mouseleave', function() {
-        const tooltip = document.getElementById('source-tooltip');
-        if (tooltip) {
-            tooltip.remove();
+    // Формируем содержимое подсказки
+    const statusClass = state.available ? 'available' : 'unavailable';
+    const statusText = state.available ? 'Доступен' : 'Недоступен';
+    
+    tooltip.innerHTML = `
+        <div class="tooltip-header">${config.name}</div>
+        <div class="tooltip-content">
+            <div class="tooltip-status ${statusClass}">
+                <span class="tooltip-status-dot"></span>
+                ${statusText}
+            </div>
+            <p>Тип: ${getSourceTypeDescription(sourceKey)}</p>
+            ${state.latency ? `<p>Задержка: ${state.latency} мс</p>` : ''}
+            ${state.lastCheck ? `<p>Проверка: ${new Date(state.lastCheck).toLocaleTimeString()}</p>` : ''}
+            ${!state.available ? '<p><strong>Используется резервный источник</strong></p>' : ''}
+        </div>
+    `;
+    
+    // Добавляем подсказку в индикатор
+    indicator.appendChild(tooltip);
+    
+    // Удаляем обработчики событий, так как теперь используем CSS для отображения/скрытия
+    // Удаляем старые слушатели событий, если они есть
+    const oldListeners = indicator._tooltipListeners;
+    if (oldListeners) {
+        if (oldListeners.mouseenter) {
+            indicator.removeEventListener('mouseenter', oldListeners.mouseenter);
         }
-    });
+        if (oldListeners.mouseleave) {
+            indicator.removeEventListener('mouseleave', oldListeners.mouseleave);
+        }
+    }
+    
+    // Сохраняем ссылки на подсказку и индикатор для возможного обновления
+    indicator._tooltip = tooltip;
 }
 
 /**
