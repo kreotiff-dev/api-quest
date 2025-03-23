@@ -234,46 +234,51 @@ function addWorkspaceContainer(parentElement, task) {
     workspaceContainer.id = 'workspace-container';
     workspaceContainer.className = 'workspace-container';
     
-    // Заполняем workspace-container полным содержимым
+    // Заполняем workspace-container - модифицируем вкладки
     workspaceContainer.innerHTML = `
-        <!-- Панель деталей задания (левая колонка) -->
-        <div class="task-details-panel">
-            <div class="task-subtitle" id="task-subtitle">${task.subtitle}</div>
-            
-            <div class="task-meta">
-                <div id="task-category">Категория: <strong>${getCategoryText(task.category)}</strong></div>
-                <div id="task-difficulty">Сложность: <strong>${getDifficultyText(task.difficulty)}</strong></div>
-            </div>
-            
-            <div class="task-description" id="task-description">
-                <h3>Описание задания</h3>
-                <p>${task.description}</p>
-            </div>
-            
-            <div class="task-requirements">
-                <h3>Требования</h3>
-                <div class="requirements-list">
-                    <ul>
-                        ${task.requirements ? task.requirements.map(req => `<li><i class="fas fa-check-circle"></i> ${req}</li>`).join('') : '<li>Нет специальных требований для этого задания.</li>'}
-                    </ul>
-                </div>
-            </div>
-            
-            <div class="task-expected-result" id="task-expected-result">
-                <h3>Ожидаемый результат</h3>
-                <p>${task.expectedResult || 'Выполните все требования задания.'}</p>
-            </div>
+        <!-- Панель деталей задания (скрываем, содержимое переносится во вкладку) -->
+        <div class="task-details-panel" style="display: none;">
         </div>
         
-        <!-- API Клиент (правая колонка) -->
-        <div class="api-client-panel">
+        <!-- API Клиент (теперь на всю ширину) -->
+        <div class="api-client-panel api-client-full-width">
             <div class="api-client-tabs">
-                <div class="api-tab active" data-tab="request">Запрос</div>
+                <div class="api-tab active" data-tab="description">Описание задания</div>
+                <div class="api-tab" data-tab="request">Запрос</div>
                 <div class="api-tab" data-tab="collection">Коллекция</div>
                 <div class="api-tab" data-tab="tests">Тесты</div>
             </div>
             
-            <div class="api-client-tab-content active" id="request-tab">
+            <!-- ВКЛАДКА: Описание задания (активна по умолчанию) -->
+            <div class="api-client-tab-content active" id="description-tab">
+                <div class="task-subtitle" id="task-subtitle">${task.subtitle}</div>
+                
+                <div class="task-meta">
+                    <div id="task-category">Категория: <strong>${getCategoryText(task.category)}</strong></div>
+                    <div id="task-difficulty">Сложность: <strong>${getDifficultyText(task.difficulty)}</strong></div>
+                </div>
+                
+                <div class="task-description" id="task-description">
+                    <h3>Описание задания</h3>
+                    <p>${task.description}</p>
+                </div>
+                
+                <div class="task-requirements">
+                    <h3>Требования</h3>
+                    <div class="requirements-list">
+                        <ul>
+                            ${task.requirements ? task.requirements.map(req => `<li><i class="fas fa-check-circle"></i> ${req}</li>`).join('') : '<li>Нет специальных требований для этого задания.</li>'}
+                        </ul>
+                    </div>
+                </div>
+                
+                <div class="task-expected-result" id="task-expected-result">
+                    <h3>Ожидаемый результат</h3>
+                    <p>${task.expectedResult || 'Выполните все требования задания.'}</p>
+                </div>
+            </div>
+            
+            <div class="api-client-tab-content" id="request-tab">
                 <div class="form-group">
                     <label for="request-url">URL</label>
                     <input type="text" id="request-url" class="form-control" placeholder="Введите URL запроса">
@@ -340,7 +345,7 @@ function addWorkspaceContainer(parentElement, task) {
     `;
     
     parentElement.appendChild(workspaceContainer);
-    console.log('workspace-container добавлен с полным содержимым');
+    console.log('workspace-container добавлен с модифицированным содержимым');
 }
 
 // Функция для добавления панели ответа

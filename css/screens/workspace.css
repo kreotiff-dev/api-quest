@@ -106,9 +106,20 @@
   list-style: disc;
 }
 
+.api-client-tab-content .requirements-list ul {
+  list-style: none;
+  padding-left: 0;
+}
+
 .requirements-list ul li {
   margin-bottom: var(--spacing-xs);
   color: var(--color-text-secondary);
+}
+
+.api-client-tab-content .requirements-list ul li {
+  display: flex;
+  align-items: flex-start;
+  margin-bottom: var(--spacing-sm);
 }
 
 .expected-result {
@@ -125,6 +136,36 @@
   gap: var(--spacing-sm);
 }
 
+/* Стили для вкладки с описанием задания */
+.api-client-tab-content#description-tab {
+  padding: var(--spacing-lg);
+}
+
+.api-client-tab-content .requirements-list {
+  margin-top: var(--spacing-xs);
+}
+
+.api-client-tab-content .requirements-list ul li i {
+  margin-right: var(--spacing-sm);
+  color: var(--color-primary);
+}
+
+.api-client-tab-content .task-subtitle {
+  font-size: var(--font-size-lg);
+  font-weight: 600;
+  margin-bottom: var(--spacing-md);
+}
+
+.api-client-tab-content .task-meta {
+  margin-bottom: var(--spacing-lg);
+}
+
+.api-client-tab-content .task-description h3,
+.api-client-tab-content .task-requirements h3,
+.api-client-tab-content .task-expected-result h3 {
+  margin-top: var(--spacing-lg);
+}
+
 /* API Клиент */
 .api-client-panel {
   background-color: var(--color-card);
@@ -133,6 +174,10 @@
   display: flex;
   flex-direction: column;
   overflow: hidden;
+}
+
+.api-client-panel.api-client-full-width {
+  grid-column: 1 / -1; /* Растягиваем на весь контейнер */
 }
 
 .api-client-tabs {
