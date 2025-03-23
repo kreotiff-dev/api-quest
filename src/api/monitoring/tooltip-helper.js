@@ -88,4 +88,36 @@ export function ensureTooltips() {
           addTooltipWhenCreatingIndicator(indicator, sourceInfo);
       }
   });
+  const assistantButtons = document.querySelectorAll('.ai-feedback-actions button, .ai-assistant-controls button');
+assistantButtons.forEach(button => {
+  // Проверяем, есть ли уже подсказка
+  if (!button.querySelector('.source-tooltip')) {
+    button.classList.add('tooltip-enabled');
+    
+    let tooltipText = '';
+    // Определяем текст подсказки по ID кнопки
+    if (button.id === 'ai-help-btn') {
+      tooltipText = 'Помощь по текущему заданию';
+    } else if (button.id === 'ai-analyze-btn') {
+      tooltipText = 'Анализировать текущий запрос';
+    } else if (button.id === 'ai-question-send') {
+      tooltipText = 'Отправить вопрос';
+    }
+    
+    if (tooltipText) {
+      // Создаем элемент подсказки
+      const tooltip = document.createElement('div');
+      tooltip.className = 'source-tooltip';
+      tooltip.innerHTML = `
+        <div class="tooltip-header">Ассистент</div>
+        <div class="tooltip-content">
+          <p>${tooltipText}</p>
+        </div>
+      `;
+      
+      // Добавляем подсказку в кнопку
+      button.appendChild(tooltip);
+    }
+  }
+});
 }

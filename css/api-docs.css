@@ -1,0 +1,337 @@
+/* Стили для документации API */
+.api-docs-container {
+  padding: 20px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.api-endpoint {
+  margin-bottom: 30px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  box-shadow: var(--shadow-sm);
+  background-color: white;
+}
+
+.endpoint-header {
+  display: flex;
+  align-items: center;
+  padding: 12px 16px;
+  background-color: var(--color-background);
+  border-bottom: 1px solid var(--color-border);
+  cursor: pointer;
+  transition: background-color var(--transition-fast);
+}
+
+.endpoint-header:hover {
+  background-color: var(--color-divider);
+}
+
+.http-method {
+  font-weight: bold;
+  padding: 4px 8px;
+  border-radius: var(--radius-sm);
+  margin-right: 10px;
+  color: white;
+  min-width: 60px;
+  text-align: center;
+  font-family: monospace;
+}
+
+.http-method.get {
+  background: var(--gradient-get);
+}
+
+.http-method.post {
+  background: var(--gradient-post);
+}
+
+.http-method.put {
+  background: var(--gradient-put);
+}
+
+.http-method.delete {
+  background: var(--gradient-delete);
+}
+
+.endpoint-path {
+  font-family: monospace;
+  font-size: 1.1em;
+  flex-grow: 1;
+}
+
+.endpoint-description {
+  margin-left: 10px;
+  color: var(--color-text-secondary);
+}
+
+.endpoint-details {
+  padding: 16px;
+  background-color: white;
+  display: none;
+}
+
+.endpoint-details.open {
+  display: block;
+}
+
+.params-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 10px 0;
+}
+
+.params-table th, .params-table td {
+  padding: 8px 12px;
+  text-align: left;
+  border: 1px solid var(--color-border);
+}
+
+.params-table th {
+  background-color: var(--color-background);
+  font-weight: 600;
+}
+
+.response-example {
+  background-color: #f5f5f5;
+  padding: 10px;
+  border-radius: var(--radius-sm);
+  overflow: auto;
+  max-height: 300px;
+}
+
+.response-code {
+  font-family: monospace;
+  white-space: pre;
+}
+
+.tabs {
+  display: flex;
+  margin-bottom: 15px;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.tab {
+  padding: 8px 16px;
+  cursor: pointer;
+  border: 1px solid transparent;
+    border-bottom: none;
+    margin-right: 5px;
+    border-radius: var(--radius-sm) var(--radius-sm) 0 0;
+    transition: all var(--transition-fast);
+}
+
+.tab.active {
+    background-color: white;
+    border-color: var(--color-border);
+    color: var(--color-primary);
+    font-weight: 500;
+}
+
+.tab-content {
+    display: none;
+}
+
+.tab-content.active {
+    display: block;
+}
+
+.badge {
+    display: inline-block;
+    padding: 3px 8px;
+    border-radius: 20px;
+    font-size: 0.8em;
+    margin-left: 8px;
+    background-color: var(--color-info-light);
+    color: var(--color-info);
+}
+
+.badge.required {
+    background-color: var(--color-danger-light);
+    color: var(--color-danger);
+}
+
+.badge.available {
+    background-color: var(--color-success-light);
+    color: var(--color-success);
+}
+
+.badge.unavailable {
+    background-color: var(--color-danger-light);
+    color: var(--color-danger);
+}
+
+.caret {
+    margin-left: 10px;
+    transition: transform 0.3s;
+}
+
+.endpoint-header.open .caret {
+    transform: rotate(180deg);
+}
+
+/* Стили для навигации */
+.api-docs-nav {
+    background-color: var(--color-card);
+    border-radius: var(--radius-md);
+    padding: 15px;
+    margin-bottom: 20px;
+    position: sticky;
+    top: 80px;
+    z-index: 10;
+    box-shadow: var(--shadow-sm);
+}
+
+.api-docs-nav h2 {
+    margin-top: 0;
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+}
+
+.api-docs-nav h2 .api-badge {
+    margin-left: 10px;
+    background-color: var(--color-primary-light);
+    color: var(--color-primary);
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-size: 0.7em;
+    font-weight: normal;
+}
+
+.nav-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    max-height: 300px;
+    overflow-y: auto;
+}
+
+.nav-list li {
+    margin-bottom: 5px;
+}
+
+.nav-list a {
+    display: flex;
+    align-items: center;
+    text-decoration: none;
+    color: var(--color-text-primary);
+    padding: 5px 0;
+    transition: color var(--transition-fast);
+}
+
+.nav-list a:hover {
+    color: var(--color-primary);
+}
+
+.nav-list .http-method {
+    padding: 2px 6px;
+    font-size: 0.8em;
+    margin-right: 8px;
+}
+
+.section-title {
+    font-size: 1.5em;
+    margin: 30px 0 15px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--color-border);
+}
+
+/* Стили для двухколоночного макета */
+.docs-layout {
+    display: flex;
+    gap: 20px;
+}
+
+.docs-sidebar {
+    width: 250px;
+    flex-shrink: 0;
+}
+
+.docs-content {
+    flex-grow: 1;
+}
+
+/* Стили для карточки информации об API */
+.api-source-info {
+    margin-bottom: 30px;
+}
+
+.source-card {
+    background-color: white;
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-sm);
+    overflow: hidden;
+    border: 1px solid var(--color-border);
+}
+
+.card-header {
+    padding: 15px;
+    background-color: var(--color-primary-light);
+    display: flex;
+    align-items: center;
+    border-bottom: 1px solid var(--color-border);
+}
+
+.card-header i {
+    font-size: 1.5em;
+    margin-right: 10px;
+    color: var(--color-primary);
+}
+
+.card-header h3 {
+    margin: 0;
+    flex-grow: 1;
+}
+
+.card-body {
+    padding: 15px;
+}
+
+.info-row {
+    display: flex;
+    align-items: center;
+    margin-bottom: 8px;
+    font-size: 0.9em;
+}
+
+.info-row span {
+    min-width: 120px;
+    color: var(--color-text-secondary);
+}
+
+.info-row code {
+    background-color: var(--color-background);
+    padding: 2px 6px;
+    border-radius: var(--radius-sm);
+    font-family: monospace;
+}
+
+/* Мобильная адаптивность */
+@media (max-width: 768px) {
+    .docs-layout {
+        flex-direction: column;
+    }
+    
+    .docs-sidebar {
+        width: 100%;
+    }
+    
+    .api-endpoint {
+        margin-bottom: 20px;
+    }
+    
+    .http-method {
+        min-width: 50px;
+    }
+    
+    .endpoint-header {
+        flex-wrap: wrap;
+    }
+    
+    .endpoint-path {
+        width: 100%;
+        margin: 5px 0;
+    }
+}

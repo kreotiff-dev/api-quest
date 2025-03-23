@@ -1,0 +1,1065 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>API Документация - API Практикум</title>
+    <link rel="stylesheet" href="/css/api-docs.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        /* Стили для документации API */
+        .api-docs-container {
+            padding: 20px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        .api-endpoint {
+            margin-bottom: 30px;
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius-md);
+            overflow: hidden;
+        }
+        
+        .endpoint-header {
+            display: flex;
+            align-items: center;
+            padding: 12px 16px;
+            background-color: var(--color-background);
+            border-bottom: 1px solid var(--color-border);
+            cursor: pointer;
+        }
+        
+        .endpoint-header:hover {
+            background-color: var(--color-divider);
+        }
+        
+        .http-method {
+            font-weight: bold;
+            padding: 4px 8px;
+            border-radius: var(--radius-sm);
+            margin-right: 10px;
+            color: white;
+            min-width: 60px;
+            text-align: center;
+        }
+        
+        .http-method.get {
+            background: var(--gradient-get);
+        }
+        
+        .http-method.post {
+            background: var(--gradient-post);
+        }
+        
+        .http-method.put {
+            background: var(--gradient-put);
+        }
+        
+        .http-method.delete {
+            background: var(--gradient-delete);
+        }
+        
+        .endpoint-path {
+            font-family: monospace;
+            font-size: 1.1em;
+            flex-grow: 1;
+        }
+        
+        .endpoint-description {
+            margin-left: 10px;
+            color: var(--color-text-secondary);
+        }
+        
+        .endpoint-details {
+            padding: 16px;
+            background-color: white;
+            display: none;
+        }
+        
+        .endpoint-details.open {
+            display: block;
+        }
+        
+        .params-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 10px 0;
+        }
+        
+        .params-table th, .params-table td {
+            padding: 8px 12px;
+            text-align: left;
+            border: 1px solid var(--color-border);
+        }
+        
+        .params-table th {
+            background-color: var(--color-background);
+            font-weight: 600;
+        }
+        
+        .response-example {
+            background-color: #f5f5f5;
+            padding: 10px;
+            border-radius: var(--radius-sm);
+            overflow: auto;
+            max-height: 300px;
+        }
+        
+        .response-code {
+            font-family: monospace;
+            white-space: pre;
+        }
+        
+        .tabs {
+            display: flex;
+            margin-bottom: 15px;
+            border-bottom: 1px solid var(--color-border);
+        }
+        
+        .tab {
+            padding: 8px 16px;
+            cursor: pointer;
+            border: 1px solid transparent;
+            border-bottom: none;
+            margin-right: 5px;
+            border-radius: var(--radius-sm) var(--radius-sm) 0 0;
+        }
+        
+        .tab.active {
+            background-color: white;
+            border-color: var(--color-border);
+            color: var(--color-primary);
+            font-weight: 500;
+        }
+        
+        .tab-content {
+            display: none;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
+        .badge {
+            display: inline-block;
+            padding: 3px 8px;
+            border-radius: 20px;
+            font-size: 0.8em;
+            margin-left: 8px;
+            background-color: var(--color-info-light);
+            color: var(--color-info);
+        }
+        
+        .badge.required {
+            background-color: var(--color-danger-light);
+            color: var(--color-danger);
+        }
+        
+        .caret {
+            margin-left: 10px;
+            transition: transform 0.3s;
+        }
+        
+        .endpoint-header.open .caret {
+            transform: rotate(180deg);
+        }
+        
+        /* Стили для навигации */
+        .api-docs-nav {
+            background-color: var(--color-card);
+            border-radius: var(--radius-md);
+            padding: 15px;
+            margin-bottom: 20px;
+            position: sticky;
+            top: 80px;
+            z-index: 10;
+            box-shadow: var(--shadow-sm);
+        }
+        
+        .api-docs-nav h2 {
+            margin-top: 0;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+        }
+        
+        .api-docs-nav h2 .api-badge {
+            margin-left: 10px;
+            background-color: var(--color-primary-light);
+            color: var(--color-primary);
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 0.7em;
+            font-weight: normal;
+        }
+        
+        .nav-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        
+        .nav-list li {
+            margin-bottom: 5px;
+        }
+        
+        .nav-list a {
+            display: flex;
+            align-items: center;
+            text-decoration: none;
+            color: var(--color-text-primary);
+            padding: 5px 0;
+        }
+        
+        .nav-list a:hover {
+            color: var(--color-primary);
+        }
+        
+        .nav-list .http-method {
+            padding: 2px 6px;
+            font-size: 0.8em;
+            margin-right: 8px;
+        }
+        
+        .section-title {
+            font-size: 1.5em;
+            margin: 30px 0 15px;
+            padding-bottom: 8px;
+            border-bottom: 1px solid var(--color-border);
+        }
+        
+        /* Стили для двухколоночного макета */
+        .docs-layout {
+            display: flex;
+            gap: 20px;
+        }
+        
+        .docs-sidebar {
+            width: 250px;
+            flex-shrink: 0;
+        }
+        
+        .docs-content {
+            flex-grow: 1;
+        }
+        
+        /* Мобильная адаптивность */
+        @media (max-width: 768px) {
+            .docs-layout {
+                flex-direction: column;
+            }
+            
+            .docs-sidebar {
+                width: 100%;
+            }
+            
+            .api-endpoint {
+                margin-bottom: 20px;
+            }
+            
+            .http-method {
+                min-width: 50px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header class="main-header">
+        <div class="logo">
+            <h1>API Документация</h1>
+        </div>
+        <div class="header-actions">
+            <button class="btn" id="back-to-app"><i class="fas fa-arrow-left"></i> Вернуться к приложению</button>
+        </div>
+    </header>
+
+    <div class="api-docs-container">
+        <div class="docs-layout">
+            <div class="docs-sidebar">
+                <div class="api-docs-nav">
+                    <h2>API Симулятор <span class="api-badge" id="api-source-name">Mock API</span></h2>
+                    <p>Документация учебного API, созданного для обучения тестированию API запросов.</p>
+                    <h3>Эндпоинты</h3>
+                    <ul class="nav-list">
+                        <li><a href="#users-get"><span class="http-method get">GET</span> /api/users</a></li>
+                        <li><a href="#users-filtered-get"><span class="http-method get">GET</span> /api/users?role=admin</a></li>
+                        <li><a href="#users-post"><span class="http-method post">POST</span> /api/users</a></li>
+                        <li><a href="#secure-data-get"><span class="http-method get">GET</span> /api/secure-data</a></li>
+                        <li><a href="#users-put"><span class="http-method put">PUT</span> /api/users/{id}</a></li>
+                        <li><a href="#users-delete"><span class="http-method delete">DELETE</span> /api/users/{id}</a></li>
+                        <li><a href="#protected-resource-get"><span class="http-method get">GET</span> /api/protected-resource</a></li>
+                        <li><a href="#upload-post"><span class="http-method post">POST</span> /api/upload</a></li>
+                        <li><a href="#graphql-post"><span class="http-method post">POST</span> /api/graphql</a></li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="docs-content">
+                <div class="section-title" id="basic-endpoints">Основные эндпоинты</div>
+                
+                <!-- GET /api/users -->
+                <div class="api-endpoint" id="users-get">
+                    <div class="endpoint-header">
+                        <span class="http-method get">GET</span>
+                        <span class="endpoint-path">/api/users</span>
+                        <span class="endpoint-description">Получение списка пользователей</span>
+                        <i class="fas fa-caret-down caret"></i>
+                    </div>
+                    <div class="endpoint-details">
+                        <p>Возвращает массив пользователей системы.</p>
+                        
+                        <div class="tabs">
+                            <div class="tab active" data-tab="params-users-get">Параметры</div>
+                            <div class="tab" data-tab="response-users-get">Пример ответа</div>
+                        </div>
+                        
+                        <div class="tab-content active" id="params-users-get">
+                            <h4>Параметры запроса</h4>
+                            <p>Данный эндпоинт не требует параметров.</p>
+                            
+                            <h4>Заголовки запроса</h4>
+                            <table class="params-table">
+                                <thead>
+                                    <tr>
+                                        <th>Имя</th>
+                                        <th>Описание</th>
+                                        <th>Обязательный</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>Accept</td>
+                                        <td>Формат ответа. Значение: application/json</td>
+                                        <td>Нет</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        
+                        <div class="tab-content" id="response-users-get">
+                            <h4>Успешный ответ (200 OK)</h4>
+                            <div class="response-example">
+                                <pre class="response-code">[
+  {
+    "id": 1,
+    "name": "Иван Петров",
+    "email": "ivan@example.com",
+    "role": "admin"
+  },
+  {
+    "id": 2,
+    "name": "Мария Сидорова",
+    "email": "maria@example.com",
+    "role": "user"
+  },
+  {
+    "id": 3,
+    "name": "Алексей Иванов",
+    "email": "alex@example.com",
+    "role": "user"
+  }
+]</pre>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- GET /api/users?role=admin&limit=10 -->
+                <div class="api-endpoint" id="users-filtered-get">
+                    <div class="endpoint-header">
+                        <span class="http-method get">GET</span>
+                        <span class="endpoint-path">/api/users?role=admin&limit=10</span>
+                        <span class="endpoint-description">Фильтрация пользователей</span>
+                        <i class="fas fa-caret-down caret"></i>
+                    </div>
+                    <div class="endpoint-details">
+                        <p>Получение отфильтрованного списка пользователей с определенной ролью и ограничением количества результатов.</p>
+                        
+                        <div class="tabs">
+                            <div class="tab active" data-tab="params-users-filtered-get">Параметры</div>
+                            <div class="tab" data-tab="response-users-filtered-get">Пример ответа</div>
+                        </div>
+                        
+                        <div class="tab-content active" id="params-users-filtered-get">
+                            <h4>Параметры запроса</h4>
+                            <table class="params-table">
+                                <thead>
+                                    <tr>
+                                        <th>Имя</th>
+                                        <th>Тип</th>
+                                        <th>Описание</th>
+                                        <th>Обязательный</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>role</td>
+                                        <td>строка</td>
+                                        <td>Фильтр по роли пользователя. Возможные значения: admin, user</td>
+                                        <td>Нет</td>
+                                    </tr>
+                                    <tr>
+                                        <td>limit</td>
+                                        <td>число</td>
+                                        <td>Ограничение количества возвращаемых результатов</td>
+                                        <td>Нет</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        
+                        <div class="tab-content" id="response-users-filtered-get">
+                            <h4>Успешный ответ (200 OK)</h4>
+                            <div class="response-example">
+                                <pre class="response-code">[
+  {
+    "id": 1,
+    "name": "Иван Петров",
+    "email": "ivan@example.com",
+    "role": "admin"
+  }
+]</pre>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- POST /api/users -->
+                <div class="api-endpoint" id="users-post">
+                    <div class="endpoint-header">
+                        <span class="http-method post">POST</span>
+                        <span class="endpoint-path">/api/users</span>
+                        <span class="endpoint-description">Создание нового пользователя</span>
+                        <i class="fas fa-caret-down caret"></i>
+                    </div>
+                    <div class="endpoint-details">
+                        <p>Создает нового пользователя на основе переданных данных.</p>
+                        
+                        <div class="tabs">
+                            <div class="tab active" data-tab="params-users-post">Параметры</div>
+                            <div class="tab" data-tab="response-users-post">Пример ответа</div>
+                        </div>
+                        
+                        <div class="tab-content active" id="params-users-post">
+                            <h4>Заголовки запроса</h4>
+                            <table class="params-table">
+                                <thead>
+                                    <tr>
+                                        <th>Имя</th>
+                                        <th>Описание</th>
+                                        <th>Обязательный</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>Content-Type</td>
+                                        <td>application/json</td>
+                                        <td>Да</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                            
+                            <h4>Тело запроса</h4>
+                            <table class="params-table">
+                                <thead>
+                                    <tr>
+                                        <th>Имя</th>
+                                        <th>Тип</th>
+                                        <th>Описание</th>
+                                        <th>Обязательный</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>name</td>
+                                        <td>строка</td>
+                                        <td>Имя пользователя</td>
+                                        <td>Да</td>
+                                    </tr>
+                                    <tr>
+                                        <td>email</td>
+                                        <td>строка</td>
+                                        <td>Email пользователя</td>
+                                        <td>Да</td>
+                                    </tr>
+                                    <tr>
+                                        <td>role</td>
+                                        <td>строка</td>
+                                        <td>Роль пользователя. Возможные значения: admin, user</td>
+                                        <td>Да</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                            
+                            <h4>Пример тела запроса</h4>
+                            <div class="response-example">
+                                <pre class="response-code">{
+  "name": "Дмитрий Кузнецов",
+  "email": "dmitry@example.com",
+  "role": "user"
+}</pre>
+                            </div>
+                        </div>
+                        
+                        <div class="tab-content" id="response-users-post">
+                            <h4>Успешный ответ (201 Created)</h4>
+                            <div class="response-example">
+                                <pre class="response-code">{
+  "id": 4,
+  "name": "Дмитрий Кузнецов",
+  "email": "dmitry@example.com",
+  "role": "user",
+  "createdAt": "2023-07-28T14:23:45Z"
+}</pre>
+                            </div>
+                            
+                            <h4>Ошибка валидации (400 Bad Request)</h4>
+                            <div class="response-example">
+                                <pre class="response-code">{
+  "error": "Bad Request",
+  "message": "Отсутствуют обязательные поля",
+  "details": {
+    "name": "Поле name обязательно",
+    "email": "Поле email обязательно",
+    "role": "Поле role обязательно"
+  }
+}</pre>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Дополнительные эндпоинты -->
+                <div class="section-title" id="auth-endpoints">Аутентификация и защищенные ресурсы</div>
+                
+                <!-- GET /api/secure-data -->
+                <div class="api-endpoint" id="secure-data-get">
+                    <div class="endpoint-header">
+                        <span class="http-method get">GET</span>
+                        <span class="endpoint-path">/api/secure-data</span>
+                        <span class="endpoint-description">Получение защищенных данных с API ключом</span>
+                        <i class="fas fa-caret-down caret"></i>
+                    </div>
+                    <div class="endpoint-details">
+                        <p>Доступ к защищенным данным с использованием API ключа.</p>
+                        
+                        <div class="tabs">
+                            <div class="tab active" data-tab="params-secure-data-get">Параметры</div>
+                            <div class="tab" data-tab="response-secure-data-get">Пример ответа</div>
+                        </div>
+                        
+                        <div class="tab-content active" id="params-secure-data-get">
+                            <h4>Заголовки запроса</h4>
+                            <table class="params-table">
+                                <thead>
+                                    <tr>
+                                        <th>Имя</th>
+                                        <th>Описание</th>
+                                        <th>Обязательный</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>X-API-Key</td>
+                                        <td>Ключ API для аутентификации. Значение: your_api_key_123</td>
+                                        <td>Да</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        
+                        <div class="tab-content" id="response-secure-data-get">
+                            <h4>Успешный ответ (200 OK)</h4>
+                            <div class="response-example">
+                                <pre class="response-code">{
+  "message": "Вы успешно получили доступ к защищенным данным",
+  "secretData": "Очень секретная информация",
+  "timestamp": "2023-07-28T14:30:12Z"
+}</pre>
+                            </div>
+                            
+                            <h4>Ошибка аутентификации (401 Unauthorized)</h4>
+                            <div class="response-example">
+                                <pre class="response-code">{
+  "error": "Unauthorized",
+  "message": "Неверный API ключ"
+}</pre>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- PUT /api/users/42 -->
+                <div class="api-endpoint" id="users-put">
+                    <div class="endpoint-header">
+                        <span class="http-method put">PUT</span>
+                        <span class="endpoint-path">/api/users/{id}</span>
+                        <span class="endpoint-description">Обновление пользователя</span>
+                        <i class="fas fa-caret-down caret"></i>
+                    </div>
+                    <div class="endpoint-details">
+                        <p>Обновляет информацию о существующем пользователе.</p>
+                        
+                        <div class="tabs">
+                            <div class="tab active" data-tab="params-users-put">Параметры</div>
+                            <div class="tab" data-tab="response-users-put">Пример ответа</div>
+                        </div>
+                        
+                        <div class="tab-content active" id="params-users-put">
+                            <h4>Параметры пути</h4>
+                            <table class="params-table">
+                                <thead>
+                                    <tr>
+                                        <th>Имя</th>
+                                        <th>Тип</th>
+                                        <th>Описание</th>
+                                        <th>Обязательный</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>id</td>
+                                        <td>число</td>
+                                        <td>Идентификатор пользователя</td>
+                                        <td>Да</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                            
+                            <h4>Заголовки запроса</h4>
+                            <table class="params-table">
+                                <thead>
+                                    <tr>
+                                        <th>Имя</th>
+                                        <th>Описание</th>
+                                        <th>Обязательный</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>Content-Type</td>
+                                        <td>application/json</td>
+                                        <td>Да</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                            
+                            <h4>Тело запроса</h4>
+                            <table class="params-table">
+                                <thead>
+                                    <tr>
+                                        <th>Имя</th>
+                                        <th>Тип</th>
+                                        <th>Описание</th>
+                                        <th>Обязательный</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>name</td>
+                                        <td>строка</td>
+                                        <td>Имя пользователя</td>
+                                        <td>Да</td>
+                                    </tr>
+                                    <tr>
+                                        <td>email</td>
+                                        <td>строка</td>
+                                        <td>Email пользователя</td>
+                                        <td>Да</td>
+                                    </tr>
+                                    <tr>
+                                        <td>role</td>
+                                        <td>строка</td>
+                                        <td>Роль пользователя. Возможные значения: admin, user</td>
+                                        <td>Да</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                            
+                            <h4>Пример тела запроса</h4>
+                            <div class="response-example">
+                                <pre class="response-code">{
+  "name": "Дмитрий Кузнецов",
+  "email": "dmitry_new@example.com",
+  "role": "admin"
+}</pre>
+                            </div>
+                        </div>
+                        
+                        <div class="tab-content" id="response-users-put">
+                            <h4>Успешный ответ (200 OK)</h4>
+                            <div class="response-example">
+                                <pre class="response-code">{
+  "id": 42,
+  "name": "Дмитрий Кузнецов",
+  "email": "dmitry_new@example.com",
+  "role": "admin",
+  "updatedAt": "2023-07-28T15:45:22Z"
+}</pre>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- DELETE /api/users/42 -->
+                <div class="api-endpoint" id="users-delete">
+                    <div class="endpoint-header">
+                        <span class="http-method delete">DELETE</span>
+                        <span class="endpoint-path">/api/users/{id}</span>
+                        <span class="endpoint-description">Удаление пользователя</span>
+                        <i class="fas fa-caret-down caret"></i>
+                    </div>
+                    <div class="endpoint-details">
+                        <p>Удаляет пользователя из системы.</p>
+                        
+                        <div class="tabs">
+                            <div class="tab active" data-tab="params-users-delete">Параметры</div>
+                            <div class="tab" data-tab="response-users-delete">Пример ответа</div>
+                        </div>
+                        
+                        <div class="tab-content active" id="params-users-delete">
+                            <h4>Параметры пути</h4>
+                            <table class="params-table">
+                                <thead>
+                                    <tr>
+                                        <th>Имя</th>
+                                        <th>Тип</th>
+                                        <th>Описание</th>
+                                        <th>Обязательный</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>id</td>
+                                        <td>число</td>
+                                        <td>Идентификатор пользователя</td>
+                                        <td>Да</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        
+                        <div class="tab-content" id="response-users-delete">
+                            <h4>Успешный ответ (204 No Content)</h4>
+                            <p>Тело ответа отсутствует.</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="section-title" id="advanced-endpoints">Продвинутые возможности API</div>
+                
+                <!-- GET /api/protected-resource -->
+                <div class="api-endpoint" id="protected-resource-get">
+                    <div class="endpoint-header">
+                        <span class="http-method get">GET</span>
+                        <span class="endpoint-path">/api/protected-resource</span>
+                        <span class="endpoint-description">Доступ к защищенному ресурсу с OAuth токеном</span>
+                        <i class="fas fa-caret-down caret"></i>
+                    </div>
+                    <div class="endpoint-details">
+                        <p>Получение доступа к защищенному ресурсу с использованием OAuth Bearer токена.</p>
+                        <div class="tabs">
+                          <div class="tab active" data-tab="params-protected-resource-get">Параметры</div>
+                          <div class="tab" data-tab="response-protected-resource-get">Пример ответа</div>
+                      </div>
+                      
+                      <div class="tab-content active" id="params-protected-resource-get">
+                          <h4>Заголовки запроса</h4>
+                          <table class="params-table">
+                              <thead>
+                                  <tr>
+                                      <th>Имя</th>
+                                      <th>Описание</th>
+                                      <th>Обязательный</th>
+                                  </tr>
+                              </thead>
+                              <tbody>
+                                  <tr>
+                                      <td>Authorization</td>
+                                      <td>OAuth Bearer токен. Формат: Bearer {token}</td>
+                                      <td>Да</td>
+                                  </tr>
+                              </tbody>
+                          </table>
+                          
+                          <h4>Пример заголовка Authorization</h4>
+                          <div class="response-example">
+                              <pre class="response-code">Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ</pre>
+                          </div>
+                      </div>
+                      
+                      <div class="tab-content" id="response-protected-resource-get">
+                          <h4>Успешный ответ (200 OK)</h4>
+                          <div class="response-example">
+                              <pre class="response-code">{
+"message": "Вы успешно получили доступ к защищенному ресурсу",
+"protectedData": {
+  "id": 999,
+  "name": "Секретный проект",
+  "description": "Описание защищенного ресурса",
+  "accessLevel": "all"
+},
+"timestamp": "2023-07-28T16:05:30Z"
+}</pre>
+                          </div>
+                          
+                          <h4>Ошибка аутентификации (401 Unauthorized)</h4>
+                          <div class="response-example">
+                              <pre class="response-code">{
+"error": "Unauthorized",
+"message": "Недействительный токен"
+}</pre>
+                          </div>
+                      </div>
+                  </div>
+              </div>
+              
+              <!-- POST /api/upload -->
+              <div class="api-endpoint" id="upload-post">
+                  <div class="endpoint-header">
+                      <span class="http-method post">POST</span>
+                      <span class="endpoint-path">/api/upload</span>
+                      <span class="endpoint-description">Загрузка файла</span>
+                      <i class="fas fa-caret-down caret"></i>
+                  </div>
+                  <div class="endpoint-details">
+                      <p>Загрузка файла на сервер с дополнительными метаданными.</p>
+                      
+                      <div class="tabs">
+                          <div class="tab active" data-tab="params-upload-post">Параметры</div>
+                          <div class="tab" data-tab="response-upload-post">Пример ответа</div>
+                      </div>
+                      
+                      <div class="tab-content active" id="params-upload-post">
+                          <h4>Заголовки запроса</h4>
+                          <table class="params-table">
+                              <thead>
+                                  <tr>
+                                      <th>Имя</th>
+                                      <th>Описание</th>
+                                      <th>Обязательный</th>
+                                  </tr>
+                              </thead>
+                              <tbody>
+                                  <tr>
+                                      <td>Content-Type</td>
+                                      <td>multipart/form-data</td>
+                                      <td>Да</td>
+                                  </tr>
+                              </tbody>
+                          </table>
+                          
+                          <h4>Параметры формы</h4>
+                          <table class="params-table">
+                              <thead>
+                                  <tr>
+                                      <th>Имя</th>
+                                      <th>Тип</th>
+                                      <th>Описание</th>
+                                      <th>Обязательный</th>
+                                  </tr>
+                              </thead>
+                              <tbody>
+                                  <tr>
+                                      <td>file</td>
+                                      <td>File</td>
+                                      <td>Файл для загрузки</td>
+                                      <td>Да</td>
+                                  </tr>
+                                  <tr>
+                                      <td>description</td>
+                                      <td>строка</td>
+                                      <td>Описание файла</td>
+                                      <td>Нет</td>
+                                  </tr>
+                              </tbody>
+                          </table>
+                      </div>
+                      
+                      <div class="tab-content" id="response-upload-post">
+                          <h4>Успешный ответ (201 Created)</h4>
+                          <div class="response-example">
+                              <pre class="response-code">{
+"message": "Файл успешно загружен",
+"fileInfo": {
+  "id": "f123456",
+  "name": "example.jpg",
+  "description": "Пример файла для загрузки",
+  "size": 12345,
+  "mimeType": "image/jpeg",
+  "uploadedAt": "2023-07-28T16:30:10Z"
+}
+}</pre>
+                          </div>
+                      </div>
+                  </div>
+              </div>
+              
+              <!-- POST /api/graphql -->
+              <div class="api-endpoint" id="graphql-post">
+                  <div class="endpoint-header">
+                      <span class="http-method post">POST</span>
+                      <span class="endpoint-path">/api/graphql</span>
+                      <span class="endpoint-description">GraphQL запрос</span>
+                      <i class="fas fa-caret-down caret"></i>
+                  </div>
+                  <div class="endpoint-details">
+                      <p>Выполняет GraphQL запрос для получения данных в формате, определённом клиентом.</p>
+                      
+                      <div class="tabs">
+                          <div class="tab active" data-tab="params-graphql-post">Параметры</div>
+                          <div class="tab" data-tab="response-graphql-post">Пример ответа</div>
+                      </div>
+                      
+                      <div class="tab-content active" id="params-graphql-post">
+                          <h4>Заголовки запроса</h4>
+                          <table class="params-table">
+                              <thead>
+                                  <tr>
+                                      <th>Имя</th>
+                                      <th>Описание</th>
+                                      <th>Обязательный</th>
+                                  </tr>
+                              </thead>
+                              <tbody>
+                                  <tr>
+                                      <td>Content-Type</td>
+                                      <td>application/json</td>
+                                      <td>Да</td>
+                                  </tr>
+                              </tbody>
+                          </table>
+                          
+                          <h4>Тело запроса</h4>
+                          <table class="params-table">
+                              <thead>
+                                  <tr>
+                                      <th>Имя</th>
+                                      <th>Тип</th>
+                                      <th>Описание</th>
+                                      <th>Обязательный</th>
+                                  </tr>
+                              </thead>
+                              <tbody>
+                                  <tr>
+                                      <td>query</td>
+                                      <td>строка</td>
+                                      <td>GraphQL запрос</td>
+                                      <td>Да</td>
+                                  </tr>
+                                  <tr>
+                                      <td>variables</td>
+                                      <td>объект</td>
+                                      <td>Переменные для GraphQL запроса</td>
+                                      <td>Нет</td>
+                                  </tr>
+                              </tbody>
+                          </table>
+                          
+                          <h4>Пример тела запроса</h4>
+                          <div class="response-example">
+                              <pre class="response-code">{
+"query": "{ user(id: 42) { id name email posts { title } } }"
+}</pre>
+                          </div>
+                      </div>
+                      
+                      <div class="tab-content" id="response-graphql-post">
+                          <h4>Успешный ответ (200 OK)</h4>
+                          <div class="response-example">
+                              <pre class="response-code">{
+"data": {
+  "user": {
+    "id": 42,
+    "name": "Дмитрий Александров",
+    "email": "dmitry@example.com",
+    "posts": [
+      {
+        "title": "Введение в GraphQL"
+      },
+      {
+        "title": "REST vs GraphQL: что выбрать?"
+      },
+      {
+        "title": "Практика работы с GraphQL"
+      }
+    ]
+  }
+}
+}</pre>
+                          </div>
+                      </div>
+                  </div>
+              </div>
+          </div>
+      </div>
+  </div>
+
+  <script>
+      // Обработка клика по заголовку эндпоинта для разворачивания/сворачивания деталей
+      document.querySelectorAll('.endpoint-header').forEach(header => {
+          header.addEventListener('click', () => {
+              const details = header.nextElementSibling;
+              const isOpen = details.style.display === 'block';
+              
+              // Закрываем все детали
+              document.querySelectorAll('.endpoint-details').forEach(detail => {
+                  detail.style.display = 'none';
+              });
+              
+              document.querySelectorAll('.endpoint-header').forEach(h => {
+                  h.classList.remove('open');
+              });
+              
+              // Если не было открыто, открываем
+              if (!isOpen) {
+                  details.style.display = 'block';
+                  header.classList.add('open');
+              }
+          });
+      });
+      
+      // Обработка клика по вкладкам
+      document.querySelectorAll('.tab').forEach(tab => {
+          tab.addEventListener('click', () => {
+              const tabId = tab.getAttribute('data-tab');
+              const tabContent = document.getElementById(tabId);
+              
+              // Убираем активность со всех вкладок и содержимого в родительском элементе
+              const tabsContainer = tab.parentElement;
+              tabsContainer.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+              
+              const tabContentsContainer = tabsContainer.parentElement;
+              tabContentsContainer.querySelectorAll('.tab-content').forEach(tc => tc.classList.remove('active'));
+              
+              // Активируем выбранную вкладку и содержимое
+              tab.classList.add('active');
+              tabContent.classList.add('active');
+          });
+      });
+      
+      // Обработка клика по кнопке "Вернуться к приложению"
+      document.getElementById('back-to-app').addEventListener('click', () => {
+          window.location.href = '/';
+      });
+      
+      // Открывает эндпоинт при загрузке страницы, если в URL есть хэш
+      window.addEventListener('load', () => {
+          const hash = window.location.hash;
+          if (hash) {
+              const targetEndpoint = document.querySelector(hash);
+              if (targetEndpoint) {
+                  const header = targetEndpoint.querySelector('.endpoint-header');
+                  if (header) {
+                      header.click();
+                      targetEndpoint.scrollIntoView({ behavior: 'smooth' });
+                  }
+              }
+          }
+      });
+  </script>
+</body>
+</html>

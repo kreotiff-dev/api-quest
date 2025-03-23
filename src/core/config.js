@@ -56,7 +56,8 @@ export const APP_MODES = {
         userProgress: 'apiQuestProgress',
         selectedApiSource: 'apiQuestSelectedSource',
         httpLogs: 'apiQuestHttpLogs',
-        aiChatHistory: 'aiChatHistory'
+        aiChatHistory: 'aiChatHistory',
+        chatgptApiKey: 'apiQuestChatGptKey'
       },
       maxEntries: {
         logs: 100,
@@ -88,7 +89,11 @@ export const APP_MODES = {
       apiEndpoint: 'https://api.openai.com/v1/chat/completions',
       modelName: 'gpt-3.5-turbo',
       maxTokens: 500,
-      temperature: 0.7
+      temperature: 0.7,
+      apiKey: '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',                          // Ключ API будет задаваться в UI
+      requestTimeout: 10000,               // Таймаут запроса в мс
+      minQuestionLength: 15,               // Минимальная длина для запроса ChatGPT
+      fallbackToLocal: true                // Использовать локальные ответы при ошибке
     },
     
     // Настройки для мониторинга

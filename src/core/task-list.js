@@ -178,9 +178,9 @@ function fillWorkspaceContent(task) {
     // Очищаем main-content, сохраняя важные элементы
     const existingElements = Array.from(mainContent.children);
     existingElements.forEach(el => {
-        if (el.id === 'workspace-container' || 
-            el.classList.contains('content-header') || 
-            el.classList.contains('response-panel') || 
+        if (el.id === 'workspace-container' ||
+            el.classList.contains('content-header') ||
+            el.classList.contains('response-panel') ||
             el.classList.contains('ai-feedback-panel')) {
             mainContent.removeChild(el);
         }
@@ -202,6 +202,14 @@ function fillWorkspaceContent(task) {
     } catch (error) {
         console.error('Ошибка при настройке рабочей области:', error);
     }
+    
+    // Инициализация AI-ассистента
+    import('../ai/assistant.js').then(module => {
+        module.initAiAssistant();
+        console.log('AI-ассистент инициализирован');
+    }).catch(error => {
+        console.error('Ошибка при инициализации AI-ассистента:', error);
+    });
 }
 
 // Функция для добавления заголовка и кнопки "Проверить решение"
@@ -371,23 +379,21 @@ function addAIFeedbackPanel(parentElement, task) {
     aiFeedbackPanel.className = 'ai-feedback-panel';
     aiFeedbackPanel.id = 'ai-feedback-panel';
     aiFeedbackPanel.innerHTML = `
-        <div class="ai-feedback-header">
+            <div class="ai-feedback-header">
             <h3><i class="fas fa-robot"></i> AI Ассистент</h3>
             <div class="ai-feedback-actions">
-                <button class="btn btn-small"><i class="fas fa-question-circle"></i></button>
-                <button class="btn btn-small"><i class="fas fa-search"></i></button>
+                <button id="ai-help-btn" class="btn btn-small"><i class="fas fa-question-circle"></i></button>
+                <button id="ai-analyze-btn" class="btn btn-small"><i class="fas fa-search"></i></button>
             </div>
         </div>
         <div class="ai-feedback-content" id="ai-feedback-content">
-            <div class="ai-message">
-                <p>Здравствуйте! Я ваш AI-ассистент. Готов помочь с выполнением задания. Вы можете попросить помощь или анализ вашего решения в любой момент.</p>
-            </div>
+             <!-- Сообщения будут добавлены динамически -->
         </div>
         <div class="ai-input-container">
-            <input type="text" class="form-control" placeholder="Задайте вопрос ассистенту...">
-            <button class="btn btn-primary"><i class="fas fa-paper-plane"></i></button>
+            <input type="text" id="ai-question-input" class="form-control" placeholder="Задайте вопрос ассистенту...">
+            <button id="ai-question-send" class="btn btn-primary"><i class="fas fa-paper-plane"></i></button>
         </div>
-    `;
+        `;
     parentElement.appendChild(aiFeedbackPanel);
     console.log('ai-feedback-panel добавлен');
 }

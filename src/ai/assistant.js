@@ -7,6 +7,8 @@ import { getCurrentTask } from '../app.js';
 import { getResponse } from './responses.js';
 import { emit } from '../core/events.js';
 import { getConfigValue } from '../core/config.js';
+import { getAnswerFromChatGpt } from './chatgpt-api.js';
+import { ensureTooltips } from '../api/monitoring/tooltip-helper.js';
 
 // Приватные переменные для модуля
 let messageContainer = null;
@@ -34,6 +36,9 @@ export function initAiAssistant() {
     
     // Генерируем событие инициализации ассистента
     emit('aiAssistantInitialized');
+    setTimeout(() => {
+        ensureTooltips();
+    }, 500);
 }
 
 /**
@@ -178,7 +183,7 @@ export function askHelp() {
 /**
  * Анализ текущего запроса
  */
-export function analyzeRequest() {
+export async function analyzeRequest() {
     const task = getCurrentTask();
     if (!task) return;
     
@@ -206,38 +211,109 @@ export function analyzeRequest() {
     });
     
     // Получение тела запроса
-    let requestBody = null;
+    let requestBody = "";
+    let parsedBody = null;
     let bodyValid = true;
     
     if (['POST', 'PUT', 'PATCH'].includes(method)) {
+        requestBody = document.getElementById('request-body')?.value.trim() || "";
         try {
-            const bodyText = document.getElementById('request-body')?.value.trim();
-            if (bodyText) {
-                requestBody = JSON.parse(bodyText);
+            if (requestBody) {
+                parsedBody = JSON.parse(requestBody);
             }
         } catch (e) {
             bodyValid = false;
         }
     }
     
+    // Добавляем индикатор печатания
+    const typingIndicator = addTypingIndicator();
+    
     // Проверяем, есть ли ограничения на источники API для задания
-    if (task.apiSourceRestrictions) {
-        const currentSource = getCurrentSourceInfo();
+    const currentSource = getCurrentSourceInfo();
+    
+    if (task.apiSourceRestrictions && !task.apiSourceRestrictions.includes(currentSource.key)) {
+        // Задание требует другого источника API
+        const sourcesInfo = task.apiSourceRestrictions.map(sourceKey => getResponse(`apiSources.${sourceKey}`, null, sourceKey)).join(' или ');
         
-        if (!task.apiSourceRestrictions.includes(currentSource.key)) {
-            // Задание требует другого источника API
-            const sourcesInfo = task.apiSourceRestrictions.map(sourceKey => getResponse(`apiSources.${sourceKey}`, null, sourceKey)).join(' или ');
-            
-            const message = `<p>Обратите внимание: для этого задания требуется использовать следующий источник API: <strong>${sourcesInfo}</strong>.</p>
-                            <p>Сейчас вы используете источник "${currentSource.name}". Пожалуйста, переключитесь на требуемый источник с помощью селектора источников API.</p>`;
-            
+        const message = `<p>Обратите внимание: для этого задания требуется использовать следующий источник API: <strong>${sourcesInfo}</strong>.</p>
+                        <p>Сейчас вы используете источник "${currentSource.name}". Пожалуйста, переключитесь на требуемый источник с помощью селектора источников API.</p>`;
+        
+        // Удаляем индикатор печатания
+        setTimeout(() => {
+            removeTypingIndicator(typingIndicator);
             addAiMessage(message);
-            
-            // Не продолжаем анализ, так как источник API неправильный
-            return;
-        }
+        }, 800);
+        
+        // Не продолжаем анализ, так как источник API неправильный
+        return;
     }
     
+    try {
+        // Проверяем, включен ли ChatGPT в настройках
+        const chatGptEnabled = getConfigValue('chatgpt.enabled', true);
+        
+        if (chatGptEnabled) {
+            // Формируем контекст запроса для передачи в ChatGPT
+            const requestContext = {
+                task,
+                request: {
+                    method,
+                    url,
+                    headers,
+                    body: requestBody,
+                    bodyValid
+                },
+                currentSource
+            };
+            
+            // Формируем вопрос для ChatGPT
+            const analysisQuestion = 
+                `Проанализируй этот API-запрос и сравни его с требованиями задания:
+                - Метод: ${method}
+                - URL: ${url}
+                - Заголовки: ${JSON.stringify(headers)}
+                - Тело запроса: ${requestBody}
+                - Валидность тела запроса: ${bodyValid ? 'корректный JSON' : 'некорректный JSON'}
+                
+                Сравни с требованиями задания и укажи все несоответствия. Если запрос соответствует требованиям, укажи это.`;
+            
+            // Получаем ответ от ChatGPT API
+            const answer = await getAnswerFromChatGpt(analysisQuestion, requestContext);
+            
+            // Удаляем индикатор печатания
+            removeTypingIndicator(typingIndicator);
+            
+            // Добавляем ответ в чат
+            addAiMessage(answer);
+        } else {
+            // Используем стандартный анализ (существующий код)
+            // Здесь можно оставить текущую логику анализа из оригинального файла
+            // ...
+
+            // Удаляем индикатор печатания через 1 секунду
+            setTimeout(() => {
+                removeTypingIndicator(typingIndicator);
+                // Вызываем существующую функцию обработки
+                processStandardAnalysis(task, method, url, headers, parsedBody, bodyValid);
+            }, 1000);
+        }
+    } catch (error) {
+        console.error('Ошибка при анализе запроса:', error);
+        
+        // Удаляем индикатор печатания
+        removeTypingIndicator(typingIndicator);
+        
+        // Добавляем сообщение об ошибке
+        addAiMessage(`<p>Извините, не удалось проанализировать ваш запрос. Попробуйте позже или сформулируйте запрос по-другому.</p>`);
+    }
+}
+
+/**
+ * Стандартный анализ запроса (без использования ChatGPT)
+ * Это вспомогательная функция для упрощения кода
+ */
+function processStandardAnalysis(task, method, url, headers, requestBody, bodyValid) {
     // Анализируем запрос на соответствие заданию
     const issues = [];
     
@@ -297,23 +373,27 @@ export function analyzeRequest() {
         analysisMessage += '<p>Исправьте указанные проблемы и попробуйте снова.</p>';
     }
     
-    // Имитация задержки "размышления"
-    setTimeout(() => {
-        // Добавляем ответ ассистента
-        addAiMessage(analysisMessage);
-    }, 1000);
+    // Добавляем ответ ассистента
+    addAiMessage(analysisMessage);
 }
 
 /**
  * Обработка пользовательского вопроса
  */
-export function sendQuestion() {
+export async function sendQuestion() {
     const inputField = document.getElementById('ai-question-input');
     if (!inputField) return;
     
     const question = inputField.value.trim();
     
     if (!question) return;
+
+    // Проверка тематики вопроса
+    if (!isRelevantQuestion(question)) {
+        addAiMessage("Я могу отвечать только на вопросы, связанные с API и тестированием. Пожалуйста, задайте вопрос по теме.");
+        inputField.value = '';
+        return;
+    }
     
     // Добавляем вопрос пользователя в чат
     addUserMessage(question);
@@ -321,13 +401,105 @@ export function sendQuestion() {
     // Очищаем поле ввода
     inputField.value = '';
     
-    // Генерируем ответ на основе ключевых слов в вопросе
-    const answer = generateAnswerFromKeywords(question);
+    // Добавляем индикатор печатания
+    const typingIndicator = addTypingIndicator();
     
-    // Имитация задержки "размышления" перед ответом
-    setTimeout(() => {
-        addAiMessage(answer);
-    }, 800);
+    try {
+        // Проверяем, включен ли ChatGPT в настройках
+        const chatGptEnabled = getConfigValue('chatgpt.enabled', true);
+        const minQuestionLength = getConfigValue('chatgpt.minQuestionLength', 15);
+        
+        // Если вопрос короткий или ChatGPT отключен, используем встроенные ответы
+        if (!chatGptEnabled || question.length < minQuestionLength) {
+            // Генерируем ответ на основе ключевых слов в вопросе
+            const answer = generateAnswerFromKeywords(question);
+            
+            // Имитируем задержку "размышления" перед ответом
+            await new Promise(resolve => setTimeout(resolve, 800));
+            
+            // Удаляем индикатор печатания
+            removeTypingIndicator(typingIndicator);
+            
+            // Добавляем ответ в чат
+            addAiMessage(answer);
+        } else {
+            // Получаем текущее задание для контекста
+            const task = getCurrentTask();
+            
+            // Получаем ответ от ChatGPT API
+            const answer = await getAnswerFromChatGpt(question, { task });
+            
+            // Удаляем индикатор печатания
+            removeTypingIndicator(typingIndicator);
+            
+            // Добавляем ответ в чат
+            addAiMessage(answer);
+        }
+    } catch (error) {
+        console.error('Ошибка при обработке вопроса:', error);
+        
+        // Удаляем индикатор печатания
+        removeTypingIndicator(typingIndicator);
+        
+        // Добавляем сообщение об ошибке
+        addAiMessage(`<p>Извините, не удалось обработать ваш вопрос. Попробуйте позже или сформулируйте вопрос по-другому.</p>`);
+    }
+}
+
+// Функция для проверки релевантности вопроса
+function isRelevantQuestion(question) {
+    // Флаг для включения/отключения проверки
+    const enableRelevanceCheck = false; // Установите в true, чтобы включить проверку
+    
+    // Если проверка отключена, всегда возвращаем true
+    if (!enableRelevanceCheck) {
+        return true;
+    }
+    
+    const lowerQuestion = question.toLowerCase();
+    
+    // Ключевые слова, связанные с API
+    const relevantKeywords = [
+        'api', 'апи', 'тестировать', 'запрос', 'метод', 'http', 'get', 'post', 'put', 'delete', 'patch',
+        'заголовок', 'header', 'тело', 'body', 'json', 'rest', 'endpoint',
+        'аутентификация', 'авторизация', 'токен', 'статус', 'код', 'тестирование',
+        'url', 'параметр', 'запрос', 'ответ', 'сервер', 'клиент'
+    ];
+    
+    // Проверяем, содержит ли вопрос хотя бы одно ключевое слово
+    return relevantKeywords.some(keyword => lowerQuestion.includes(keyword));
+}
+
+/**
+ * Добавление индикатора печатания в чат
+ * @returns {HTMLElement} Элемент индикатора
+ */
+function addTypingIndicator() {
+    if (!messageContainer) {
+        messageContainer = document.getElementById('ai-feedback-content');
+        if (!messageContainer) return null;
+    }
+    
+    const indicatorElement = document.createElement('div');
+    indicatorElement.className = 'ai-message typing-indicator';
+    indicatorElement.innerHTML = `<p><span class="dot"></span><span class="dot"></span><span class="dot"></span></p>`;
+    
+    messageContainer.appendChild(indicatorElement);
+    
+    // Прокрутка к последнему сообщению
+    messageContainer.scrollTop = messageContainer.scrollHeight;
+    
+    return indicatorElement;
+}
+
+/**
+ * Удаление индикатора печатания из чата
+ * @param {HTMLElement} indicator - Элемент индикатора
+ */
+function removeTypingIndicator(indicator) {
+    if (indicator && indicator.parentNode) {
+        indicator.parentNode.removeChild(indicator);
+    }
 }
 
 /**

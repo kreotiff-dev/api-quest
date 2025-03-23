@@ -196,9 +196,11 @@ export async function init() {
             режим: getAppMode(),
             источникAPI: apiSources.getCurrentSourceInfo().name
         });
+
         
         // Генерируем событие инициализации
         events.emit('appInitialized');
+
         
     } catch (error) {
         console.error('Ошибка при инициализации приложения:', error);

@@ -14,6 +14,7 @@
 @import url('./components/forms.css');
 @import url('./components/modals.css');
 @import url('./components/notifications.css');
+@import url('./components/ai-assistant.css');
 
 /* Макеты и структура */
 @import url('./layout/header.css');
