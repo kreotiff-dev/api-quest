@@ -5,7 +5,7 @@
 
 import { getCurrentTask } from '../app.js';
 import { getResponse } from './responses.js';
-import { emit } from '../core/events.js';
+import { emit, on } from '../core/events.js';
 import { getConfigValue } from '../core/config.js';
 import { getAnswerFromChatGpt } from './chatgpt-api.js';
 import { ensureTooltips } from '../api/monitoring/tooltip-helper.js';
@@ -13,6 +13,15 @@ import { ensureTooltips } from '../api/monitoring/tooltip-helper.js';
 // Приватные переменные для модуля
 let messageContainer = null;
 let initialized = false;
+
+on('screenChanged', (screenName) => {
+    console.log('Обработчик screenChanged в ассистенте:', screenName);
+    
+    if (screenName === 'tasks') {
+        // Если перешли на экран заданий, сбрасываем состояние ассистента
+        resetAiAssistant();
+    }
+});
 
 /**
  * Инициализация AI-ассистента
@@ -41,6 +50,13 @@ export function initAiAssistant() {
     }, 500);
 }
 
+// Объявление функции handleKeyPress для использования с addEventListener/removeEventListener
+function handleKeyPress(e) {
+    if (e.key === 'Enter') {
+        sendQuestion();
+    }
+}
+
 /**
  * Настройка обработчиков событий
  */
@@ -55,11 +71,7 @@ function setupEventListeners() {
     document.getElementById('ai-question-send')?.addEventListener('click', sendQuestion);
     
     // Обработчик для поля ввода (отправка по Enter)
-    document.getElementById('ai-question-input')?.addEventListener('keypress', (e) => {
-        if (e.key === 'Enter') {
-            sendQuestion();
-        }
-    });
+    document.getElementById('ai-question-input')?.addEventListener('keypress', handleKeyPress);
 }
 
 /**
@@ -107,6 +119,32 @@ export function addUserMessage(message) {
     // Генерируем событие добавления сообщения
     emit('aiMessageAdded', { type: 'user', message });
 }
+
+/**
+ * Сброс состояния AI-ассистента
+ */
+export function resetAiAssistant() {
+    if (!initialized) return;
+    
+    initialized = false;
+    messageContainer = null;
+
+    document.getElementById('ai-help-btn')?.removeEventListener('click', askHelp);
+    document.getElementById('ai-analyze-btn')?.removeEventListener('click', analyzeRequest);
+    document.getElementById('ai-question-send')?.removeEventListener('click', sendQuestion);
+    
+    const inputElement = document.getElementById('ai-question-input');
+    if (inputElement) {
+        inputElement.removeEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                sendQuestion();
+            }
+        });
+    }
+    
+    console.log('AI-ассистент сброшен');
+}
+
 
 /**
  * Помощь по текущему заданию
@@ -625,5 +663,6 @@ export default {
     addUserMessage,
     askHelp,
     analyzeRequest,
-    sendQuestion
+    sendQuestion,
+    resetAiAssistant
 };
