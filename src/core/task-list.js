@@ -11,6 +11,7 @@ import { setCurrentTask, setCurrentScreen } from '../app.js';
 import { switchScreen } from '../ui/index.js';
 import { setupTaskWorkspace } from '../core/workspace.js';
 import { sendApiRequest, resetRequest, formatJsonBody, addHeaderRow } from '../api/client/index.js';
+import { showNotification } from '../ui/notifications.js';
 
 /**
  * Отрисовка списка заданий
@@ -219,7 +220,7 @@ function addContentHeader(parentElement, task) {
     contentHeader.innerHTML = `
         <h2 id="task-title">${task.title}</h2>
         <div class="actions">
-            <button class="btn btn-success" id="check-solution">
+            <button class="btn btn-secondary" id="check-solution">
                 <i class="fas fa-check"></i> Проверить решение
             </button>
         </div>
@@ -245,6 +246,7 @@ function addWorkspaceContainer(parentElement, task) {
             <div class="api-client-tabs">
                 <div class="api-tab active" data-tab="description">Описание задания</div>
                 <div class="api-tab" data-tab="request">Запрос</div>
+                <div class="api-tab" data-tab="verification">Проверка</div>
                 <div class="api-tab" data-tab="collection">Коллекция</div>
                 <div class="api-tab" data-tab="tests">Тесты</div>
             </div>
@@ -341,6 +343,31 @@ function addWorkspaceContainer(parentElement, task) {
                     <p>Тесты будут доступны в будущих версиях.</p>
                 </div>
             </div>
+            <!-- Добавляем новый блок контента после блока с id="tests-tab" -->
+            <!-- Вкладка "Проверка" - для заданий по проверке понимания материала -->
+            <div class="api-client-tab-content" id="verification-tab">
+                <div class="verification-container">
+                    <div class="verification-header">
+                        <h3>Проверка выполнения задания</h3>
+                        <p class="verification-description">Ответьте на вопросы по результатам выполнения запроса.</p>
+                    </div>
+                    
+                    <!-- Контейнер для вопросов с вариантами ответов -->
+                    <div class="question-block" id="multiple-choice-questions">
+                        <!-- Вопросы будут добавлены динамически -->
+                    </div>
+                    
+                    <!-- Контейнер для свободного ответа -->
+                    <div class="question-block" id="free-form-questions" style="display: none;">
+                        <!-- Форма свободного ответа будет добавлена динамически -->
+                    </div>
+                    
+                    <!-- Блок для отображения результатов проверки -->
+                    <div class="verification-results" id="verification-results" style="display: none;">
+                        <!-- Результаты будут добавлены динамически -->
+                    </div>
+                </div>
+            </div>
         </div>
     `;
     
@@ -405,37 +432,67 @@ function addAIFeedbackPanel(parentElement, task) {
 
 // Функция для добавления обработчиков событий для всех элементов
 function addEventHandlers() {
-    // Обработчик для кнопки проверки решения
-    document.getElementById('check-solution')?.addEventListener('click', function() {
-        console.log('Проверка решения');
-        checkTaskCompletion();
-    });
+    // Инициализация кнопки "Проверить решение" при первой загрузке
+    const checkSolutionBtn = document.getElementById('check-solution');
+    if (checkSolutionBtn) {
+        // Проверяем, какая вкладка активна при загрузке
+        const activeTab = document.querySelector('.api-tab.active');
+        
+        // Если активна вкладка "Проверка"
+        if (activeTab && activeTab.dataset.tab === 'verification') {
+            checkSolutionBtn.className = 'btn btn-success';
+            checkSolutionBtn.removeAttribute('title');
+            
+            checkSolutionBtn.addEventListener('click', function() {
+                import('../verification/index.js').then(module => {
+                    module.default.checkAnswer();
+                }).catch(error => {
+                    console.error('Ошибка при проверке ответа:', error);
+                    import('../ui/notifications.js').then(module => {
+                        module.showNotification('Ошибка при проверке ответа. Пожалуйста, попробуйте еще раз.', 'error');
+                    });
+                });
+            });
+        } else {
+            // Для других вкладок
+            checkSolutionBtn.className = 'btn btn-secondary';
+            checkSolutionBtn.title = 'Для проверки ответа перейдите на вкладку "Проверка"';
+            
+            checkSolutionBtn.addEventListener('click', function() {
+                import('../ui/notifications.js').then(module => {
+                    module.showNotification('Для проверки ответа перейдите на вкладку "Проверка"', 'info');
+                    
+                    const verificationTab = document.querySelector('.api-tab[data-tab="verification"]');
+                    if (verificationTab) {
+                        verificationTab.click();
+                    }
+                });
+            });
+        }
+    }
     
-    // Обработчик для кнопки отправки запроса
+    // Обработчики для других кнопок
     document.getElementById('send-request')?.addEventListener('click', function() {
         console.log('Отправка запроса');
         sendApiRequest(); // Вызываем настоящую функцию отправки запроса
     });
     
-    // Обработчик для кнопки сброса запроса
     document.getElementById('reset-request')?.addEventListener('click', function() {
         console.log('Сброс запроса');
         resetRequest(); // Вызываем настоящую функцию сброса
     });
     
-    // Обработчик для кнопки форматирования JSON
     document.getElementById('format-json-btn')?.addEventListener('click', function() {
         console.log('Форматирование JSON');
         formatJsonBody(); // Вызываем настоящую функцию форматирования
     });
     
-    // Обработчик для кнопки добавления заголовка
     document.getElementById('add-header')?.addEventListener('click', function() {
         console.log('Добавление заголовка');
         addHeaderRow(); // Вызываем настоящую функцию добавления заголовка
     });
     
-    // Обработчики для табов API клиента
+    // Обработчики для табов API клиента - оставляем как есть
     document.querySelectorAll('.api-tab').forEach(tab => {
         tab.addEventListener('click', function() {
             const tabGroup = this.closest('.api-client-tabs').parentElement;
@@ -445,10 +502,58 @@ function addEventHandlers() {
             this.classList.add('active');
             const tabId = `${this.dataset.tab}-tab`;
             tabGroup.querySelector(`#${tabId}`)?.classList.add('active');
+            
+            // Изменяем стиль и обработчик кнопки "Проверить решение" в зависимости от вкладки
+            const checkSolutionBtn = document.getElementById('check-solution');
+            if (checkSolutionBtn) {
+                // Если выбрана вкладка "Проверка", кнопка становится зеленой и использует модуль verification
+                if (this.dataset.tab === 'verification') {
+                    // Меняем стиль кнопки на зеленый
+                    checkSolutionBtn.className = 'btn btn-success';
+                    checkSolutionBtn.removeAttribute('title');
+                    
+                    // Удаляем все существующие обработчики и создаем новый
+                    const newBtn = checkSolutionBtn.cloneNode(true);
+                    checkSolutionBtn.parentNode.replaceChild(newBtn, checkSolutionBtn);
+                    
+                    // Добавляем обработчик для вкладки "Проверка"
+                    newBtn.addEventListener('click', function() {
+                        import('../verification/index.js').then(module => {
+                            module.default.checkAnswer();
+                        }).catch(error => {
+                            console.error('Ошибка при проверке ответа:', error);
+                            import('../ui/notifications.js').then(module => {
+                                module.showNotification('Ошибка при проверке ответа. Пожалуйста, попробуйте еще раз.', 'error');
+                            });
+                        });
+                    });
+                } else {
+                    // Для других вкладок кнопка становится серой
+                    checkSolutionBtn.className = 'btn btn-secondary';
+                    checkSolutionBtn.title = 'Для проверки ответа перейдите на вкладку "Проверка"';
+                    
+                    // Удаляем все существующие обработчики и создаем новый
+                    const newBtn = checkSolutionBtn.cloneNode(true);
+                    checkSolutionBtn.parentNode.replaceChild(newBtn, checkSolutionBtn);
+                    
+                    newBtn.addEventListener('click', function() {
+                        // При клике показываем уведомление
+                        import('../ui/notifications.js').then(module => {
+                            module.showNotification('Для проверки ответа перейдите на вкладку "Проверка"', 'info');
+                            
+                            // Можно автоматически переключиться на вкладку "Проверка"
+                            const verificationTab = document.querySelector('.api-tab[data-tab="verification"]');
+                            if (verificationTab) {
+                                verificationTab.click();
+                            }
+                        });
+                    });
+                }
+            }
         });
     });
     
-    // Обработчики для табов ответа
+    // Остальные обработчики оставляем без изменений
     document.querySelectorAll('.response-tab').forEach(tab => {
         tab.addEventListener('click', function() {
             const tabGroup = this.closest('.response-tabs').parentElement;
@@ -459,6 +564,39 @@ function addEventHandlers() {
             const tabId = `${this.dataset.tab}-response-tab`;
             tabGroup.querySelector(`#${tabId}`)?.classList.add('active');
         });
+    });
+
+    // Обработчики для методов проверки
+    document.querySelectorAll('.verification-method').forEach(method => {
+        method.addEventListener('click', function() {
+            const methodType = this.dataset.method;
+            const verificationBlocks = document.querySelectorAll('.verification-block');
+            
+            // Удаляем активный класс у всех методов
+            document.querySelectorAll('.verification-method').forEach(m => 
+                m.classList.remove('active'));
+            
+            // Добавляем активный класс выбранному методу
+            this.classList.add('active');
+            
+            // Скрываем все блоки проверки
+            verificationBlocks.forEach(block => block.classList.remove('active'));
+            
+            // Показываем соответствующий блок
+            document.getElementById(`${methodType}-verification`).classList.add('active');
+        });
+    });
+
+    // Обработчик для кнопки AI-проверки
+    document.getElementById('run-ai-verification')?.addEventListener('click', function() {
+        // Вызов функции из модуля verification
+        verification.runAiVerification();
+    });
+
+    // Обработчик для кнопки внешней проверки
+    document.getElementById('run-custom-verification')?.addEventListener('click', function() {
+        // Вызов функции из модуля verification
+        verification.runCustomVerification();
     });
     
     console.log('Обработчики событий добавлены');

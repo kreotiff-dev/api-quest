@@ -18,18 +18,21 @@ export const apiResponses = {
                 id: 1,
                 name: "Иван Петров",
                 email: "ivan@example.com",
-                role: "admin"
+                role: "admin",
+                createdAt: "2024-03-15T10:30:00.000Z"
             },
             {
                 id: 2,
                 name: "Мария Сидорова",
                 email: "maria@example.com",
-                role: "user"
+                role: "user",
+                createdAt: "2024-03-18T14:25:00.000Z"
             },
             {
                 id: 3,
                 name: "Алексей Иванов",
                 email: "alex@example.com",
+                createdAt: "2024-03-20T09:15:00.000Z",
                 role: "user"
             }
         ]

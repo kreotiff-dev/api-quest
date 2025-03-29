@@ -9,6 +9,7 @@ import * as apiClient from './api/client/index.js';
 import * as logger from './api/monitoring/logger.js';
 import * as loggerUI from './api/monitoring/logger-ui.js';
 import * as indicator from './api/monitoring/indicator.js';
+import verification from './verification/index.js';
 
 // Импорт модулей UI
 import * as ui from './ui/index.js';
@@ -197,7 +198,7 @@ export async function init() {
             источникAPI: apiSources.getCurrentSourceInfo().name
         });
 
-        
+        verification.initVerificationTab();
         // Генерируем событие инициализации
         events.emit('appInitialized');
 

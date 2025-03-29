@@ -342,6 +342,21 @@ export function saveCurrentSolution() {
  * Проверка выполнения задания
  */
 export function checkTaskCompletion() {
+    // Проверяем, активна ли вкладка "Проверка"
+    const verificationTab = document.querySelector('.api-tab[data-tab="verification"]');
+    const isVerificationTabActive = verificationTab && verificationTab.classList.contains('active');
+
+    if (isVerificationTabActive) {
+        // Если активна вкладка "Проверка", используем проверку из модуля verification
+        import('../verification/index.js').then(module => {
+            module.default.checkAnswer();
+        }).catch(error => {
+            console.error('Ошибка при загрузке модуля verification:', error);
+            showNotification('Ошибка при проверке ответа. Пожалуйста, попробуйте еще раз.', 'error');
+        });
+        return; // Выходим из функции, так как проверка будет выполнена модулем verification
+    }
+
     const task = getCurrentTask();
     if (!task) return;
     

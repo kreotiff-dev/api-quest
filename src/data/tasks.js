@@ -12,24 +12,37 @@ export const tasks = [
         id: 1,
         title: "Базовый GET запрос",
         subtitle: "Основы HTTP запросов",
-        description: "Научитесь создавать простые GET запросы для получения данных с сервера.",
+        description: "Научитесь создавать простые GET запросы для получения данных с сервера. Согласно документации API, эндпоинт /api/users должен возвращать список пользователей, каждый из которых содержит следующие поля: id, name, email и role. Дополнительные поля не документированы.",
         category: "basics",
         difficulty: "easy",
+        verificationType: 'multiple-choice',
         status: "not_started",
         tags: ["GET", "Основы"],
         requirements: [
-            "Использовать метод GET",
-            "URL эндпоинта: /api/users",
-            "Не требуется дополнительных заголовков"
+          "Использовать метод GET",
+          "URL эндпоинта: /api/users",
+          "Не требуется дополнительных заголовков"
         ],
-        expectedResult: "Успешный ответ будет иметь статус-код 200 OK и содержать массив пользователей в формате JSON.",
+        expectedResult: "Успешный ответ будет иметь статус-код 200 OK и содержать массив пользователей в формате JSON с полями id, name, email и role для каждого пользователя.",
+        verification_answers: {
+          beginnerAnswers: ['missing-fields', 'extra-field'],
+          advancedAnswerKeywords: ['отсутствует возраст', 'age отсутствует', 'createdAt лишнее', 'createdAt не документировано']
+        },
+        verificationQuestion: "Какие несоответствия в структуре ответа есть исходя из документации API?",
+        verificationOptions: [
+            { value: 'missing-fields', label: 'Отсутствует поле age, которое должно быть согласно документации' },
+            { value: 'empty-fields', label: 'Пустые значения полей name, email и role' },
+            { value: 'wrong-status', label: 'Неверный статус-код ответа' },
+            { value: 'extra-field', label: 'Лишнее поле createdAt, не указанное в документации' },
+            { value: 'wrong-format', label: 'Неверный формат данных в полях' }
+        ],
         solution: {
-            url: "/api/users",
-            method: "GET",
-            headers: {},
-            body: ""
+          url: "/api/users",
+          method: "GET",
+          headers: {},
+          body: ""
         }
-    },
+      },
     {
         id: 2,
         title: "Создание нового пользователя",
