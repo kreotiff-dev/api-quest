@@ -204,14 +204,24 @@ function setupAuthEventListeners() {
     document.getElementById('login-form')?.addEventListener('submit', async (e) => {
         e.preventDefault();
         
+        updateAuthDebugStatus('Отправка формы входа...', 'info');
+        
         const email = document.getElementById('login-email').value;
         const password = document.getElementById('login-password').value;
         
+        if (!email || !password) {
+            updateAuthDebugStatus('Заполните все поля формы', 'error');
+            return;
+        }
+        
         try {
+            updateAuthDebugStatus(`Вход для ${email}...`, 'info');
             await auth.login(email, password);
+            updateAuthDebugStatus('Вход успешен, обновление состояния', 'success');
             checkAuthState();
         } catch (error) {
             console.error('Ошибка при входе:', error);
+            updateAuthDebugStatus(`Ошибка: ${error.message}`, 'error');
         }
     });
     
@@ -219,33 +229,120 @@ function setupAuthEventListeners() {
     document.getElementById('register-form')?.addEventListener('submit', async (e) => {
         e.preventDefault();
         
+        updateAuthDebugStatus('Отправка формы регистрации...', 'info');
+        
         const name = document.getElementById('register-name').value;
         const email = document.getElementById('register-email').value;
         const password = document.getElementById('register-password').value;
         
+        if (!name || !email || !password) {
+            updateAuthDebugStatus('Заполните все поля формы', 'error');
+            return;
+        }
+        
+        if (password.length < 6) {
+            updateAuthDebugStatus('Пароль должен быть не менее 6 символов', 'error');
+            return;
+        }
+        
         try {
+            updateAuthDebugStatus(`Регистрация ${email}...`, 'info');
             await auth.register(name, email, password);
+            updateAuthDebugStatus('Регистрация успешна, обновление состояния', 'success');
             checkAuthState();
         } catch (error) {
             console.error('Ошибка при регистрации:', error);
+            updateAuthDebugStatus(`Ошибка: ${error.message}`, 'error');
         }
     });
     
     // Подписываемся на события аутентификации
-    events.on('auth:authenticated', updateUserInfo);
+    events.on('auth:authenticated', (user) => {
+        console.log('Событие auth:authenticated получено, пользователь:', user);
+        updateUserInfo(user);
+        
+        // Обновляем состояние экрана сразу, без таймаута
+        // и используем принудительное обновление
+        checkAuthState(true);
+    });
+    
     events.on('auth:loggedOut', () => {
+        console.log('Событие auth:loggedOut получено');
+        // Сбрасываем состояние и показываем экран авторизации
+        currentScreenState = false;
         showAuthScreen();
     });
 }
 
 /**
+ * Обновляет статус отладки аутентификации
+ * @param {string} status - Статус для отображения
+ * @param {string} type - Тип статуса (success, error, info)
+ */
+function updateAuthDebugStatus(status, type = 'info') {
+    const debugElement = document.getElementById('auth-debug-status');
+    if (!debugElement) return;
+    
+    let backgroundColor;
+    switch (type) {
+        case 'success':
+            backgroundColor = '#d4edda';
+            break;
+        case 'error':
+            backgroundColor = '#f8d7da';
+            break;
+        default:
+            backgroundColor = '#d1ecf1';
+    }
+    
+    debugElement.style.backgroundColor = backgroundColor;
+    debugElement.textContent = status;
+}
+
+/**
  * Проверка состояния авторизации и переключение экранов
  */
-function checkAuthState() {
-    if (auth.isAuthenticated()) {
+// Флаг для отслеживания текущего состояния экрана
+let currentScreenState = null;
+
+/**
+ * Проверка состояния авторизации и переключение экранов
+ * @param {boolean} force - Принудительно обновить состояние экрана
+ */
+function checkAuthState(force = false) {
+    // Проверяем наличие токена в localStorage
+    const token = localStorage.getItem('token');
+    console.log('checkAuthState: проверка состояния аутентификации');
+    
+    if (token) {
+        updateAuthDebugStatus('Токен найден в localStorage', 'info');
+        console.log('checkAuthState: Токен в localStorage найден');
+    } else {
+        updateAuthDebugStatus('Токен отсутствует в localStorage', 'error');
+        console.log('checkAuthState: Токен в localStorage отсутствует');
+    }
+    
+    const authenticated = auth.isAuthenticated();
+    console.log('checkAuthState: результат auth.isAuthenticated():', authenticated);
+    
+    // Предотвращаем переключение экрана, если состояние не изменилось
+    // Это убирает "моргание" интерфейса при повторных вызовах
+    if (currentScreenState === authenticated && !force) {
+        console.log(`checkAuthState: состояние не изменилось (${authenticated}), пропускаем переключение экрана`);
+        return;
+    }
+    
+    // Запоминаем новое состояние экрана
+    currentScreenState = authenticated;
+    
+    if (authenticated) {
+        updateAuthDebugStatus('Пользователь авторизован', 'success');
+        console.log('checkAuthState: переключение на главный экран');
         showMainScreen();
         updateUserInfo(auth.getAuthState().user);
     } else {
+        updateAuthDebugStatus('Пользователь не авторизован', 'error');
+        console.log('checkAuthState: переключение на экран авторизации');
         showAuthScreen();
     }
 }
@@ -285,10 +382,27 @@ function updateUserInfo(user) {
  * Инициализация приложения
  * @returns {Promise<void>}
  */
+// Флаг, предотвращающий повторную инициализацию
+let isInitialized = false;
+
 export async function init() {
+    // Предотвращаем повторную инициализацию
+    if (isInitialized) {
+        console.log('Приложение уже инициализировано, пропускаем повторную инициализацию');
+        return;
+    }
+    
+    console.log('=== Инициализация приложения API-Quest ===');
+    isInitialized = true;
+    
     try {
-        // Инициализация модуля аутентификации
-        auth.initAuth();
+        // Настройка обработчиков событий
+        setupEventListeners();
+        
+        // Инициализация модуля аутентификации и ожидание результата
+        // Это гарантирует, что authState будет установлен до проверки статуса
+        const isAuthenticated = await auth.initAuth();
+        console.log('Результат инициализации аутентификации:', isAuthenticated);
         
         // Инициализация модулей
         await apiSources.init();
@@ -296,9 +410,6 @@ export async function init() {
         logger.init();
         loggerUI.init();
         indicator.init();
-        
-        // Настройка обработчиков событий
-        setupEventListeners();
         
         // Загрузка задач и прогресса
         await tasks.loadTasks();
@@ -312,7 +423,8 @@ export async function init() {
         // Ручной вызов отрисовки списка заданий
         taskList.renderTaskList();
         
-        // Проверка состояния авторизации
+        // Проверка состояния авторизации теперь безопасна,
+        // т.к. мы дождались результата auth.initAuth()
         checkAuthState();
         
         // Отображаем информацию о приложении в консоли
@@ -323,7 +435,9 @@ export async function init() {
             авторизация: auth.isAuthenticated() ? 'выполнена' : 'не выполнена'
         });
 
-        verification.initVerificationTab();
+        // Временно отключаем верификацию, так как она вызывает ошибки
+        // verification.initVerificationTab();
+        
         // Генерируем событие инициализации
         events.emit('appInitialized');
 

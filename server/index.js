@@ -4,6 +4,7 @@ const cors = require('cors');
 const morgan = require('morgan');
 const helmet = require('helmet');
 const path = require('path');
+const mongoose = require('mongoose');
 const rateLimit = require('express-rate-limit');
 const swaggerUi = require('swagger-ui-express');
 const swaggerSpec = require('./config/swagger');
@@ -23,7 +24,10 @@ connectDB();
 // Middleware
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
+
+// Настраиваем CORS
 app.use(cors());
+
 app.use(helmet({ contentSecurityPolicy: false }));
 
 // Логирование в режиме разработки
@@ -45,6 +49,20 @@ app.use('/api/auth', limiter);
 
 // Swagger документация
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
+
+// Тестовый маршрут для проверки API и MongoDB
+app.get('/api/healthcheck', (req, res) => {
+  res.status(200).json({ 
+    success: true, 
+    message: 'API работает',
+    mongoConnection: mongoose.connection.readyState === 1 ? 'Connected' : 'Disconnected',
+    env: {
+      nodeEnv: process.env.NODE_ENV,
+      port: process.env.PORT,
+      mongoUri: process.env.MONGO_URI ? process.env.MONGO_URI.substring(0, 20) + '...' : 'Not set'
+    }
+  });
+});
 
 // Маршруты API
 app.use('/api/auth', require('./routes/auth'));

@@ -7,7 +7,8 @@ import { emit } from '../core/events.js';
 import { showNotification } from '../ui/notifications.js';
 
 // URL API для аутентификации
-const API_URL = '/api/auth';
+const API_URL = 'http://localhost:3000/api/auth';
+const API_BASE_URL = 'http://localhost:3000/api';
 
 // Состояние авторизации
 let authState = {
@@ -18,25 +19,12 @@ let authState = {
 
 /**
  * Инициализация модуля аутентификации
+ * @returns {Promise<boolean>} Промис, который резолвится в true, если пользователь авторизован
  */
-export function initAuth() {
+export async function initAuth() {
   // Проверяем наличие токена в localStorage
   const token = localStorage.getItem('token');
-  
-  if (token) {
-    authState.token = token;
-    
-    // Получаем информацию о пользователе
-    getCurrentUser()
-      .then(() => {
-        console.log('Пользователь автоматически авторизован');
-        emit('auth:authenticated', authState.user);
-      })
-      .catch(error => {
-        console.error('Ошибка автоматической авторизации:', error);
-        logout();
-      });
-  }
+  console.log('Инициализация аутентификации. Токен в localStorage:', !!token);
   
   // Добавляем обработчики для форм авторизации
   document.addEventListener('submit', handleAuthForms);
@@ -48,6 +36,37 @@ export function initAuth() {
       logout();
     }
   });
+  
+  // Если токена нет, сразу возвращаем false
+  if (!token) {
+    console.log('Токен отсутствует, пользователь не авторизован');
+    return false;
+  }
+  
+  // Устанавливаем токен
+  authState.token = token;
+  console.log('Токен установлен в authState');
+  
+  try {
+    // Получаем информацию о пользователе и ждем результата
+    const user = await getCurrentUser();
+    console.log('Пользователь автоматически авторизован:', user);
+    console.log('Состояние после авторизации:', {
+      isAuthenticated: authState.isAuthenticated,
+      hasUser: !!authState.user
+    });
+    
+    // Генерируем событие только если пользователь действительно авторизован
+    if (authState.isAuthenticated && authState.user) {
+      emit('auth:authenticated', authState.user);
+    }
+    
+    return authState.isAuthenticated;
+  } catch (error) {
+    console.error('Ошибка автоматической авторизации:', error);
+    await logout();
+    return false;
+  }
 }
 
 /**
@@ -58,14 +77,14 @@ function handleAuthForms(e) {
   // Проверяем, что это форма авторизации/регистрации
   if (e.target.matches('#login-form')) {
     e.preventDefault();
-    const email = e.target.querySelector('#email').value;
-    const password = e.target.querySelector('#password').value;
+    const email = e.target.querySelector('#login-email').value;
+    const password = e.target.querySelector('#login-password').value;
     login(email, password);
   } else if (e.target.matches('#register-form')) {
     e.preventDefault();
-    const name = e.target.querySelector('#name').value;
-    const email = e.target.querySelector('#email').value;
-    const password = e.target.querySelector('#password').value;
+    const name = e.target.querySelector('#register-name').value;
+    const email = e.target.querySelector('#register-email').value;
+    const password = e.target.querySelector('#register-password').value;
     register(name, email, password);
   }
 }
@@ -79,6 +98,10 @@ function handleAuthForms(e) {
  */
 export async function register(name, email, password) {
   try {
+    console.log(`Попытка регистрации: ${email}`);
+    console.log(`API URL: ${API_URL}/register`);
+    
+    // Простой запрос на регистрацию
     const response = await fetch(`${API_URL}/register`, {
       method: 'POST',
       headers: {
@@ -91,10 +114,12 @@ export async function register(name, email, password) {
       })
     });
     
+    // Получаем данные
     const data = await response.json();
+    console.log('Ответ получен:', response.status, response.statusText);
     
     if (!response.ok) {
-      throw new Error(data.error || 'Ошибка при регистрации');
+      throw new Error(data.error || `Ошибка при регистрации (${response.status})`);
     }
     
     // Сохраняем токен
@@ -130,6 +155,10 @@ export async function register(name, email, password) {
  */
 export async function login(email, password) {
   try {
+    console.log(`Попытка входа: ${email}`);
+    console.log(`API URL: ${API_URL}/login`);
+    
+    // Простой запрос на логин
     const response = await fetch(`${API_URL}/login`, {
       method: 'POST',
       headers: {
@@ -141,10 +170,12 @@ export async function login(email, password) {
       })
     });
     
+    // Получаем данные
     const data = await response.json();
+    console.log('Ответ получен:', response.status, response.statusText);
     
     if (!response.ok) {
-      throw new Error(data.error || 'Ошибка при входе');
+      throw new Error(data.error || `Ошибка при входе (${response.status})`);
     }
     
     // Сохраняем токен
@@ -224,9 +255,14 @@ export async function logout() {
  */
 export async function getCurrentUser() {
   try {
+    console.log('getCurrentUser: запрос данных пользователя');
+    
     if (!authState.token) {
+      console.log('getCurrentUser: токен отсутствует');
       throw new Error('Токен авторизации отсутствует');
     }
+    
+    console.log('getCurrentUser: отправка запроса с токеном:', authState.token.substring(0, 10) + '...');
     
     const response = await fetch(`${API_URL}/me`, {
       method: 'GET',
@@ -235,19 +271,25 @@ export async function getCurrentUser() {
       }
     });
     
+    console.log('getCurrentUser: ответ получен:', response.status, response.statusText);
+    
     const data = await response.json();
+    console.log('getCurrentUser: данные:', data);
     
     if (!response.ok) {
+      console.log('getCurrentUser: ошибка в ответе');
       throw new Error(data.error || 'Ошибка при получении данных пользователя');
     }
     
     // Обновляем состояние авторизации
     authState.isAuthenticated = true;
     authState.user = data.data;
+    console.log('getCurrentUser: состояние обновлено, пользователь авторизован');
     
     return data.data;
   } catch (error) {
     console.error('Ошибка при получении данных пользователя:', error);
+    console.log('getCurrentUser: сброс состояния аутентификации из-за ошибки');
     authState.isAuthenticated = false;
     authState.user = null;
     throw error;
@@ -355,7 +397,55 @@ export function getAuthState() {
  * @returns {boolean} Статус авторизации
  */
 export function isAuthenticated() {
+  console.log("Проверка аутентификации:", {
+    isAuthenticated: authState.isAuthenticated,
+    hasToken: !!authState.token,
+    hasUser: !!authState.user
+  });
   return authState.isAuthenticated;
+}
+
+/**
+ * Проверка работоспособности API и MongoDB
+ * @returns {Promise<Object>} Результат проверки
+ */
+export async function checkApiHealth() {
+  try {
+    // Используем режим no-cors для обхода проблем с CORS при проверке доступности
+    const response = await fetch(`${API_BASE_URL}/healthcheck`, {
+      method: 'GET',
+      mode: 'no-cors',
+      cache: 'no-cache',
+      credentials: 'omit'
+    });
+    
+    console.log('Проверка API:', response.status, response.type);
+    
+    // В режиме no-cors ответ будет типа "opaque", поэтому мы не можем прочитать его содержимое
+    // Но если получили ответ, значит сервер работает
+    if (response.type === 'opaque') {
+      return { 
+        success: true, 
+        message: 'API работает, но его ответ недоступен из-за CORS',
+        opaque: true
+      };
+    }
+    
+    try {
+      const text = await response.text();
+      return text ? JSON.parse(text) : { success: false, message: 'Пустой ответ' };
+    } catch (e) {
+      console.error('Ошибка при разборе ответа:', e);
+      return { success: true, message: 'API доступен, но вернул некорректный JSON' };
+    }
+  } catch (error) {
+    console.error('Ошибка при проверке API:', error);
+    return { 
+      success: false, 
+      error: error.message,
+      message: 'API недоступен, возможно сервер не запущен'
+    };
+  }
 }
 
 export default {
@@ -367,5 +457,6 @@ export default {
   updateUserDetails,
   updatePassword,
   getAuthState,
-  isAuthenticated
+  isAuthenticated,
+  checkApiHealth
 };
