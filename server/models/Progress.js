@@ -300,4 +300,92 @@ ProgressSchema.statics.updateTaskCompletion = async function(userId, courseId, m
   return progress;
 };
 
+// Метод для получения общего прогресса пользователя
+ProgressSchema.statics.getOverallProgress = async function(userId) {
+  const progress = await this.findOne({ user: userId })
+    .populate('courseProgress.course', 'name code level imageUrl')
+    .populate('courseProgress.moduleProgress.module', 'title description order')
+    .populate('courseProgress.moduleProgress.taskProgress.task', 'title difficulty type points');
+  
+  if (!progress) {
+    return {
+      coursesStarted: 0,
+      coursesCompleted: 0,
+      totalPoints: 0,
+      completionPercentage: 0,
+      courses: []
+    };
+  }
+  
+  let totalPoints = 0;
+  let completedTasks = 0;
+  let totalTasks = 0;
+  
+  // Обрабатываем каждый курс
+  const courseData = progress.courseProgress.map(cp => {
+    const courseInfo = {
+      id: cp.course._id,
+      name: cp.course.name,
+      code: cp.course.code,
+      level: cp.course.level,
+      imageUrl: cp.course.imageUrl,
+      startedAt: cp.startedAt,
+      completedAt: cp.completedAt,
+      completionPercentage: cp.completionPercentage,
+      modules: []
+    };
+    
+    // Обрабатываем каждый модуль в курсе
+    cp.moduleProgress.forEach(mp => {
+      const moduleInfo = {
+        id: mp.module._id,
+        title: mp.module.title,
+        description: mp.module.description,
+        order: mp.module.order,
+        startedAt: mp.startedAt,
+        completedAt: mp.completedAt,
+        completionPercentage: mp.completionPercentage,
+        tasks: []
+      };
+      
+      // Обрабатываем каждое задание в модуле
+      mp.taskProgress.forEach(tp => {
+        const taskInfo = {
+          id: tp.task._id,
+          title: tp.task.title,
+          difficulty: tp.task.difficulty,
+          type: tp.task.type,
+          points: tp.task.points,
+          startedAt: tp.startedAt,
+          completedAt: tp.completedAt,
+          attempts: tp.attempts,
+          completed: tp.completed
+        };
+        
+        moduleInfo.tasks.push(taskInfo);
+        
+        // Собираем статистику
+        totalTasks++;
+        if (tp.completed) {
+          completedTasks++;
+          totalPoints += tp.task.points || 0;
+        }
+      });
+      
+      courseInfo.modules.push(moduleInfo);
+    });
+    
+    return courseInfo;
+  });
+  
+  return {
+    coursesStarted: progress.courseProgress.length,
+    coursesCompleted: progress.courseProgress.filter(c => c.completedAt).length,
+    totalPoints,
+    completionPercentage: totalTasks > 0 ? Math.round((completedTasks / totalTasks) * 100) : 0,
+    courses: courseData,
+    lastActivity: progress.lastActivity
+  };
+};
+
 module.exports = mongoose.model('Progress', ProgressSchema);

@@ -158,3 +158,104 @@ exports.getCourseModules = asyncHandler(async (req, res, next) => {
     data: modules.modules
   });
 });
+
+/**
+ * @desc    Подписка на курс
+ * @route   POST /api/courses/:id/enroll
+ * @access  Private
+ */
+exports.enrollInCourse = asyncHandler(async (req, res, next) => {
+  const course = await Course.findById(req.params.id);
+
+  if (!course) {
+    return next(new ErrorResponse(`Курс с ID ${req.params.id} не найден`, 404));
+  }
+
+  // Проверка доступа для обычных пользователей
+  if (req.user.role === 'user' && !course.isActive) {
+    return next(new ErrorResponse(`Курс недоступен`, 403));
+  }
+
+  // Проверка доступности курса для пользователя
+  const isAvailable = await course.isAvailableForUser(req.user.id);
+  if (!isAvailable) {
+    return next(new ErrorResponse(`Вы не можете подписаться на этот курс. Необходимо выполнить предварительные требования.`, 403));
+  }
+
+  // Получаем пользователя и подписываем на курс
+  const User = require('../models/User');
+  const user = await User.findById(req.user.id);
+  const progress = await user.enrollInCourse(course._id);
+
+  res.status(200).json({
+    success: true,
+    message: `Вы успешно подписались на курс "${course.name}"`,
+    data: {
+      courseId: course._id,
+      courseName: course.name,
+      enrolledAt: new Date()
+    }
+  });
+});
+
+/**
+ * @desc    Получение прогресса пользователя по курсу
+ * @route   GET /api/courses/:id/progress
+ * @access  Private
+ */
+exports.getCourseProgress = asyncHandler(async (req, res, next) => {
+  const course = await Course.findById(req.params.id);
+
+  if (!course) {
+    return next(new ErrorResponse(`Курс с ID ${req.params.id} не найден`, 404));
+  }
+
+  // Получаем прогресс пользователя по курсу
+  const courseProgress = await course.getUserProgress(req.user.id);
+
+  if (!courseProgress) {
+    return res.status(200).json({
+      success: true,
+      data: {
+        enrolled: false,
+        message: 'Вы не подписаны на этот курс'
+      }
+    });
+  }
+
+  // Получаем информацию о модулях
+  const Module = require('../models/Module');
+  const modules = await Module.find({ course: course._id }).sort('order');
+  
+  // Обогащаем данные о прогрессе информацией о модулях
+  const moduleData = modules.map(module => {
+    const moduleProgress = courseProgress.moduleProgress.find(
+      mp => mp.module.toString() === module._id.toString()
+    );
+    
+    return {
+      id: module._id,
+      title: module.title,
+      description: module.shortDescription || module.description,
+      order: module.order,
+      duration: module.duration,
+      started: moduleProgress ? true : false,
+      completed: moduleProgress && moduleProgress.completedAt ? true : false,
+      completionPercentage: moduleProgress ? moduleProgress.completionPercentage : 0,
+      startedAt: moduleProgress ? moduleProgress.startedAt : null,
+      completedAt: moduleProgress ? moduleProgress.completedAt : null,
+      isAvailable: !module.isLocked || (req.user.role !== 'user')
+    };
+  });
+
+  res.status(200).json({
+    success: true,
+    data: {
+      enrolled: true,
+      startedAt: courseProgress.startedAt,
+      completedAt: courseProgress.completedAt,
+      completionPercentage: courseProgress.completionPercentage,
+      modules: moduleData
+    }
+  });
+});

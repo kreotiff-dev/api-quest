@@ -142,8 +142,19 @@ const TaskSchema = new mongoose.Schema({
   },
   type: {
     type: String,
-    enum: ['api', 'quiz', 'theory', 'project'],
+    enum: ['api', 'quiz', 'theory', 'project', 'exercise', 'challenge'],
     default: 'api'
+  },
+  duration: {
+    type: Number, // в минутах
+    default: 15
+  },
+  points: {
+    type: Number, // очки за выполнение
+    default: 10
+  },
+  tags: {
+    type: [String]
   },
   apiSourceRestrictions: {
     type: [String],
@@ -168,10 +179,18 @@ const TaskSchema = new mongoose.Schema({
     type: Boolean,
     default: true
   },
+  isLocked: {
+    type: Boolean,
+    default: false
+  },
   requiresServerResponse: {
     type: Boolean,
     default: true
   },
+  hintTimeThresholds: [{
+    timeInMinutes: Number, // время в минутах, после которого станет доступна подсказка
+    hintIndex: Number // индекс подсказки, которая станет доступна
+  }],
   createdAt: {
     type: Date,
     default: Date.now
@@ -199,5 +218,113 @@ TaskSchema.pre('save', function(next) {
   this.updatedAt = Date.now();
   next();
 });
+
+// Метод для получения прогресса пользователя по заданию
+TaskSchema.methods.getUserProgress = async function(userId, courseId, moduleId) {
+  const Progress = mongoose.model('Progress');
+  const userProgress = await Progress.findOne({ user: userId });
+  
+  if (!userProgress) {
+    return null;
+  }
+  
+  const courseProgress = userProgress.courseProgress.find(
+    cp => cp.course.toString() === courseId.toString()
+  );
+  
+  if (!courseProgress) {
+    return null;
+  }
+  
+  const moduleProgress = courseProgress.moduleProgress.find(
+    mp => mp.module.toString() === moduleId.toString()
+  );
+  
+  if (!moduleProgress) {
+    return null;
+  }
+  
+  const taskProgress = moduleProgress.taskProgress.find(
+    tp => tp.task.toString() === this._id.toString()
+  );
+  
+  return taskProgress || null;
+};
+
+// Метод для проверки доступности задания для пользователя
+TaskSchema.methods.isAvailableForUser = async function(userId) {
+  // Если задание не активно, оно доступно только администраторам и создателю
+  if (!this.isActive) {
+    const User = mongoose.model('User');
+    const user = await User.findById(userId);
+    return user && (user.role === 'admin' || this.createdBy.toString() === userId.toString());
+  }
+  
+  // Если задание заблокировано, проверяем доступность модуля
+  if (this.isLocked) {
+    const Module = mongoose.model('Module');
+    const module = await Module.findById(this.module);
+    if (!module) {
+      return false;
+    }
+    return await module.isAvailableForUser(userId);
+  }
+  
+  return true;
+};
+
+// Метод для получения доступных подсказок в зависимости от времени работы
+TaskSchema.methods.getAvailableHints = async function(userId, startTime) {
+  if (!this.hints || this.hints.length === 0 || !this.hintTimeThresholds) {
+    return [];
+  }
+  
+  // Если время начала не указано, получаем его из прогресса пользователя
+  if (!startTime) {
+    const Progress = mongoose.model('Progress');
+    const userProgress = await Progress.findOne({ user: userId });
+    
+    if (!userProgress) {
+      return [];
+    }
+    
+    // Находим прогресс по заданию
+    let taskProgress = null;
+    
+    for (const cp of userProgress.courseProgress) {
+      for (const mp of cp.moduleProgress) {
+        const tp = mp.taskProgress.find(tp => tp.task.toString() === this._id.toString());
+        if (tp) {
+          taskProgress = tp;
+          break;
+        }
+      }
+      if (taskProgress) break;
+    }
+    
+    if (!taskProgress || !taskProgress.startedAt) {
+      return [];
+    }
+    
+    startTime = taskProgress.startedAt;
+  }
+  
+  // Вычисляем время в минутах с момента начала работы над заданием
+  const timeSpent = Math.floor((Date.now() - new Date(startTime).getTime()) / 60000);
+  
+  // Определяем доступные подсказки
+  const availableHints = [];
+  
+  for (const threshold of this.hintTimeThresholds) {
+    if (timeSpent >= threshold.timeInMinutes && threshold.hintIndex < this.hints.length) {
+      availableHints.push({
+        index: threshold.hintIndex,
+        text: this.hints[threshold.hintIndex]
+      });
+    }
+  }
+  
+  return availableHints;
+};
 
 module.exports = mongoose.model('Task', TaskSchema);

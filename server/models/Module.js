@@ -21,16 +21,38 @@ const mongoose = require('mongoose');
  *           description: Название модуля
  *         description:
  *           type: string
- *           description: Описание модуля
+ *           description: Полное описание модуля
+ *         shortDescription:
+ *           type: string
+ *           description: Краткое описание модуля
  *         order:
  *           type: number
  *           description: Порядковый номер модуля в курсе
  *         course:
  *           type: string
  *           description: ID курса, к которому относится модуль
+ *         duration:
+ *           type: number
+ *           description: Продолжительность модуля в минутах
+ *         imageUrl:
+ *           type: string
+ *           description: URL изображения для модуля
  *         isActive:
  *           type: boolean
  *           description: Активен ли модуль
+ *         isLocked:
+ *           type: boolean
+ *           description: Заблокирован ли модуль для прохождения
+ *         requiredModules:
+ *           type: array
+ *           items:
+ *             type: string
+ *           description: ID модулей, которые нужно пройти перед этим
+ *         tags:
+ *           type: array
+ *           items:
+ *             type: string
+ *           description: Теги модуля
  *         createdAt:
  *           type: string
  *           format: date-time
@@ -49,9 +71,15 @@ const mongoose = require('mongoose');
  *         _id: 60d0fe4f5311236168a109cd
  *         title: Введение в RESTful API
  *         description: Основы работы с REST API и HTTP методами
+ *         shortDescription: Знакомство с REST API
  *         order: 1
  *         course: 60d0fe4f5311236168a109cb
+ *         duration: 60
+ *         imageUrl: https://example.com/images/rest-module.jpg
  *         isActive: true
+ *         isLocked: false
+ *         requiredModules: []
+ *         tags: [REST, HTTP, API]
  *         createdAt: 2020-04-14T16:00:00.000Z
  *         createdBy: 60d0fe4f5311236168a109ca
  *         updatedAt: 2020-04-14T16:00:00.000Z
@@ -69,6 +97,10 @@ const ModuleSchema = new mongoose.Schema({
     type: String,
     required: [true, 'Необходимо указать описание модуля']
   },
+  shortDescription: {
+    type: String,
+    maxlength: [200, 'Краткое описание не может быть длиннее 200 символов']
+  },
   order: {
     type: Number,
     required: [true, 'Необходимо указать порядковый номер модуля']
@@ -78,9 +110,27 @@ const ModuleSchema = new mongoose.Schema({
     ref: 'Course',
     required: [true, 'Необходимо указать принадлежность к курсу']
   },
+  duration: {
+    type: Number, // в минутах
+    default: 0
+  },
+  imageUrl: {
+    type: String
+  },
   isActive: {
     type: Boolean,
     default: true
+  },
+  isLocked: {
+    type: Boolean,
+    default: false
+  },
+  requiredModules: [{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Module'
+  }],
+  tags: {
+    type: [String]
   },
   createdAt: {
     type: Date,
@@ -112,10 +162,89 @@ ModuleSchema.virtual('tasks', {
   justOne: false
 });
 
+// Индекс для быстрого поиска модулей по курсу и порядковому номеру
+ModuleSchema.index({ course: 1, order: 1 }, { unique: true });
+
 // Автоматическое обновление даты изменения
 ModuleSchema.pre('save', function(next) {
   this.updatedAt = Date.now();
   next();
 });
+
+// Метод для получения прогресса пользователя по модулю
+ModuleSchema.methods.getUserProgress = async function(userId, courseId) {
+  const Progress = mongoose.model('Progress');
+  const userProgress = await Progress.findOne({ user: userId });
+  
+  if (!userProgress) {
+    return null;
+  }
+  
+  const courseProgress = userProgress.courseProgress.find(
+    cp => cp.course.toString() === courseId.toString()
+  );
+  
+  if (!courseProgress) {
+    return null;
+  }
+  
+  const moduleProgress = courseProgress.moduleProgress.find(
+    mp => mp.module.toString() === this._id.toString()
+  );
+  
+  return moduleProgress || null;
+};
+
+// Метод для проверки доступности модуля для пользователя
+ModuleSchema.methods.isAvailableForUser = async function(userId) {
+  // Если модуль не активен, он доступен только администраторам и создателю
+  if (!this.isActive) {
+    const User = mongoose.model('User');
+    const user = await User.findById(userId);
+    return user && (user.role === 'admin' || this.createdBy.toString() === userId.toString());
+  }
+  
+  // Если модуль заблокирован, проверяем требования
+  if (this.isLocked) {
+    // Если модуль не имеет предварительных требований, проверяем доступность курса
+    if (!this.requiredModules || this.requiredModules.length === 0) {
+      const Course = mongoose.model('Course');
+      const course = await Course.findById(this.course);
+      if (!course) {
+        return false;
+      }
+      return await course.isAvailableForUser(userId);
+    }
+    
+    // Проверяем, выполнены ли все требуемые модули
+    const Progress = mongoose.model('Progress');
+    const userProgress = await Progress.findOne({ user: userId });
+    
+    if (!userProgress) {
+      return false;
+    }
+    
+    const courseProgress = userProgress.courseProgress.find(
+      cp => cp.course.toString() === this.course.toString()
+    );
+    
+    if (!courseProgress) {
+      return false;
+    }
+    
+    for (const requiredModuleId of this.requiredModules) {
+      const requiredModuleProgress = courseProgress.moduleProgress.find(
+        mp => mp.module.toString() === requiredModuleId.toString()
+      );
+      
+      // Если прогресс по требуемому модулю не найден или модуль не завершен, возвращаем false
+      if (!requiredModuleProgress || !requiredModuleProgress.completedAt) {
+        return false;
+      }
+    }
+  }
+  
+  return true;
+};
 
 module.exports = mongoose.model('Module', ModuleSchema);

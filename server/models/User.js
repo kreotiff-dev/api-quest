@@ -118,4 +118,41 @@ UserSchema.methods.matchPassword = async function(enteredPassword) {
   return await bcrypt.compare(enteredPassword, this.password);
 };
 
+// Метод для подписки на курс
+UserSchema.methods.enrollInCourse = async function(courseId) {
+  // Обновляем активный курс пользователя
+  this.activeCourse = courseId;
+  await this.save();
+  
+  // Создаем или обновляем запись о прогрессе
+  const Progress = mongoose.model('Progress');
+  let progress = await Progress.findOne({ user: this._id });
+  
+  if (!progress) {
+    progress = new Progress({
+      user: this._id,
+      courseProgress: []
+    });
+  }
+  
+  // Проверяем, есть ли уже запись о прогрессе для этого курса
+  const existingCourseProgress = progress.courseProgress.find(
+    cp => cp.course.toString() === courseId.toString()
+  );
+  
+  if (!existingCourseProgress) {
+    // Добавляем новую запись для курса
+    progress.courseProgress.push({
+      course: courseId,
+      startedAt: Date.now(),
+      completionPercentage: 0,
+      moduleProgress: []
+    });
+    
+    await progress.save();
+  }
+  
+  return progress;
+};
+
 module.exports = mongoose.model('User', UserSchema);

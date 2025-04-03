@@ -236,6 +236,124 @@ const { protect, authorize } = require('../middleware/auth');
  *         description: Курс не найден
  */
 
+/**
+ * @swagger
+ * /api/courses/{id}/enroll:
+ *   post:
+ *     summary: Подписка на курс
+ *     tags: [Courses]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         schema:
+ *           type: string
+ *         required: true
+ *         description: ID курса
+ *     responses:
+ *       200:
+ *         description: Успешная подписка на курс
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 message:
+ *                   type: string
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     courseId:
+ *                       type: string
+ *                     courseName:
+ *                       type: string
+ *                     enrolledAt:
+ *                       type: string
+ *                       format: date-time
+ *       401:
+ *         description: Не авторизован
+ *       403:
+ *         description: Доступ запрещен или не выполнены предварительные требования
+ *       404:
+ *         description: Курс не найден
+ */
+
+/**
+ * @swagger
+ * /api/courses/{id}/progress:
+ *   get:
+ *     summary: Получение прогресса пользователя по курсу
+ *     tags: [Courses]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         schema:
+ *           type: string
+ *         required: true
+ *         description: ID курса
+ *     responses:
+ *       200:
+ *         description: Информация о прогрессе пользователя по курсу
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     enrolled:
+ *                       type: boolean
+ *                     startedAt:
+ *                       type: string
+ *                       format: date-time
+ *                     completedAt:
+ *                       type: string
+ *                       format: date-time
+ *                     completionPercentage:
+ *                       type: number
+ *                     modules:
+ *                       type: array
+ *                       items:
+ *                         type: object
+ *                         properties:
+ *                           id:
+ *                             type: string
+ *                           title:
+ *                             type: string
+ *                           description:
+ *                             type: string
+ *                           order:
+ *                             type: number
+ *                           duration:
+ *                             type: number
+ *                           started:
+ *                             type: boolean
+ *                           completed:
+ *                             type: boolean
+ *                           completionPercentage:
+ *                             type: number
+ *                           startedAt:
+ *                             type: string
+ *                             format: date-time
+ *                           completedAt:
+ *                             type: string
+ *                             format: date-time
+ *                           isAvailable:
+ *                             type: boolean
+ *       401:
+ *         description: Не авторизован
+ *       404:
+ *         description: Курс не найден
+ */
+
 // Импортируем контроллер курсов
 const {
   getCourses,
@@ -243,7 +361,9 @@ const {
   createCourse,
   updateCourse,
   deleteCourse,
-  getCourseModules
+  getCourseModules,
+  enrollInCourse,
+  getCourseProgress
 } = require('../controllers/courses');
 
 // Маршруты
@@ -260,5 +380,11 @@ router
 
 // Получение модулей для конкретного курса
 router.get('/:id/modules', protect, getCourseModules);
+
+// Подписка на курс
+router.post('/:id/enroll', protect, enrollInCourse);
+
+// Получение прогресса пользователя по курсу
+router.get('/:id/progress', protect, getCourseProgress);
 
 module.exports = router;
