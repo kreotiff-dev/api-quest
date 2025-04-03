@@ -2,3 +2,21 @@ node_modules/
 **/.DS_Store
 .vscode/
 *.log
+CLAUDE.md
+
+# Environment variables and secrets
+.env
+.env.local
+.env.development
+.env.test
+.env.production
+
+# Logs
+logs/
+npm-debug.log*
+
+# Coverage reports
+coverage/
+
+# Optional npm cache
+.npm
