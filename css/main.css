@@ -24,6 +24,7 @@
 @import url('./layout/grid.css');
 
 /* Экраны */
+@import url('./screens/auth.css');
 @import url('./screens/tasks.css');
 @import url('./screens/workspace.css');
 
@@ -31,3 +32,12 @@
 @import url('./modules/api-client.css');
 @import url('./modules/filters.css');
 @import url('./modules/api-sources.css');
+
+/* Общие стили */
+.screen {
+  display: none;
+}
+
+.screen.active {
+  display: block;
+}

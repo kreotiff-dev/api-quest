@@ -14,6 +14,9 @@ import verification from './verification/index.js';
 // Импорт модулей UI
 import * as ui from './ui/index.js';
 
+// Импорт модуля аутентификации
+import * as auth from './auth/auth.js';
+
 // Импорт модулей ядра
 import * as events from './core/events.js';
 import * as config from './core/config.js';
@@ -76,6 +79,9 @@ export function getAppMode() {
  * Настройка обработчиков событий
  */
 function setupEventListeners() {
+    // Обработчики для аутентификации
+    setupAuthEventListeners();
+    
     // Кнопка открытия документации API
     document.getElementById('open-api-docs')?.addEventListener('click', ui.openApiDocs);
     
@@ -164,11 +170,126 @@ function setupEventListeners() {
 }
 
 /**
+ * Настройка обработчиков событий для аутентификации
+ */
+function setupAuthEventListeners() {
+    // Переключение между вкладками авторизации
+    document.querySelectorAll('.auth-tab').forEach(tab => {
+        tab.addEventListener('click', function() {
+            // Убираем активный класс у всех вкладок
+            document.querySelectorAll('.auth-tab').forEach(t => t.classList.remove('active'));
+            // Скрываем все формы
+            document.querySelectorAll('.auth-form').forEach(f => f.classList.remove('active'));
+            
+            // Активируем выбранную вкладку
+            this.classList.add('active');
+            
+            // Показываем соответствующую форму
+            const tabName = this.getAttribute('data-tab');
+            document.getElementById(`${tabName}-form`).classList.add('active');
+        });
+    });
+    
+    // Кнопка выхода
+    document.getElementById('logout-btn')?.addEventListener('click', async () => {
+        try {
+            await auth.logout();
+            checkAuthState();
+        } catch (error) {
+            console.error('Ошибка при выходе:', error);
+        }
+    });
+    
+    // Обработчик для формы входа
+    document.getElementById('login-form')?.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        
+        const email = document.getElementById('login-email').value;
+        const password = document.getElementById('login-password').value;
+        
+        try {
+            await auth.login(email, password);
+            checkAuthState();
+        } catch (error) {
+            console.error('Ошибка при входе:', error);
+        }
+    });
+    
+    // Обработчик для формы регистрации
+    document.getElementById('register-form')?.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        
+        const name = document.getElementById('register-name').value;
+        const email = document.getElementById('register-email').value;
+        const password = document.getElementById('register-password').value;
+        
+        try {
+            await auth.register(name, email, password);
+            checkAuthState();
+        } catch (error) {
+            console.error('Ошибка при регистрации:', error);
+        }
+    });
+    
+    // Подписываемся на события аутентификации
+    events.on('auth:authenticated', updateUserInfo);
+    events.on('auth:loggedOut', () => {
+        showAuthScreen();
+    });
+}
+
+/**
+ * Проверка состояния авторизации и переключение экранов
+ */
+function checkAuthState() {
+    if (auth.isAuthenticated()) {
+        showMainScreen();
+        updateUserInfo(auth.getAuthState().user);
+    } else {
+        showAuthScreen();
+    }
+}
+
+/**
+ * Показ экрана авторизации
+ */
+function showAuthScreen() {
+    document.getElementById('auth-screen').classList.add('active');
+    document.getElementById('tasks-screen').classList.remove('active');
+    document.getElementById('workspace-screen').style.display = 'none';
+}
+
+/**
+ * Показ основного экрана приложения
+ */
+function showMainScreen() {
+    document.getElementById('auth-screen').classList.remove('active');
+    document.getElementById('tasks-screen').classList.add('active');
+}
+
+/**
+ * Обновление информации о пользователе в интерфейсе
+ * @param {Object} user - Данные пользователя
+ */
+function updateUserInfo(user) {
+    if (user) {
+        // Обновляем имя пользователя
+        const userNameElement = document.getElementById('user-name');
+        if (userNameElement) {
+            userNameElement.textContent = user.name;
+        }
+    }
+}
+
+/**
  * Инициализация приложения
  * @returns {Promise<void>}
  */
 export async function init() {
     try {
+        // Инициализация модуля аутентификации
+        auth.initAuth();
+        
         // Инициализация модулей
         await apiSources.init();
         apiClient.init();
@@ -191,11 +312,15 @@ export async function init() {
         // Ручной вызов отрисовки списка заданий
         taskList.renderTaskList();
         
+        // Проверка состояния авторизации
+        checkAuthState();
+        
         // Отображаем информацию о приложении в консоли
         console.log('API-Quest инициализирован', {
             версия: config.VERSION,
             режим: getAppMode(),
-            источникAPI: apiSources.getCurrentSourceInfo().name
+            источникAPI: apiSources.getCurrentSourceInfo().name,
+            авторизация: auth.isAuthenticated() ? 'выполнена' : 'не выполнена'
         });
 
         verification.initVerificationTab();

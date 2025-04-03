@@ -8,8 +8,57 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
 <body>
+    <!-- Экран авторизации -->
+    <div id="auth-screen" class="screen">
+        <div class="auth-container">
+            <div class="auth-box">
+                <div class="auth-header">
+                    <h2>API Практикум</h2>
+                    <p>Войдите в аккаунт, чтобы продолжить обучение</p>
+                </div>
+                <div class="auth-tabs">
+                    <div class="auth-tab active" data-tab="login">Вход</div>
+                    <div class="auth-tab" data-tab="register">Регистрация</div>
+                </div>
+                
+                <div class="auth-form-container">
+                    <!-- Форма входа -->
+                    <form id="login-form" class="auth-form active">
+                        <div class="form-group">
+                            <label for="login-email">Email</label>
+                            <input type="email" id="login-email" name="email" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="login-password">Пароль</label>
+                            <input type="password" id="login-password" name="password" required>
+                        </div>
+                        <button type="submit" class="btn btn-primary btn-block">Войти</button>
+                    </form>
+                    
+                    <!-- Форма регистрации -->
+                    <form id="register-form" class="auth-form">
+                        <div class="form-group">
+                            <label for="register-name">Имя</label>
+                            <input type="text" id="register-name" name="name" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="register-email">Email</label>
+                            <input type="email" id="register-email" name="email" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="register-password">Пароль</label>
+                            <input type="password" id="register-password" name="password" required minlength="6">
+                            <small>Не менее 6 символов</small>
+                        </div>
+                        <button type="submit" class="btn btn-primary btn-block">Зарегистрироваться</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Экран выбора заданий -->
-    <div id="tasks-screen" class="screen active">
+    <div id="tasks-screen" class="screen">
         <header class="main-header">
             <div class="logo">
                 <h1>API Практикум</h1>
@@ -17,7 +66,10 @@
             <div class="user-info">
                 <div class="user-profile">
                     <i class="fas fa-user-circle"></i>
-                    <span>Студент</span>
+                    <span id="user-name">Студент</span>
+                </div>
+                <div class="user-actions">
+                    <button id="logout-btn" class="btn btn-small">Выйти</button>
                 </div>
             </div>
         </header>
