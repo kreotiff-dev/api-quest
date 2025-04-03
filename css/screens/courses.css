@@ -1,0 +1,275 @@
+/* 
+ * API-Quest - Стили для экрана курсов
+ */
+
+/* Контейнер для курсов */
+.courses-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(var(--card-min-width), 1fr));
+  gap: var(--spacing-lg);
+  margin-top: var(--spacing-lg);
+}
+
+/* Карточка курса */
+.course-card {
+  background-color: var(--color-card);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-lg);
+  transition: all var(--transition-normal);
+  overflow: hidden;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  cursor: pointer;
+}
+
+.course-card:hover {
+  transform: translateY(-8px);
+  box-shadow: var(--shadow-hover);
+}
+
+/* Обложка курса */
+.course-cover {
+  height: 140px;
+  background-color: var(--color-primary-light);
+  background-size: cover;
+  background-position: center;
+  position: relative;
+}
+
+.course-cover .course-level {
+  position: absolute;
+  top: var(--spacing-sm);
+  right: var(--spacing-sm);
+  padding: var(--spacing-xs) var(--spacing-sm);
+  border-radius: var(--radius-sm);
+  font-size: var(--font-size-xs);
+  font-weight: 600;
+  color: white;
+  background-color: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(4px);
+}
+
+/* Заголовок курса */
+.course-header {
+  padding: var(--spacing-lg) var(--spacing-lg) var(--spacing-md);
+  position: relative;
+  border-bottom: 1px solid var(--color-divider);
+}
+
+/* Метки для уровня сложности */
+.course-level-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+  padding: var(--spacing-xs) var(--spacing-sm);
+  border-radius: var(--radius-sm);
+  font-size: var(--font-size-sm);
+  color: white;
+  margin-right: var(--spacing-sm);
+  min-width: 60px;
+  text-align: center;
+}
+
+.course-level-badge.beginner {
+  background: linear-gradient(90deg, #43cea2 0%, #185a9d 100%);
+}
+
+.course-level-badge.intermediate {
+  background: linear-gradient(90deg, #f09819 0%, #edde5d 100%);
+}
+
+.course-level-badge.advanced {
+  background: linear-gradient(90deg, #ff512f 0%, #dd2476 100%);
+}
+
+/* Заголовки */
+.course-title {
+  font-size: var(--font-size-lg);
+  font-weight: 700;
+  color: var(--color-text-primary);
+  margin: var(--spacing-md) 0 var(--spacing-xs);
+  line-height: 1.3;
+}
+
+.course-subtitle {
+  font-size: var(--font-size-md);
+  font-weight: 400;
+  color: var(--color-text-secondary);
+  margin: 0 0 var(--spacing-xs);
+  line-height: 1.3;
+}
+
+/* Основной контент */
+.course-content {
+  padding: var(--spacing-md) var(--spacing-lg);
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Информация о курсе */
+.course-info {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--spacing-md);
+  font-size: var(--font-size-sm);
+  color: var(--color-text-tertiary);
+}
+
+.course-stats {
+  display: flex;
+  gap: var(--spacing-md);
+}
+
+.course-stat {
+  display: flex;
+  align-items: center;
+}
+
+.course-stat i {
+  margin-right: var(--spacing-xs);
+  opacity: 0.7;
+}
+
+/* Прогресс курса */
+.course-progress-container {
+  margin-top: var(--spacing-md);
+}
+
+.course-progress-info {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: var(--spacing-xs);
+  font-size: var(--font-size-sm);
+}
+
+.course-progress-bar {
+  height: 6px;
+  background-color: var(--color-background);
+  border-radius: var(--radius-circular);
+  overflow: hidden;
+}
+
+.course-progress-fill {
+  height: 100%;
+  background-color: var(--color-primary);
+  border-radius: var(--radius-circular);
+  transition: width 0.3s ease;
+}
+
+/* Теги */
+.course-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--spacing-xs);
+  margin-top: auto;
+  padding-top: var(--spacing-md);
+}
+
+.course-tag {
+  background-color: var(--color-background);
+  padding: 2px var(--spacing-sm);
+  border-radius: var(--radius-xl);
+  font-size: var(--font-size-xs);
+  color: var(--color-text-tertiary);
+}
+
+/* Область действий */
+.course-actions {
+  margin-top: var(--spacing-md);
+  display: flex;
+  justify-content: flex-end;
+}
+
+/* Кнопка в карточке */
+.course-btn {
+  background-color: var(--color-background);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-xl);
+  padding: var(--spacing-sm) var(--spacing-lg);
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.course-btn:hover {
+  background-color: var(--color-border);
+}
+
+.course-btn.primary {
+  background-color: var(--color-primary);
+  color: white;
+  border: none;
+}
+
+.course-btn.primary:hover {
+  background-color: var(--color-primary-dark);
+}
+
+/* Сообщение об отсутствии курсов */
+.no-courses {
+  grid-column: 1 / -1;
+  padding: var(--spacing-xl);
+  text-align: center;
+  color: var(--color-text-hint);
+  font-size: var(--font-size-md);
+  background-color: var(--color-card);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-sm);
+}
+
+/* Статусы курсов */
+.course-status {
+  position: absolute;
+  top: var(--spacing-sm);
+  left: var(--spacing-sm);
+  width: 32px;
+  height: 32px;
+  border-radius: var(--radius-circular);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: white;
+  color: var(--color-text-primary);
+  box-shadow: var(--shadow-sm);
+}
+
+.course-status.completed {
+  background-color: var(--color-success);
+  color: white;
+}
+
+.course-status.in_progress {
+  background-color: var(--color-warning);
+  color: white;
+}
+
+.course-status.locked {
+  background-color: var(--color-text-hint);
+  color: white;
+}
+
+/* Адаптивность для маленьких экранов */
+@media (max-width: 768px) {
+  .courses-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .course-header {
+    padding: var(--spacing-md);
+  }
+  
+  .course-content {
+    padding: var(--spacing-md);
+  }
+  
+  .course-cover {
+    height: 120px;
+  }
+}

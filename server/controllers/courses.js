@@ -8,26 +8,37 @@ const asyncHandler = require('../middleware/async');
  * @access  Private
  */
 exports.getCourses = asyncHandler(async (req, res, next) => {
-  // Для обычных пользователей отображаем только активные курсы
-  let query = {};
-  
-  if (req.user.role === 'user') {
-    query.isActive = true;
+  try {
+    // Для отладки - записываем информацию о запросе
+    console.log(`GetCourses called by user: ${req.user ? req.user.id : 'unknown'}, 
+                 User Role: ${req.user ? req.user.role : 'unknown'}`);
+
+    // Для обычных пользователей отображаем только активные курсы
+    let query = {};
+    
+    if (req.user.role === 'user') {
+      query.isActive = true;
+    }
+
+    // Опции для populate
+    const populateOptions = [
+      { path: 'createdBy', select: 'name' },
+    ];
+
+    const courses = await Course.find(query)
+      .populate(populateOptions);
+
+    console.log(`Found ${courses.length} courses`);
+
+    res.status(200).json({
+      success: true,
+      count: courses.length,
+      data: courses
+    });
+  } catch (error) {
+    console.error('Error in getCourses:', error);
+    next(error);
   }
-
-  // Опции для populate
-  const populateOptions = [
-    { path: 'createdBy', select: 'name' },
-  ];
-
-  const courses = await Course.find(query)
-    .populate(populateOptions);
-
-  res.status(200).json({
-    success: true,
-    count: courses.length,
-    data: courses
-  });
 });
 
 /**

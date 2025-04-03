@@ -23,6 +23,10 @@ import * as config from './core/config.js';
 import * as tasks from './core/tasks.js';
 import * as taskList from './core/task-list.js';
 
+// Импорт модулей курсов
+import courseList from './courses/index.js';
+import courseRenderer from './courses/renderer.js';
+
 // Переменные состояния приложения
 let currentTask = null;
 let currentScreen = 'tasks';
@@ -128,6 +132,17 @@ function setupEventListeners() {
             this.classList.add('active');
             const tabId = `${this.dataset.tab}-response-tab`;
             document.getElementById(tabId)?.classList.add('active');
+        });
+    });
+    
+    // Обработчики переключения разделов в боковой панели
+    document.querySelectorAll('.main-nav li a').forEach(link => {
+        link.addEventListener('click', function(e) {
+            const section = this.getAttribute('data-section');
+            if (section) {
+                e.preventDefault();
+                ui.switchSection(section);
+            }
         });
     });
     
@@ -379,6 +394,33 @@ function updateUserInfo(user) {
 }
 
 /**
+ * Загрузка и отображение курсов
+ */
+async function loadCourses() {
+    try {
+        const courses = await courseList.loadCourses();
+        
+        const courseProgressMap = {};
+        for (const course of courses) {
+            try {
+                // Получаем прогресс пользователя по каждому курсу
+                const progress = await courseList.getCourseProgress(course._id);
+                courseProgressMap[course._id] = progress;
+            } catch (error) {
+                console.error(`Ошибка при получении прогресса курса ${course._id}:`, error);
+            }
+        }
+        
+        // Рендерим курсы с данными о прогрессе
+        await courseRenderer.renderCourses(courses, courseProgressMap);
+        
+    } catch (error) {
+        console.error('Ошибка при загрузке курсов:', error);
+        ui.showNotification('Не удалось загрузить список курсов', 'error');
+    }
+}
+
+/**
  * Инициализация приложения
  * @returns {Promise<void>}
  */
@@ -413,6 +455,32 @@ export async function init() {
         
         // Загрузка задач и прогресса
         await tasks.loadTasks();
+        
+        // Загрузка курсов
+        events.on('auth:authenticated', () => {
+            // Загружаем курсы после авторизации
+            loadCourses();
+        });
+        
+        // Загружаем курсы при активации вкладки курсов
+        events.on('coursesTabActivated', () => {
+            console.log('Обработка события активации вкладки курсов');
+            // Перезагружаем курсы при необходимости
+            if (courseList.courses.length === 0) {
+                loadCourses();
+            }
+            
+            // Показываем контейнер с курсами
+            const coursesContainer = document.getElementById('courses-container');
+            if (coursesContainer) {
+                coursesContainer.style.display = 'grid';
+            }
+        });
+        
+        // Если пользователь уже авторизован, загружаем курсы
+        if (isAuthenticated) {
+            loadCourses();
+        }
         
         // Инициализация UI
         ui.init();

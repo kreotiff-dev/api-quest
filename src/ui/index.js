@@ -9,76 +9,137 @@ import { emit } from '../core/events.js';
 
 /**
  * Переключение между экранами
- * @param {string} screen - Экран для активации ('tasks' или 'workspace')
+ * @param {string} screen - Экран для активации ('tasks', 'workspace', 'courses')
  */
 export function switchScreen(screen) {
     console.log(`switchScreen вызвана с параметром ${screen}`);
     
     const tasksScreen = document.getElementById('tasks-screen');
     const workspaceScreen = document.getElementById('workspace-screen');
+    const coursesScreen = document.getElementById('courses-screen');
     
-    console.log('Элементы экранов:', {
-        tasksScreen: tasksScreen ? 'найден' : 'не найден',
-        workspaceScreen: workspaceScreen ? 'найден' : 'не найден'
+    // Скрываем все экраны
+    if (tasksScreen) {
+        tasksScreen.classList.remove('active');
+        tasksScreen.style.display = 'none';
+    }
+    
+    if (workspaceScreen) {
+        workspaceScreen.classList.remove('active');
+        workspaceScreen.style.display = 'none';
+    }
+    
+    if (coursesScreen) {
+        coursesScreen.classList.remove('active');
+        coursesScreen.style.display = 'none';
+    }
+    
+    // Показываем нужный экран
+    switch (screen) {
+        case 'tasks':
+            if (tasksScreen) {
+                tasksScreen.classList.add('active');
+                tasksScreen.style.display = 'block';
+            }
+            break;
+            
+        case 'workspace':
+            if (workspaceScreen) {
+                workspaceScreen.classList.add('active');
+                workspaceScreen.style.display = 'block';
+            }
+            break;
+            
+        case 'courses':
+            if (coursesScreen) {
+                coursesScreen.classList.add('active');
+                coursesScreen.style.display = 'block';
+            }
+            break;
+    }
+    
+    // Генерируем событие о смене экрана
+    emit('screenChanged', screen);
+}
+
+/**
+ * Переключение между разделами приложения
+ * @param {string} section - Раздел для активации ('tasks', 'courses', 'progress', etc)
+ */
+export function switchSection(section) {
+    console.log(`Переключение на раздел: ${section}`);
+    
+    // Получаем все элементы меню
+    const menuItems = document.querySelectorAll('.main-nav li');
+    
+    // Сначала снимаем активный класс со всех элементов
+    menuItems.forEach(item => {
+        item.classList.remove('active');
     });
     
-    if (screen === 'tasks') {
-        console.log('Переключение на экран заданий');
-        // Показываем экран заданий
-        if (tasksScreen) {
-            tasksScreen.classList.add('active');
-            tasksScreen.style.display = 'block'; // Явное указание display
+    // Затем находим соответствующий пункт меню и делаем его активным
+    const activeMenuItem = document.querySelector(`.main-nav li a[data-section="${section}"]`);
+    if (activeMenuItem) {
+        // Находим родительский элемент 'li' и делаем его активным
+        const parentLi = activeMenuItem.closest('li');
+        if (parentLi) {
+            parentLi.classList.add('active');
         }
-        
-        // Скрываем рабочую область
-        if (workspaceScreen) {
-            workspaceScreen.classList.remove('active');
-            workspaceScreen.style.display = 'none';
-        }
-        
-        emit('screenChanged', 'tasks');
-    } else if (screen === 'workspace') {
-        console.log('Переключение на экран рабочей области');
-        
-        // Показываем рабочую область
-        if (workspaceScreen) {
-            workspaceScreen.classList.add('active');
-            workspaceScreen.style.display = 'block'; // Явное указание display
-            console.log('Стиль workspaceScreen после изменения:', workspaceScreen.style.display);
-            
-            // Для отладки - выведем текущие стили
-            const styles = window.getComputedStyle(workspaceScreen);
-            console.log('Текущие стили workspaceScreen:', {
-                display: styles.display,
-                visibility: styles.visibility,
-                opacity: styles.opacity,
-                position: styles.position,
-                zIndex: styles.zIndex
-            });
-            
-            // Принудительная видимость
-            workspaceScreen.setAttribute('style', 'display: block !important; visibility: visible !important; opacity: 1 !important;');
-            
-            // Проверка родительских элементов
-            let parent = workspaceScreen.parentElement;
-            while (parent) {
-                const parentStyle = window.getComputedStyle(parent);
-                if (parentStyle.display === 'none' || parentStyle.visibility === 'hidden') {
-                    console.log('Обнаружен скрытый родитель:', parent);
-                    parent.style.display = 'block';
-                    parent.style.visibility = 'visible';
-                }
-                parent = parent.parentElement;
+    }
+    
+    // Обрабатываем переключение контента в зависимости от раздела
+    switch (section) {
+        case 'tasks':
+            // Показываем экран заданий
+            switchScreen('tasks');
+            // Обновляем заголовок
+            document.querySelector('.content-header h2').textContent = 'Задания по API';
+            // Показываем контейнер заданий
+            document.getElementById('tasks-container').style.display = 'grid';
+            // Скрываем контейнер курсов
+            const coursesContainerTasks = document.getElementById('courses-container');
+            if (coursesContainerTasks) {
+                coursesContainerTasks.style.display = 'none';
             }
-        }
-        
-        // Скрываем экран заданий
-        if (tasksScreen) {
-            tasksScreen.classList.remove('active');
-            tasksScreen.style.display = 'none';
-        }
-        
-        emit('screenChanged', 'workspace');
+            break;
+            
+        case 'courses':
+            // Показываем экран заданий (так как курсы будут на том же экране)
+            switchScreen('tasks');
+            // Обновляем заголовок
+            document.querySelector('.content-header h2').textContent = 'Курсы';
+            
+            // Скрываем контейнер заданий
+            document.getElementById('tasks-container').style.display = 'none';
+            
+            // Показываем контейнер курсов, создаем его если не существует
+            const coursesContainer = document.getElementById('courses-container');
+            if (!coursesContainer) {
+                coursesContainer = document.createElement('div');
+                coursesContainer.id = 'courses-container';
+                coursesContainer.className = 'courses-grid';
+                
+                // Добавляем контейнер после контейнера заданий
+                document.getElementById('tasks-container').insertAdjacentElement('afterend', coursesContainer);
+            }
+            
+            coursesContainer.style.display = 'grid';
+            
+            // Генерируем событие о смене раздела
+            emit('sectionChanged', 'courses');
+            break;
+            
+        case 'progress':
+            // Логика для раздела "Мой прогресс" будет добавлена позже
+            break;
+            
+        case 'theory':
+            // Логика для раздела "Теория" будет добавлена позже
+            break;
+            
+        case 'help':
+            // Логика для раздела "Помощь" будет добавлена позже
+            break;
     }
 }
 
@@ -248,8 +309,82 @@ export function setActiveElement(elementsSelector, activeIndex) {
  * Инициализация модуля UI
  */
 export function init() {
-    // Можно добавить дополнительную инициализацию UI
+    // Добавляем дополнительные пункты меню
+    setupUI();
+    
+    // Добавляем обработчики для элементов меню
+    setupEventListeners();
+    
     console.log('UI модуль инициализирован');
+}
+
+/**
+ * Настройка обработчиков событий
+ */
+function setupEventListeners() {
+    // Находим все ссылки в боковой панели
+    const navLinks = document.querySelectorAll('.main-nav li a[data-section]');
+    
+    // Добавляем обработчики для каждой ссылки
+    navLinks.forEach(link => {
+        link.addEventListener('click', function(e) {
+            e.preventDefault();
+            
+            const section = this.getAttribute('data-section');
+            if (section) {
+                console.log(`Клик по секции: ${section}`);
+                switchSection(section);
+            }
+        });
+    });
+    
+    // Добавляем специальный обработчик для вкладки курсов
+    const coursesLink = document.querySelector('.main-nav li a[data-section="courses"]');
+    if (coursesLink) {
+        coursesLink.addEventListener('click', function(e) {
+            console.log('Клик по вкладке Курсы');
+            // Дополнительно вызываем событие для загрузки курсов, если это необходимо
+            emit('coursesTabActivated');
+        });
+    }
+}
+
+/**
+ * Настройка UI элементов
+ */
+function setupUI() {
+    // Добавляем пункт "Курсы" в боковое меню
+    const mainNav = document.querySelector('.main-nav ul');
+    
+    if (mainNav) {
+        // Ищем элемент, перед которым нужно вставить новый пункт
+        const progessMenuItem = mainNav.querySelector('li a[href="#"]');
+        
+        if (progessMenuItem) {
+            // Создаем новый пункт меню для курсов
+            const coursesMenuItem = document.createElement('li');
+            coursesMenuItem.innerHTML = '<a href="#" data-section="courses"><i class="fas fa-graduation-cap"></i> Курсы</a>';
+            
+            // Вставляем после пункта "Задания"
+            const tasksMenuItem = mainNav.querySelector('li:first-child');
+            tasksMenuItem.after(coursesMenuItem);
+            
+            // Добавляем атрибут data-section для существующих пунктов
+            mainNav.querySelector('li:first-child a').setAttribute('data-section', 'tasks');
+            progessMenuItem.setAttribute('data-section', 'progress');
+            
+            // Ищем и настраиваем остальные пункты меню
+            const theoryMenuItem = mainNav.querySelector('li:nth-child(4) a');
+            if (theoryMenuItem) {
+                theoryMenuItem.setAttribute('data-section', 'theory');
+            }
+            
+            const helpMenuItem = mainNav.querySelector('li:last-child a');
+            if (helpMenuItem) {
+                helpMenuItem.setAttribute('data-section', 'help');
+            }
+        }
+    }
 }
 
 // Реэкспорт функций из подмодулей для удобства использования
