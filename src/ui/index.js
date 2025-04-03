@@ -96,11 +96,10 @@ export function switchSection(section) {
             document.querySelector('.content-header h2').textContent = 'Задания по API';
             // Показываем контейнер заданий
             document.getElementById('tasks-container').style.display = 'grid';
-            // Скрываем контейнер курсов
-            const coursesContainerTasks = document.getElementById('courses-container');
-            if (coursesContainerTasks) {
-                coursesContainerTasks.style.display = 'none';
-            }
+            
+            // Скрываем другие контейнеры
+            hideContainer('courses-container');
+            hideContainer('course-details-container');
             break;
             
         case 'courses':
@@ -109,11 +108,12 @@ export function switchSection(section) {
             // Обновляем заголовок
             document.querySelector('.content-header h2').textContent = 'Курсы';
             
-            // Скрываем контейнер заданий
-            document.getElementById('tasks-container').style.display = 'none';
+            // Скрываем другие контейнеры
+            hideContainer('tasks-container');
+            hideContainer('course-details-container');
             
             // Показываем контейнер курсов, создаем его если не существует
-            const coursesContainer = document.getElementById('courses-container');
+            let coursesContainer = document.getElementById('courses-container');
             if (!coursesContainer) {
                 coursesContainer = document.createElement('div');
                 coursesContainer.id = 'courses-container';
@@ -129,6 +129,26 @@ export function switchSection(section) {
             emit('sectionChanged', 'courses');
             break;
             
+        case 'course-details':
+            // Показываем экран заданий (так как детали курса будут на том же экране)
+            switchScreen('tasks');
+            // Обновляем заголовок (будет меняться в зависимости от курса)
+            document.querySelector('.content-header h2').textContent = 'Детали курса';
+            
+            // Скрываем другие контейнеры
+            hideContainer('tasks-container');
+            hideContainer('courses-container');
+            
+            // Показываем контейнер деталей курса
+            let detailsContainer = document.getElementById('course-details-container');
+            if (detailsContainer) {
+                detailsContainer.style.display = 'block';
+            }
+            
+            // Генерируем событие о смене раздела
+            emit('sectionChanged', 'course-details');
+            break;
+            
         case 'progress':
             // Логика для раздела "Мой прогресс" будет добавлена позже
             break;
@@ -140,6 +160,17 @@ export function switchSection(section) {
         case 'help':
             // Логика для раздела "Помощь" будет добавлена позже
             break;
+    }
+}
+
+/**
+ * Скрывает контейнер по его ID, если он существует
+ * @param {string} containerId - ID контейнера
+ */
+function hideContainer(containerId) {
+    const container = document.getElementById(containerId);
+    if (container) {
+        container.style.display = 'none';
     }
 }
 

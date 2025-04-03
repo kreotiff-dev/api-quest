@@ -26,6 +26,7 @@ import * as taskList from './core/task-list.js';
 // Импорт модулей курсов
 import courseList from './courses/index.js';
 import courseRenderer from './courses/renderer.js';
+import courseDetails from './courses/details.js';
 
 // Переменные состояния приложения
 let currentTask = null;
@@ -475,6 +476,23 @@ export async function init() {
             if (coursesContainer) {
                 coursesContainer.style.display = 'grid';
             }
+        });
+        
+        // Обработка события просмотра деталей курса
+        events.on('viewCourseDetails', async (courseId) => {
+            console.log(`Просмотр деталей курса: ${courseId}`);
+            
+            // Переключаемся на экран деталей курса
+            ui.switchSection('course-details');
+            
+            // Загружаем детали курса
+            await courseDetails.loadCourse(courseId);
+        });
+        
+        // Обработка события возврата к списку курсов
+        events.on('backToCoursesList', () => {
+            console.log('Возврат к списку курсов');
+            ui.switchSection('courses');
         });
         
         // Если пользователь уже авторизован, загружаем курсы

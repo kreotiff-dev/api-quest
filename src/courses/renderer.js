@@ -275,6 +275,8 @@ class CourseRenderer {
       // Добавляем обработчик клика
       courseCard.addEventListener('click', () => {
         emit('courseSelected', { course, progress });
+        // Генерируем событие для перехода к деталям курса
+        emit('viewCourseDetails', course._id);
       });
       
       this.container.appendChild(courseCard);
