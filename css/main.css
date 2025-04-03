@@ -29,6 +29,7 @@
 @import url('./screens/workspace.css');
 @import url('./screens/courses.css');
 @import url('./screens/course-details.css');
+@import url('./screens/module-details.css');
 
 /* Модули приложения */
 @import url('./modules/api-client.css');

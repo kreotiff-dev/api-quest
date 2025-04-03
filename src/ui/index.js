@@ -138,6 +138,7 @@ export function switchSection(section) {
             // Скрываем другие контейнеры
             hideContainer('tasks-container');
             hideContainer('courses-container');
+            hideContainer('module-details-container');
             
             // Показываем контейнер деталей курса
             let detailsContainer = document.getElementById('course-details-container');
@@ -147,6 +148,27 @@ export function switchSection(section) {
             
             // Генерируем событие о смене раздела
             emit('sectionChanged', 'course-details');
+            break;
+            
+        case 'module-details':
+            // Показываем экран заданий (так как детали модуля будут на том же экране)
+            switchScreen('tasks');
+            // Обновляем заголовок
+            document.querySelector('.content-header h2').textContent = 'Детали модуля';
+            
+            // Скрываем другие контейнеры
+            hideContainer('tasks-container');
+            hideContainer('courses-container');
+            hideContainer('course-details-container');
+            
+            // Показываем контейнер деталей модуля
+            let moduleDetailsContainer = document.getElementById('module-details-container');
+            if (moduleDetailsContainer) {
+                moduleDetailsContainer.style.display = 'block';
+            }
+            
+            // Генерируем событие о смене раздела
+            emit('sectionChanged', 'module-details');
             break;
             
         case 'progress':

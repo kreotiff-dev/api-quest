@@ -28,6 +28,9 @@ import courseList from './courses/index.js';
 import courseRenderer from './courses/renderer.js';
 import courseDetails from './courses/details.js';
 
+// Импорт модулей для работы с модулями курсов
+import moduleDetails from './modules/details.js';
+
 // Переменные состояния приложения
 let currentTask = null;
 let currentScreen = 'tasks';
@@ -493,6 +496,47 @@ export async function init() {
         events.on('backToCoursesList', () => {
             console.log('Возврат к списку курсов');
             ui.switchSection('courses');
+        });
+        
+        // Обработка события открытия модуля курса
+        events.on('openCourseModule', async ({ courseId, moduleId }) => {
+            console.log(`Открытие модуля ${moduleId} курса ${courseId}`);
+            
+            // Переключаемся на экран деталей модуля
+            ui.switchSection('module-details');
+            
+            // Загружаем детали модуля
+            await moduleDetails.loadModule(moduleId, courseId);
+        });
+        
+        // Обработка события открытия задания из модуля
+        events.on('openModuleTask', async ({ moduleId, taskId }) => {
+            console.log(`Открытие задания ${taskId} из модуля ${moduleId}`);
+            
+            // Получаем задание из модуля
+            try {
+                const task = await tasks.loadTaskById(taskId);
+                if (!task) {
+                    ui.showNotification('Задание не найдено', 'error');
+                    return;
+                }
+                
+                // Устанавливаем текущее задание
+                setCurrentTask(task);
+                
+                // Переключаемся на экран рабочей области
+                ui.switchScreen('workspace');
+                
+                // Загружаем рабочую область с заданием
+                await tasks.loadTaskWorkspace(task);
+                
+                // Отмечаем задание как начатое
+                await tasks.updateTaskProgress(taskId, { started: true });
+                
+            } catch (error) {
+                console.error('Ошибка при загрузке задания:', error);
+                ui.showNotification('Не удалось загрузить задание', 'error');
+            }
         });
         
         // Если пользователь уже авторизован, загружаем курсы

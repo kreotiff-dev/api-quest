@@ -1,0 +1,369 @@
+/* 
+ * API-Quest - Стили для страницы деталей модуля
+ */
+
+.module-details {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-lg);
+}
+
+/* Заголовок модуля */
+.module-header-info {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md);
+  padding: var(--spacing-lg);
+  background-color: var(--color-card);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-md);
+}
+
+.module-title-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.module-main-title {
+  font-size: var(--font-size-xl);
+  font-weight: 700;
+  color: var(--color-text-primary);
+  margin: 0;
+}
+
+.module-difficulty {
+  display: inline-flex;
+  padding: var(--spacing-xs) var(--spacing-md);
+  border-radius: var(--radius-pill);
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+  color: white;
+}
+
+.module-difficulty.beginner {
+  background: linear-gradient(90deg, #43cea2 0%, #185a9d 100%);
+}
+
+.module-difficulty.intermediate {
+  background: linear-gradient(90deg, #f09819 0%, #edde5d 100%);
+}
+
+.module-difficulty.advanced {
+  background: linear-gradient(90deg, #ff512f 0%, #dd2476 100%);
+}
+
+.module-description {
+  color: var(--color-text-secondary);
+  line-height: 1.6;
+}
+
+/* Мета-информация о модуле */
+.module-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--spacing-md);
+  margin-top: var(--spacing-md);
+}
+
+.meta-item {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+  color: var(--color-text-tertiary);
+  font-size: var(--font-size-sm);
+}
+
+.meta-item i {
+  color: var(--color-primary);
+}
+
+/* Кнопки действий */
+.module-actions {
+  display: flex;
+  gap: var(--spacing-md);
+  margin-top: var(--spacing-md);
+}
+
+.module-btn {
+  padding: var(--spacing-sm) var(--spacing-lg);
+  border-radius: var(--radius-md);
+  font-weight: 600;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.module-btn.primary {
+  background-color: var(--color-primary);
+  color: white;
+  border: none;
+}
+
+.module-btn.primary:hover {
+  background-color: var(--color-primary-dark);
+}
+
+.module-btn.secondary {
+  background-color: var(--color-background);
+  color: var(--color-text-secondary);
+  border: 1px solid var(--color-border);
+}
+
+.module-btn.secondary:hover {
+  background-color: var(--color-border);
+}
+
+/* Прогресс модуля */
+.module-progress-block {
+  margin-top: var(--spacing-md);
+  padding-top: var(--spacing-md);
+  border-top: 1px solid var(--color-divider);
+}
+
+.progress-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--spacing-sm);
+}
+
+.progress-title {
+  font-weight: 600;
+  font-size: var(--font-size-md);
+  color: var(--color-text-primary);
+}
+
+.progress-percentage {
+  font-weight: 700;
+  color: var(--color-primary);
+}
+
+.progress-bar-container {
+  height: 8px;
+  background-color: var(--color-background);
+  border-radius: var(--radius-pill);
+  overflow: hidden;
+}
+
+.progress-bar-fill {
+  height: 100%;
+  background-color: var(--color-primary);
+  border-radius: var(--radius-pill);
+  transition: width 0.3s ease;
+}
+
+/* Секция заданий */
+.tasks-section {
+  margin-top: var(--spacing-lg);
+}
+
+.section-title {
+  font-size: var(--font-size-lg);
+  font-weight: 700;
+  color: var(--color-text-primary);
+  margin-bottom: var(--spacing-md);
+}
+
+.module-tasks-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md);
+}
+
+.module-task-card {
+  display: flex;
+  flex-direction: column;
+  background-color: var(--color-card);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-sm);
+  padding: var(--spacing-md);
+  transition: all var(--transition-fast);
+  cursor: pointer;
+  border-left: 4px solid var(--color-primary);
+}
+
+.module-task-card:hover {
+  box-shadow: var(--shadow-md);
+  transform: translateY(-2px);
+}
+
+.module-task-card.completed {
+  border-left-color: var(--color-success);
+}
+
+.module-task-card.in-progress {
+  border-left-color: var(--color-warning);
+}
+
+.module-task-card.locked {
+  border-left-color: var(--color-text-hint);
+  opacity: 0.7;
+}
+
+.module-task-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: var(--spacing-sm);
+}
+
+.module-task-title-area {
+  flex: 1;
+}
+
+.module-task-method {
+  display: inline-block;
+  padding: 3px 6px;
+  border-radius: var(--radius-sm);
+  font-size: var(--font-size-xs);
+  font-weight: 700;
+  margin-right: var(--spacing-xs);
+  color: white;
+  text-transform: uppercase;
+}
+
+.module-task-method.get {
+  background-color: var(--color-method-get);
+}
+
+.module-task-method.post {
+  background-color: var(--color-method-post);
+}
+
+.module-task-method.put {
+  background-color: var(--color-method-put);
+}
+
+.module-task-method.delete {
+  background-color: var(--color-method-delete);
+}
+
+.module-task-method.patch {
+  background-color: var(--color-method-patch);
+}
+
+.module-task-method.exercise {
+  background-color: #8e44ad;
+}
+
+.module-task-method.api {
+  background-color: #3498db;
+}
+
+.module-task-method.quiz {
+  background-color: #2ecc71;
+}
+
+.module-task-method.theory {
+  background-color: #f39c12;
+}
+
+.module-task-method.project {
+  background-color: #e74c3c;
+}
+
+.module-task-method.challenge {
+  background-color: #9b59b6;
+}
+
+.module-task-title {
+  font-weight: 600;
+  font-size: var(--font-size-md);
+  color: var(--color-text-primary);
+  margin: var(--spacing-xs) 0;
+}
+
+.module-task-subtitle {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+  margin: 0;
+}
+
+.module-task-status {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-left: var(--spacing-sm);
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  font-size: var(--font-size-sm);
+}
+
+.module-task-status.completed {
+  color: var(--color-success);
+}
+
+.module-task-status.in-progress {
+  color: var(--color-warning);
+}
+
+.module-task-status.locked {
+  color: var(--color-text-hint);
+}
+
+.module-task-info {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: var(--spacing-sm);
+}
+
+.module-task-tech-info {
+  color: var(--color-text-tertiary);
+  font-size: var(--font-size-xs);
+  font-family: monospace;
+  background-color: var(--color-background);
+  padding: 2px 6px;
+  border-radius: var(--radius-sm);
+}
+
+/* Навигация по курсу */
+.course-navigation {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--spacing-md);
+}
+
+.course-navigation-item {
+  display: flex;
+  align-items: center;
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-sm);
+  transition: all var(--transition-fast);
+}
+
+.course-navigation-item:hover {
+  color: var(--color-primary);
+}
+
+.course-navigation-item i {
+  margin-right: var(--spacing-xs);
+}
+
+/* Адаптивность */
+@media (max-width: 768px) {
+  .module-title-row {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--spacing-sm);
+  }
+  
+  .module-actions {
+    flex-direction: column;
+  }
+  
+  .module-meta {
+    flex-direction: column;
+    gap: var(--spacing-xs);
+  }
+  
+  .module-task-header {
+    flex-direction: column;
+  }
+  
+  .module-task-status {
+    margin: var(--spacing-xs) 0 0 0;
+  }
+}

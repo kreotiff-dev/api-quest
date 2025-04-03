@@ -42,6 +42,13 @@
   --gradient-put: linear-gradient(90deg, #fa709a 0%, #fee140 100%);
   --gradient-delete: linear-gradient(90deg, #f5576c 0%, #f093fb 100%);
   
+  /* Цвета для HTTP-методов */
+  --color-method-get: #4481eb;
+  --color-method-post: #43e97b;
+  --color-method-put: #fa709a;
+  --color-method-delete: #f5576c;
+  --color-method-patch: #9b59b6;
+  
   /* Размеры и отступы */
   --spacing-xs: 4px;
   --spacing-sm: 8px;

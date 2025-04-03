@@ -535,6 +535,110 @@ export function getTaskById(id) {
 }
 
 /**
+ * Загрузка задания по идентификатору с сервера
+ * @param {string} id - Идентификатор задания
+ * @returns {Promise<Object|null>} Промис с заданием или null
+ */
+export async function loadTaskById(id) {
+  try {
+    const token = localStorage.getItem('token');
+    if (!token) {
+      console.error('Ошибка: отсутствует токен авторизации');
+      showNotification('Необходима авторизация', 'error');
+      return null;
+    }
+    
+    const response = await fetch(`http://localhost:3000/api/tasks/${id}`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
+      }
+    });
+    
+    if (!response.ok) {
+      const error = await response.text();
+      throw new Error(`Ошибка при получении задания: ${response.status} ${error}`);
+    }
+    
+    const data = await response.json();
+    return data.data;
+  } catch (error) {
+    console.error('Ошибка при загрузке задания:', error);
+    return null;
+  }
+}
+
+/**
+ * Обновление прогресса по заданию
+ * @param {string} taskId - Идентификатор задания
+ * @param {Object} progressData - Данные о прогрессе
+ * @returns {Promise<Object|null>} Промис с обновленным прогрессом или null
+ */
+export async function updateTaskProgress(taskId, progressData) {
+  try {
+    const token = localStorage.getItem('token');
+    if (!token) {
+      console.error('Ошибка: отсутствует токен авторизации');
+      showNotification('Необходима авторизация', 'error');
+      return null;
+    }
+    
+    const response = await fetch(`http://localhost:3000/api/progress/tasks/${taskId}`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
+      },
+      body: JSON.stringify(progressData)
+    });
+    
+    if (!response.ok) {
+      const error = await response.text();
+      throw new Error(`Ошибка при обновлении прогресса: ${response.status} ${error}`);
+    }
+    
+    const data = await response.json();
+    return data.data;
+  } catch (error) {
+    console.error('Ошибка при обновлении прогресса задания:', error);
+    return null;
+  }
+}
+
+/**
+ * Загрузка рабочей области задания
+ * @param {Object} task - Задание
+ * @returns {Promise<void>}
+ */
+export async function loadTaskWorkspace(task) {
+  try {
+    // Обновляем заголовок задания
+    const taskTitle = document.querySelector('#workspace-screen .workspace-title');
+    if (taskTitle) {
+      taskTitle.textContent = task.title;
+    }
+    
+    // Обновляем описание задания
+    const taskDescription = document.querySelector('#workspace-screen .workspace-description');
+    if (taskDescription) {
+      taskDescription.innerHTML = task.description;
+    }
+    
+    // Настраиваем API клиент
+    // Например, заполняем значения по умолчанию
+    
+    // Генерируем событие загрузки рабочей области
+    eventBus.emit('workspaceLoaded', { task });
+    
+    return Promise.resolve();
+  } catch (error) {
+    console.error('Ошибка при загрузке рабочей области задания:', error);
+    return Promise.reject(error);
+  }
+}
+
+/**
  * Получение всех заданий
  * @returns {Array} Массив заданий
  */
@@ -546,6 +650,9 @@ export function getAllTasks() {
 export default {
   getCurrentTask,
   loadTasks,
+  loadTaskById,
+  updateTaskProgress,
+  loadTaskWorkspace,
   checkTaskCompletion,
   getHint,
   getTaskById,

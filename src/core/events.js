@@ -13,6 +13,9 @@ const onceHandlers = new Set();
 // Флаг для включения подробного логирования событий
 const ENABLE_DEBUG_LOGGING = true;
 
+// Включаем специальное подробное логирование для модулей
+const ENABLE_DETAILED_MODULE_LOGGING = true;
+
 /**
  * Подписка на событие
  * @param {string} eventName - Имя события

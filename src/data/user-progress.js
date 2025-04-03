@@ -328,6 +328,20 @@ export function resetUserProgress(confirmReset = false) {
     return true;
 }
 
+/**
+ * Получение всех заданий из внешнего модуля
+ * @returns {Array} Массив всех заданий
+ */
+export function getAllTasks() {
+    try {
+        // Пытаемся импортировать задания из модуля tasks
+        return window.allTasks || [];
+    } catch (error) {
+        console.error('Ошибка при получении всех заданий:', error);
+        return [];
+    }
+}
+
 export default {
     loadUserProgress,
     saveUserProgress,
@@ -342,5 +356,6 @@ export default {
     checkTasksUnlocking,
     getSavedSolution,
     saveSolution,
-    resetUserProgress
+    resetUserProgress,
+    getAllTasks
 };
