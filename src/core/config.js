@@ -85,12 +85,11 @@ export const APP_MODES = {
     // Настройки AI-ассистента
     aiAssistant: {
       enabled: true,
-      useExternalApi: false,
-      apiEndpoint: 'https://api.openai.com/v1/chat/completions',
+      useExternalApi: true,  // Теперь всегда используем внешний API через серверный прокси
+      apiEndpoint: '/api/ai/chat', // Локальный эндпоинт сервера
       modelName: 'gpt-3.5-turbo',
       maxTokens: 500,
       temperature: 0.7,
-      apiKey: '', // Ключ API будет задаваться в UI через безопасное хранилище
       requestTimeout: 10000,               // Таймаут запроса в мс
       minQuestionLength: 15,               // Минимальная длина для запроса ChatGPT
       fallbackToLocal: true                // Использовать локальные ответы при ошибке

@@ -10,45 +10,40 @@ const API_URL = 'https://api.openai.com/v1/chat/completions';
 const DEFAULT_MODEL = 'gpt-3.5-turbo';
 
 /**
- * Отправляет запрос к ChatGPT API
+ * Отправляет запрос к ChatGPT API через серверный прокси
  * @param {Array<Object>} messages - Массив сообщений для отправки
  * @param {Object} options - Дополнительные опции запроса
  * @returns {Promise<Object>} Ответ от API
  */
 export async function sendChatGptRequest(messages, options = {}) {
-    const apiKey = getConfigValue('aiAssistant.apiKey');
-    
-    if (!apiKey) {
-        throw new Error('API ключ для ChatGPT не настроен. Проверьте конфигурацию.');
-    }
-
-    const requestOptions = {
-        model: options.model || DEFAULT_MODEL,
-        messages: messages,
-        temperature: options.temperature || 0.7,
-        max_tokens: options.maxTokens || 500,
-        top_p: options.topP || 1,
-        frequency_penalty: options.frequencyPenalty || 0,
-        presence_penalty: options.presencePenalty || 0,
-    };
-
     try {
-        const response = await fetch(API_URL, {
+        // Используем серверный прокси вместо прямого вызова OpenAI API
+        const response = await fetch('/api/ai/chat', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
-                'Authorization': `Bearer ${apiKey}`
+                'Authorization': `Bearer ${localStorage.getItem('token')}`
             },
-            body: JSON.stringify(requestOptions)
+            body: JSON.stringify({
+                messages: messages,
+                options: {
+                    model: options.model || DEFAULT_MODEL,
+                    temperature: options.temperature || 0.7,
+                    maxTokens: options.maxTokens || 500,
+                    topP: options.topP || 1,
+                    frequencyPenalty: options.frequencyPenalty || 0,
+                    presencePenalty: options.presencePenalty || 0,
+                }
+            })
         });
 
         if (!response.ok) {
             const errorData = await response.json().catch(() => ({}));
-            throw new Error(`Ошибка API (${response.status}): ${errorData.error?.message || response.statusText}`);
+            throw new Error(`Ошибка API (${response.status}): ${errorData.error || response.statusText}`);
         }
 
         const data = await response.json();
-        return data;
+        return data.data; // Данные вложены в свойство data
     } catch (error) {
         console.error('Ошибка при обращении к ChatGPT API:', error);
         throw error;
