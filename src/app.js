@@ -565,8 +565,13 @@ export async function init() {
             авторизация: auth.isAuthenticated() ? 'выполнена' : 'не выполнена'
         });
 
-        // Инициализируем вкладку проверки
-        verification.initVerificationTab();
+        // Инициализация вкладки проверки временно отключена
+        // setTimeout(() => {
+        //     const success = verification.initVerificationTab();
+        //     if (!success) {
+        //         console.warn('Вкладка "Проверка" не инициализирована при старте приложения, будет инициализирована при переходе в задание');
+        //     }
+        // }, 500);
         
         // Генерируем событие инициализации
         events.emit('appInitialized');

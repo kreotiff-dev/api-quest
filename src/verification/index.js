@@ -21,53 +21,73 @@ let correctAnswers = null; // Будет заполнено из данных з
  * Инициализация вкладки "Проверка"
  */
 export function initVerificationTab() {
-  // Проверяем, что DOM загружен
-  if (!document.getElementById('multiple-choice-questions') || !document.getElementById('free-form-questions')) {
-    console.warn('Элементы для вкладки "Проверка" еще не загружены');
-    // Отложенная инициализация
-    setTimeout(initVerificationTab, 100);
-    return;
-  }
+  try {
+    // Проверяем, что DOM загружен и элементы существуют
+    const multipleChoiceContainer = document.getElementById('multiple-choice-questions');
+    const freeFormContainer = document.getElementById('free-form-questions');
+    
+    if (!multipleChoiceContainer || !freeFormContainer) {
+      console.warn('Элементы для вкладки "Проверка" еще не загружены');
+      return false; // Возвращаем false, чтобы показать, что инициализация не выполнена
+    }
 
-  // Получаем текущее задание
-  currentTask = getCurrentTask();
-  
-  // Инициализируем корректные ответы из данных задания
-  initCorrectAnswers();
-  generateQuestions();
-  
-  // Определяем режим ответа на основе флага в задании
-  if (currentTask && currentTask.verificationType) {
-      currentMode = currentTask.verificationType;
-  } else {
-      // По умолчанию используем режим с вариантами ответов
-      currentMode = 'multiple-choice';
+    // Получаем текущее задание
+    currentTask = getCurrentTask();
+    
+    if (!currentTask) {
+      console.warn('Текущее задание не найдено для вкладки "Проверка"');
+      return false;
+    }
+    
+    // Инициализируем корректные ответы из данных задания
+    initCorrectAnswers();
+    generateQuestions();
+    
+    // Определяем режим ответа на основе флага в задании
+    if (currentTask && currentTask.verificationType) {
+        currentMode = currentTask.verificationType;
+    } else {
+        // По умолчанию используем режим с вариантами ответов
+        currentMode = 'multiple-choice';
+    }
+    
+    // Отображаем соответствующий блок вопросов
+    multipleChoiceContainer.style.display = currentMode === 'multiple-choice' ? 'block' : 'none';
+    freeFormContainer.style.display = currentMode === 'free-form' ? 'block' : 'none';
+    
+    // Инициализируем кнопку проверки ответа, если она существует
+    const checkButton = document.getElementById('check-solution');
+    if (checkButton) {
+      console.log('Кнопка проверки ответа найдена и инициализирована');
+    }
+    
+    // Подписываемся на события изменения рабочей области, только если еще не подписаны
+    const alreadySubscribed = on('workspaceSetup', (task) => {
+        currentTask = task;
+        resetVerification();
+        initCorrectAnswers();
+        generateQuestions();
+        
+        // Обновляем режим при смене задания
+        if (task && task.verificationType) {
+            currentMode = task.verificationType;
+        } else {
+            currentMode = 'multiple-choice';
+        }
+        
+        // Отображаем соответствующий блок вопросов
+        if (document.getElementById('multiple-choice-questions') && document.getElementById('free-form-questions')) {
+            document.getElementById('multiple-choice-questions').style.display = currentMode === 'multiple-choice' ? 'block' : 'none';
+            document.getElementById('free-form-questions').style.display = currentMode === 'free-form' ? 'block' : 'none';
+        }
+    });
+    
+    console.log('Вкладка "Проверка" успешно инициализирована');
+    return true; // Возвращаем true, чтобы показать успешную инициализацию
+  } catch (error) {
+    console.error('Ошибка при инициализации вкладки "Проверка":', error);
+    return false;
   }
-  
-  // Отображаем соответствующий блок вопросов
-  document.getElementById('multiple-choice-questions').style.display = currentMode === 'multiple-choice' ? 'block' : 'none';
-  document.getElementById('free-form-questions').style.display = currentMode === 'free-form' ? 'block' : 'none';
-  
-  // Подписываемся на события изменения рабочей области
-  on('workspaceSetup', (task) => {
-      currentTask = task;
-      resetVerification();
-      initCorrectAnswers();
-      generateQuestions();
-      
-      // Обновляем режим при смене задания
-      if (task && task.verificationType) {
-          currentMode = task.verificationType;
-      } else {
-          currentMode = 'multiple-choice';
-      }
-      
-      // Отображаем соответствующий блок вопросов
-      document.getElementById('multiple-choice-questions').style.display = currentMode === 'multiple-choice' ? 'block' : 'none';
-      document.getElementById('free-form-questions').style.display = currentMode === 'free-form' ? 'block' : 'none';
-  });
-  
-  console.log('Вкладка "Проверка" инициализирована');
 }
 
 /**

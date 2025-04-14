@@ -212,13 +212,19 @@ function fillWorkspaceContent(task) {
         console.error('Ошибка при инициализации AI-ассистента:', error);
     });
     
-    // Инициализация вкладки проверки
-    import('../verification/index.js').then(module => {
-        module.default.initVerificationTab();
-        console.log('Вкладка "Проверка" инициализирована при загрузке задания');
-    }).catch(error => {
-        console.error('Ошибка при инициализации вкладки "Проверка":', error);
-    });
+    // Инициализация вкладки проверки с задержкой для загрузки DOM
+    setTimeout(() => {
+        import('../verification/index.js').then(module => {
+            const success = module.default.initVerificationTab();
+            if (success) {
+                console.log('Вкладка "Проверка" успешно инициализирована при загрузке задания');
+            } else {
+                console.warn('Не удалось инициализировать вкладку "Проверка" при загрузке задания, DOM не готов');
+            }
+        }).catch(error => {
+            console.error('Ошибка при инициализации вкладки "Проверка":', error);
+        });
+    }, 300); // Даем время для рендеринга DOM
 }
 
 // Функция для добавления заголовка и кнопки "Проверить решение"
@@ -516,14 +522,19 @@ function addEventHandlers() {
             if (checkSolutionBtn) {
                 // Если выбрана вкладка "Проверка", кнопка становится зеленой и использует модуль verification
                 if (this.dataset.tab === 'verification') {
-                    // Инициализируем вкладку проверки
-                    import('../verification/index.js').then(module => {
-                        // Инициализируем вкладку проверки
-                        module.default.initVerificationTab();
-                        console.log('Вкладка "Проверка" инициализирована при переключении');
-                    }).catch(error => {
-                        console.error('Ошибка при инициализации вкладки "Проверка":', error);
-                    });
+                    // Инициализируем вкладку проверки с небольшой задержкой для завершения рендеринга DOM
+                    setTimeout(() => {
+                        import('../verification/index.js').then(module => {
+                            const success = module.default.initVerificationTab();
+                            if (success) {
+                                console.log('Вкладка "Проверка" успешно инициализирована при переключении вкладки');
+                            } else {
+                                console.warn('Не удалось инициализировать вкладку "Проверка" при переключении, DOM не готов');
+                            }
+                        }).catch(error => {
+                            console.error('Ошибка при инициализации вкладки "Проверка":', error);
+                        });
+                    }, 100);
                     
                     // Меняем стиль кнопки на зеленый
                     checkSolutionBtn.className = 'btn btn-success';
