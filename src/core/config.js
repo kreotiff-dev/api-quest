@@ -86,7 +86,7 @@ export const APP_MODES = {
     aiAssistant: {
       enabled: true,
       useExternalApi: true,  // Теперь всегда используем внешний API через серверный прокси
-      apiEndpoint: '/api/ai/chat', // Локальный эндпоинт сервера
+      apiEndpoint: 'http://localhost:3000/api/ai/chat', // Полный URL для доступа к серверному прокси
       modelName: 'gpt-3.5-turbo',
       maxTokens: 500,
       temperature: 0.7,

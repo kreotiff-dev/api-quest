@@ -17,8 +17,11 @@ const DEFAULT_MODEL = 'gpt-3.5-turbo';
  */
 export async function sendChatGptRequest(messages, options = {}) {
     try {
+        // Получаем URL API из конфигурации
+        const apiEndpoint = getConfigValue('aiAssistant.apiEndpoint', 'http://localhost:3000/api/ai/chat');
+        
         // Используем серверный прокси вместо прямого вызова OpenAI API
-        const response = await fetch('/api/ai/chat', {
+        const response = await fetch(apiEndpoint, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
