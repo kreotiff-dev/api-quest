@@ -565,8 +565,8 @@ export async function init() {
             авторизация: auth.isAuthenticated() ? 'выполнена' : 'не выполнена'
         });
 
-        // Временно отключаем верификацию, так как она вызывает ошибки
-        // verification.initVerificationTab();
+        // Инициализируем вкладку проверки
+        verification.initVerificationTab();
         
         // Генерируем событие инициализации
         events.emit('appInitialized');

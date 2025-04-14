@@ -211,6 +211,14 @@ function fillWorkspaceContent(task) {
     }).catch(error => {
         console.error('Ошибка при инициализации AI-ассистента:', error);
     });
+    
+    // Инициализация вкладки проверки
+    import('../verification/index.js').then(module => {
+        module.default.initVerificationTab();
+        console.log('Вкладка "Проверка" инициализирована при загрузке задания');
+    }).catch(error => {
+        console.error('Ошибка при инициализации вкладки "Проверка":', error);
+    });
 }
 
 // Функция для добавления заголовка и кнопки "Проверить решение"
@@ -508,6 +516,15 @@ function addEventHandlers() {
             if (checkSolutionBtn) {
                 // Если выбрана вкладка "Проверка", кнопка становится зеленой и использует модуль verification
                 if (this.dataset.tab === 'verification') {
+                    // Инициализируем вкладку проверки
+                    import('../verification/index.js').then(module => {
+                        // Инициализируем вкладку проверки
+                        module.default.initVerificationTab();
+                        console.log('Вкладка "Проверка" инициализирована при переключении');
+                    }).catch(error => {
+                        console.error('Ошибка при инициализации вкладки "Проверка":', error);
+                    });
+                    
                     // Меняем стиль кнопки на зеленый
                     checkSolutionBtn.className = 'btn btn-success';
                     checkSolutionBtn.removeAttribute('title');
