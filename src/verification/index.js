@@ -390,15 +390,23 @@ async function checkAdvancedAnswer(userAnswer) {
         // 2. Пробуем получить из ответа последнего запроса
         else {
             try {
-                // Предполагается что у нас есть доступ к последнему ответу API
-                const lastResponse = window.apiQuestApp.getLastResponse(); // Это метод нужно будет реализовать
-                if (lastResponse && lastResponse.body) {
-                    apiResponse = typeof lastResponse.body === 'object'
-                        ? JSON.stringify(lastResponse.body, null, 2)
-                        : lastResponse.body;
+                // Получаем последний ответ из DOM - текста pre с ответом
+                const responseBodyElement = document.getElementById('response-body');
+                if (responseBodyElement && responseBodyElement.textContent) {
+                    const responseText = responseBodyElement.textContent.trim();
+                    if (responseText && responseText !== '[Нет содержимого]') {
+                        try {
+                            // Пробуем распарсить JSON
+                            const responseObj = JSON.parse(responseText);
+                            apiResponse = JSON.stringify(responseObj, null, 2);
+                        } catch {
+                            // Если не удалось распарсить, используем как текст
+                            apiResponse = responseText;
+                        }
+                    }
                 }
             } catch (e) {
-                console.warn("Не удалось получить последний ответ API:", e);
+                console.warn("Не удалось получить последний ответ API из DOM:", e);
             }
         }
         
@@ -627,15 +635,23 @@ async function generateAiFeedbackForMultipleChoice(userAnswers, result) {
         // 2. Пробуем получить из ответа последнего запроса
         else {
             try {
-                // Предполагается что у нас есть доступ к последнему ответу API
-                const lastResponse = window.apiQuestApp.getLastResponse(); // Это метод нужно будет реализовать
-                if (lastResponse && lastResponse.body) {
-                    apiResponse = typeof lastResponse.body === 'object'
-                        ? JSON.stringify(lastResponse.body, null, 2)
-                        : lastResponse.body;
+                // Получаем последний ответ из DOM - текста pre с ответом
+                const responseBodyElement = document.getElementById('response-body');
+                if (responseBodyElement && responseBodyElement.textContent) {
+                    const responseText = responseBodyElement.textContent.trim();
+                    if (responseText && responseText !== '[Нет содержимого]') {
+                        try {
+                            // Пробуем распарсить JSON
+                            const responseObj = JSON.parse(responseText);
+                            apiResponse = JSON.stringify(responseObj, null, 2);
+                        } catch {
+                            // Если не удалось распарсить, используем как текст
+                            apiResponse = responseText;
+                        }
+                    }
                 }
             } catch (e) {
-                console.warn("Не удалось получить последний ответ API:", e);
+                console.warn("Не удалось получить последний ответ API из DOM:", e);
             }
         }
         
