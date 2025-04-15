@@ -56,4 +56,5 @@
   flex: 1;
   padding: 20px;
   overflow-y: auto;
+  margin-left: var(--sidebar-width); /* Добавлен отступ слева, чтобы содержимое не перекрывалось сайдбаром */
 }

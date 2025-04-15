@@ -302,12 +302,7 @@
                             <p>Задайте вопрос по текущему заданию, и я постараюсь вам помочь.</p>
                         </div>
                         <div class="ai-message-container" id="ai-messages">
-                            <div class="ai-message system">
-                                <div class="ai-message-content">
-                                    <p>Я AI-ассистент, созданный для помощи с API запросами. Опишите, с чем вам помочь, и я постараюсь дать рекомендации по решению задачи.</p>
-                                </div>
-                                <div class="ai-message-time">сейчас</div>
-                            </div>
+                            <!-- Приветственное сообщение будет добавлено через JavaScript -->
                         </div>
                         <div class="ai-input-area">
                             <textarea id="ai-input" class="ai-input" placeholder="Опишите вашу проблему или задайте вопрос..." onkeydown="if(event.key === 'Enter' && !event.shiftKey) { event.preventDefault(); window.aiAssistantSendQuestion(); return false; }"></textarea>
@@ -325,6 +320,36 @@
 
     <!-- Контейнер уведомлений -->
     <div id="notifications-container"></div>
+    
+    <!-- Футер -->
+    <footer class="main-footer">
+        <div class="footer-content">
+            <div class="footer-logo">
+                <h2>API-Quest</h2>
+                <p>Платформа для обучения тестированию API</p>
+            </div>
+            <div class="footer-links">
+                <h3>Полезные ссылки</h3>
+                <ul>
+                    <li><a href="https://restfulapi.net/" target="_blank">REST API Tutorial</a></li>
+                    <li><a href="https://developer.mozilla.org/ru/docs/Web/HTTP" target="_blank">MDN Web Docs: HTTP</a></li>
+                    <li><a href="https://www.postman.com/api-documentation-tool/" target="_blank">Postman</a></li>
+                </ul>
+            </div>
+            <div class="footer-social">
+                <h3>Сообщество</h3>
+                <div class="social-icons">
+                    <a href="#" class="social-icon"><i class="fab fa-github"></i></a>
+                    <a href="#" class="social-icon"><i class="fab fa-telegram"></i></a>
+                    <a href="#" class="social-icon"><i class="fab fa-twitter"></i></a>
+                </div>
+            </div>
+        </div>
+        <div class="copyright">
+            <p>&copy; 2024 API-Quest. Все права защищены.</p>
+        </div>
+    </footer>
+    
     <script type="module" src="main.js"></script>
     <script type="module">
         // Инициализация AI ассистента при загрузке страницы
