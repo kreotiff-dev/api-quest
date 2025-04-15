@@ -1,0 +1,392 @@
+[
+  {
+    "taskId": "67eeca27379df7644b246e2d",
+    "title": "Тестирование CRUD операций",
+    "success": true,
+    "verification": {
+      "verificationQuestion": "Какие из перечисленных аспектов являются важными при тестировании POST запросов в RESTful API?",
+      "verificationOptions": [
+        {
+          "value": "requestStructure",
+          "label": "Структура тела запроса"
+        },
+        {
+          "value": "idempotency",
+          "label": "Идемпотентность"
+        },
+        {
+          "value": "dataValidation",
+          "label": "Валидация данных"
+        },
+        {
+          "value": "resourceUpdate",
+          "label": "Обновление ресурсов"
+        },
+        {
+          "value": "headers",
+          "label": "Заголовки запроса"
+        }
+      ],
+      "verification_answers": {
+        "beginnerAnswers": [
+          "requestStructure",
+          "dataValidation",
+          "headers"
+        ],
+        "advancedAnswerKeywords": [
+          "структура тела запроса",
+          "валидация данных",
+          "заголовки"
+        ]
+      }
+    }
+  },
+  {
+    "taskId": "67eeca27379df7644b246e2e",
+    "title": "Проверка валидации данных API",
+    "success": true,
+    "verification": {
+      "verificationQuestion": "Какие аспекты необходимо учесть при тестировании POST запроса в данном задании?",
+      "verificationOptions": [
+        {
+          "value": "jsonformat",
+          "label": "Тело запроса должно быть в формате JSON"
+        },
+        {
+          "value": "errorcodes",
+          "label": "API должен возвращать конкретные коды ошибок при отправке некорректных данных"
+        },
+        {
+          "value": "getmethod",
+          "label": "Необходимо использовать метод GET для отправки запроса"
+        },
+        {
+          "value": "headers",
+          "label": "Необходимо учесть заголовки запроса"
+        },
+        {
+          "value": "idempotence",
+          "label": "Запрос должен быть идемпотентным"
+        }
+      ],
+      "verification_answers": {
+        "beginnerAnswers": [
+          "jsonformat",
+          "errorcodes",
+          "headers"
+        ],
+        "advancedAnswerKeywords": [
+          "валидация",
+          "формат JSON",
+          "коды ошибок",
+          "заголовки"
+        ]
+      }
+    }
+  },
+  {
+    "taskId": "67eeca27379df7644b246e2f",
+    "title": "Создание тестовых сценариев для API",
+    "success": true,
+    "verification": {
+      "verificationQuestion": "Какие аспекты следует учесть при создании тестовых сценариев для API?",
+      "verificationOptions": [
+        {
+          "value": "positiveScenarios",
+          "label": "Позитивные сценарии"
+        },
+        {
+          "value": "negativeScenarios",
+          "label": "Негативные сценарии"
+        },
+        {
+          "value": "uiTesting",
+          "label": "Тестирование пользовательского интерфейса"
+        },
+        {
+          "value": "edgeCases",
+          "label": "Краевые случаи"
+        },
+        {
+          "value": "apiBehavior",
+          "label": "Поведение API в различных ситуациях"
+        }
+      ],
+      "verification_answers": {
+        "beginnerAnswers": [
+          "positiveScenarios",
+          "negativeScenarios",
+          "edgeCases",
+          "apiBehavior"
+        ],
+        "advancedAnswerKeywords": [
+          "позитивные сценарии",
+          "негативные сценарии",
+          "краевые случаи",
+          "поведение API"
+        ]
+      }
+    }
+  },
+  {
+    "taskId": "67eeca27379df7644b246e30",
+    "title": "Использование Postman для тестирования API",
+    "success": true,
+    "verification": {
+      "verificationQuestion": "Что из перечисленного ниже правильно отражает возможности и функциональность Postman для тестирования API?",
+      "verificationOptions": [
+        {
+          "value": "sendreq",
+          "label": "Postman позволяет отправлять и тестировать HTTP запросы"
+        },
+        {
+          "value": "valdata",
+          "label": "Postman позволяет осуществлять валидацию входящих данных"
+        },
+        {
+          "value": "createui",
+          "label": "Postman позволяет создавать пользовательский интерфейс для API"
+        },
+        {
+          "value": "testres",
+          "label": "Postman позволяет писать и запускать тесты для проверки ответов API"
+        },
+        {
+          "value": "codedep",
+          "label": "Postman позволяет развертывать код на сервере"
+        }
+      ],
+      "verification_answers": {
+        "beginnerAnswers": [
+          "sendreq",
+          "testres"
+        ],
+        "advancedAnswerKeywords": [
+          "HTTP запросы",
+          "тестирование ответов",
+          "валидация данных"
+        ]
+      }
+    }
+  },
+  {
+    "taskId": "67eeca27379df7644b246e31",
+    "title": "Автоматизация тестирования API",
+    "success": true,
+    "verification": {
+      "verificationQuestion": "Какие из приведенных утверждений верны для GET запроса в контексте задания 'Автоматизация тестирования API'?",
+      "verificationOptions": [
+        {
+          "value": "noBody",
+          "label": "GET запросы не могут иметь тела запроса"
+        },
+        {
+          "value": "queryParameters",
+          "label": "GET запросы могут содержать параметры запроса, передаваемые через URL"
+        },
+        {
+          "value": "idempotent",
+          "label": "GET запрос является идемпотентным"
+        },
+        {
+          "value": "usedForUpdate",
+          "label": "GET запросы обычно используются для обновления данных на сервере"
+        },
+        {
+          "value": "returnResource",
+          "label": "GET запросы обычно используются для получения данных с сервера"
+        }
+      ],
+      "verification_answers": {
+        "beginnerAnswers": [
+          "queryParameters",
+          "idempotent",
+          "returnResource"
+        ],
+        "advancedAnswerKeywords": [
+          "идемпотентность",
+          "параметры запроса",
+          "получение данных"
+        ]
+      }
+    }
+  },
+  {
+    "taskId": "67eeca27379df7644b246e32",
+    "title": "Проверка аутентификации и авторизации",
+    "success": true,
+    "verification": {
+      "verificationQuestion": "Какие аспекты важны при тестировании механизмов аутентификации и авторизации в API с использованием GET запроса для доступа к защищенным ресурсам?",
+      "verificationOptions": [
+        {
+          "value": "requestFormation",
+          "label": "Правильное формирование запроса, включая необходимые параметры"
+        },
+        {
+          "value": "tokenSecurity",
+          "label": "Безопасность использования токенов авторизации"
+        },
+        {
+          "value": "responseHandling",
+          "label": "Обработка ответа, включая обработку ошибок и статус-коды"
+        },
+        {
+          "value": "dataValidation",
+          "label": "Валидация данных в теле запроса"
+        },
+        {
+          "value": "idempotency",
+          "label": "Идемпотентность запроса"
+        }
+      ],
+      "verification_answers": {
+        "beginnerAnswers": [
+          "requestFormation",
+          "tokenSecurity",
+          "responseHandling"
+        ],
+        "advancedAnswerKeywords": [
+          "headers",
+          "authorization",
+          "status codes",
+          "security"
+        ]
+      }
+    }
+  },
+  {
+    "taskId": "67eeca27379df7644b246e33",
+    "title": "Тестирование на распространенные уязвимости API",
+    "success": false,
+    "error": "Task validation failed: difficulty: `expert` is not a valid enum value for path `difficulty`."
+  },
+  {
+    "taskId": "67eedfea4fc2e212d196c20a",
+    "title": "Базовый GET запрос",
+    "success": true,
+    "verification": {
+      "verificationQuestion": "Какие из перечисленных утверждений правильно описывают особенности GET запроса к API, на примере задания 'Базовый GET запрос'?",
+      "verificationOptions": [
+        {
+          "value": "getFormat",
+          "label": "GET запрос не содержит тела, все необходимые параметры передаются в URL"
+        },
+        {
+          "value": "getUpdate",
+          "label": "GET запрос может использоваться для обновления информации на сервере"
+        },
+        {
+          "value": "getResponse",
+          "label": "GET запрос предназначен для получения данных от сервера"
+        },
+        {
+          "value": "getAuth",
+          "label": "GET запрос всегда требует авторизации для доступа к данным"
+        },
+        {
+          "value": "getParams",
+          "label": "GET запрос может включать параметры запроса в URL для фильтрации или сортировки данных"
+        }
+      ],
+      "verification_answers": {
+        "beginnerAnswers": [
+          "getFormat",
+          "getResponse",
+          "getParams"
+        ],
+        "advancedAnswerKeywords": [
+          "GET",
+          "без тела запроса",
+          "получение данных",
+          "параметры в URL"
+        ]
+      }
+    }
+  },
+  {
+    "taskId": "67eedfea4fc2e212d196c20b",
+    "title": "Создание нового пользователя",
+    "success": true,
+    "verification": {
+      "verificationQuestion": "Какие из перечисленных аспектов важны при создании нового пользователя с помощью POST запроса и передачи данных в формате JSON?",
+      "verificationOptions": [
+        {
+          "value": "requestBody",
+          "label": "Правильное формирование тела запроса"
+        },
+        {
+          "value": "getUrl",
+          "label": "Получение URL для отправки GET запроса"
+        },
+        {
+          "value": "dataValidation",
+          "label": "Валидация отправляемых данных"
+        },
+        {
+          "value": "headersSetting",
+          "label": "Установка необходимых заголовков"
+        },
+        {
+          "value": "deleteCheck",
+          "label": "Проверка успешности удаления данных"
+        }
+      ],
+      "verification_answers": {
+        "beginnerAnswers": [
+          "requestBody",
+          "dataValidation",
+          "headersSetting"
+        ],
+        "advancedAnswerKeywords": [
+          "POST",
+          "JSON",
+          "валидация",
+          "заголовки"
+        ]
+      }
+    }
+  },
+  {
+    "taskId": "67eedfea4fc2e212d196c20c",
+    "title": "Фильтрация данных",
+    "success": true,
+    "verification": {
+      "verificationQuestion": "Что происходит при отправке запроса GET на URL \"/api/users?role=admin&limit=10\"?",
+      "verificationOptions": [
+        {
+          "value": "allUsers",
+          "label": "Возвращаются все пользователи, независимо от их роли и количества"
+        },
+        {
+          "value": "adminUsers",
+          "label": "Возвращаются только пользователи с ролью администратора"
+        },
+        {
+          "value": "limitUsers",
+          "label": "Возвращается ограниченное количество пользователей, независимо от их роли"
+        },
+        {
+          "value": "adminLimitUsers",
+          "label": "Возвращается ограниченное количество пользователей с ролью администратора"
+        },
+        {
+          "value": "error",
+          "label": "Возвращает ошибку, так как запрос не верно сформирован"
+        }
+      ],
+      "verification_answers": {
+        "beginnerAnswers": [
+          "adminLimitUsers"
+        ],
+        "advancedAnswerKeywords": [
+          "фильтрация",
+          "сортировка",
+          "параметры запроса",
+          "GET",
+          "ограничение",
+          "роль"
+        ]
+      }
+    }
+  }
+]

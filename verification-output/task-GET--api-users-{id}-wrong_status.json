@@ -1,0 +1,55 @@
+{
+  "title": "Проверка соответствия API документации и ответов API",
+  "description": "Выполните GET запрос к API эндпоинту /api/users/{id}, где {id} это ID пользователя. Сравните ответ API с документацией и найдите несоответствие.",
+  "solution": {
+    "method": "GET",
+    "url": "/api/users/1",
+    "headers": {},
+    "body": null
+  },
+  "mockResponse": {
+    "status": 400,
+    "headers": {
+      "content-type": "application/json"
+    },
+    "body": {
+      "id": 1,
+      "name": "John Doe",
+      "email": "john@example.com",
+      "role": "admin"
+    }
+  },
+  "verificationQuestion": "Какое несоответствие между документацией и фактическим ответом вы нашли?",
+  "verificationOptions": [
+    {
+      "value": "wrong_id",
+      "label": "Несоответствие ID пользователя в ответе и в запросе"
+    },
+    {
+      "value": "wrong_status",
+      "label": "Несоответствие статуса ответа и ожидаемого статуса в документации"
+    },
+    {
+      "value": "wrong_email",
+      "label": "Несоответствие email пользователя в ответе и в документации"
+    },
+    {
+      "value": "wrong_role",
+      "label": "Несоответствие роли пользователя в ответе и в документации"
+    },
+    {
+      "value": "no_error",
+      "label": "Никаких несоответствий не найдено"
+    }
+  ],
+  "verification_answers": {
+    "beginnerAnswers": [
+      "wrong_status"
+    ],
+    "advancedAnswerKeywords": [
+      "status",
+      "400",
+      "200"
+    ]
+  }
+}

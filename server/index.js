@@ -71,6 +71,7 @@ app.use('/api/courses', require('./routes/courses'));
 app.use('/api/modules', require('./routes/modules'));
 app.use('/api/tasks', require('./routes/tasks'));
 app.use('/api/progress', require('./routes/progress'));
+app.use('/api/dashboard', require('./routes/dashboard'));
 app.use('/api/ai', require('./routes/ai'));
 
 // Статические файлы для клиентской части

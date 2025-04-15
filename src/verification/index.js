@@ -39,6 +39,15 @@ export function initVerificationTab() {
       return false;
     }
     
+    // Диагностическое логирование
+    console.log('Текущее задание для верификации:', currentTask);
+    console.log('Параметры верификации:', {
+      verificationType: currentTask.verificationType,
+      verificationQuestion: currentTask.verificationQuestion,
+      verificationOptions: currentTask.verificationOptions,
+      verification_answers: currentTask.verification_answers
+    });
+    
     // Инициализируем корректные ответы из данных задания
     initCorrectAnswers();
     generateQuestions();
@@ -96,18 +105,19 @@ export function initVerificationTab() {
 function initCorrectAnswers() {
     if (!currentTask) return;
     
-    // В реальном приложении эти данные должны приходить из задания
-    // Здесь мы устанавливаем демонстрационные значения
+    // Берем данные только из задания в БД
     
     // Если в задании указаны verification_answers, используем их
     if (currentTask.verification_answers) {
         correctAnswers = currentTask.verification_answers;
+        console.log('Правильные ответы загружены из задания:', correctAnswers);
     } else {
-        // Демонстрационные данные для примера
+        // Базовые значения по умолчанию, если данных нет
         correctAnswers = {
-            beginnerAnswers: ['empty-fields', 'extra-field'],
-            advancedAnswerKeywords: ['пустые поля', 'значения не заполнены', 'createdAt', 'лишнее поле']
+            beginnerAnswers: ['correct'],
+            advancedAnswerKeywords: ['корректно', 'правильно', 'верно']
         };
+        console.log('Внимание: в задании отсутствуют данные о правильных ответах, используем значения по умолчанию');
     }
 }
 
@@ -123,30 +133,31 @@ function generateQuestions() {
       // Очищаем контейнер
       multipleChoiceQuestionsContainer.innerHTML = '';
       
-      // Создаем заголовок вопроса
+      // Создаем заголовок вопроса (используем вопрос из задания или стандартный)
       const questionTitle = document.createElement('div');
       questionTitle.className = 'question-title';
-      questionTitle.innerHTML = `<h4>${currentTask.verificationQuestion}</h4>`;
+      const questionText = currentTask.verificationQuestion || 'Проверьте правильность выполнения задания';
+      questionTitle.innerHTML = `<h4>${questionText}</h4>`;
       multipleChoiceQuestionsContainer.appendChild(questionTitle);
       
       // Создаем варианты ответов
       const answerOptions = document.createElement('div');
       answerOptions.className = 'answer-options';
       
-      // Предопределенные варианты ответов для этого типа заданий
-      const answerChoices = [
-          { value: 'missing-fields', label: 'Отсутствует поле age, которое должно быть согласно документации' },
-          { value: 'empty-fields', label: 'Пустые значения полей name, email и role' },
-          { value: 'wrong-status', label: 'Неверный статус-код ответа' },
-          { value: 'extra-field', label: 'Лишнее поле createdAt, не указанное в документации' },
-          { value: 'wrong-format', label: 'Неверный формат данных в полях' }
+      // Если в задании нет вариантов ответов, добавляем базовые заглушки
+      const defaultChoices = [
+          { value: 'correct', label: 'Запрос выполнен корректно' },
+          { value: 'incorrect_url', label: 'Неверный URL запроса' },
+          { value: 'incorrect_method', label: 'Неверный метод запроса' }
       ];
       
-      // Если в задании есть свои варианты ответов, используем их
-      const customAnswers = currentTask.verificationOptions || answerChoices;
+      // Используем только варианты ответов из БД, если их нет - показываем базовые
+      console.log('Варианты ответов из задания:', currentTask.verificationOptions);
+      const taskAnswers = currentTask.verificationOptions || defaultChoices;
+      console.log('Фактически используемые варианты ответов:', taskAnswers);
       
       // Генерируем HTML для каждого варианта ответа
-      customAnswers.forEach((answer, index) => {
+      taskAnswers.forEach((answer, index) => {
           const optionDiv = document.createElement('div');
           optionDiv.className = 'answer-option';
           
@@ -163,14 +174,15 @@ function generateQuestions() {
   
   // Контейнер для свободного ответа
   const freeFormQuestionsContainer = document.getElementById('free-form-questions');
-  if (freeFormQuestionsContainer && currentTask.verificationQuestion) {
+  if (freeFormQuestionsContainer) {
       // Очищаем контейнер
       freeFormQuestionsContainer.innerHTML = '';
       
-      // Создаем заголовок вопроса
+      // Создаем заголовок вопроса (используем вопрос из задания или стандартный)
       const questionTitle = document.createElement('div');
       questionTitle.className = 'question-title';
-      questionTitle.innerHTML = `<h4>${currentTask.verificationQuestion}</h4>`;
+      const questionText = currentTask.verificationQuestion || 'Проверьте правильность выполнения задания';
+      questionTitle.innerHTML = `<h4>${questionText}</h4>`;
       freeFormQuestionsContainer.appendChild(questionTitle);
       
       // Создаем поле для свободного ответа
@@ -186,8 +198,9 @@ function generateQuestions() {
 
 /**
  * Проверка ответа пользователя
+ * @export
  */
-async function checkAnswer() {
+export async function checkAnswer() {
     // Проверяем, не выполняется ли уже проверка
     if (verificationInProgress) {
         showNotification('Проверка уже выполняется. Пожалуйста, подождите.', 'info');
@@ -538,7 +551,7 @@ function performBasicKeywordCheck(userAnswer) {
     const lowerAnswer = userAnswer.toLowerCase();
     let foundKeywords = 0;
     const keywords = correctAnswers.advancedAnswerKeywords || 
-        ['пустые поля', 'значения не заполнены', 'createdAt', 'лишнее поле'];
+        ['корректно', 'правильно', 'верно'];
     
     // Подсчитываем количество найденных ключевых слов
     for (const keyword of keywords) {

@@ -1,0 +1,61 @@
+{
+  "title": "Проверка соответствия API эндпоинта документации",
+  "description": "Ваша задача - проверить, соответствует ли фактический ответ API документации. Для этого вам необходимо отправить POST запрос на эндпоинт /api/users с ожидаемым телом запроса, и сравнить ответ с указанным в документации. В ответе API внедрен тип ошибки/несоответствия: 'wrong_format'.",
+  "solution": {
+    "method": "POST",
+    "url": "/api/users",
+    "headers": {
+      "Content-Type": "application/json"
+    },
+    "body": {
+      "name": "John Doe",
+      "email": "john@example.com",
+      "password": "secret123",
+      "role": "user"
+    }
+  },
+  "mockResponse": {
+    "status": 201,
+    "headers": {
+      "Content-Type": "application/json"
+    },
+    "body": {
+      "id": 2,
+      "name": "John Doe",
+      "email": "john@example",
+      "role": "user"
+    }
+  },
+  "verificationQuestion": "Какое несоответствие вы обнаружили между документацией и фактическим ответом API?",
+  "verificationOptions": [
+    {
+      "value": "wrong_status",
+      "label": "Статус ответа не соответствует ожидаемому"
+    },
+    {
+      "value": "missing_field",
+      "label": "В ответе отсутствует ожидаемое поле"
+    },
+    {
+      "value": "wrong_format",
+      "label": "Формат данных в ответе не соответствует ожидаемому"
+    },
+    {
+      "value": "extra_field",
+      "label": "В ответе присутствует лишнее поле"
+    },
+    {
+      "value": "no_error",
+      "label": "Несоответствий не обнаружено"
+    }
+  ],
+  "verification_answers": {
+    "beginnerAnswers": [
+      "wrong_format"
+    ],
+    "advancedAnswerKeywords": [
+      "формат",
+      "email"
+    ]
+  }
+}

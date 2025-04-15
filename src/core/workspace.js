@@ -3,7 +3,7 @@
  * @module core/workspace
  */
 
-import { getTaskById, getDifficultyText, getCategoryText } from '../data/tasks.js';
+import { getDifficultyText, getCategoryText } from '../data/tasks.js';
 import { getUserProgress, updateTaskAttempt, markTaskAsCompleted, getSavedSolution, saveSolution } from '../data/user-progress.js';
 import { getCurrentTask } from '../app.js';
 import { showNotification } from '../ui/notifications.js';

@@ -222,15 +222,10 @@ class CourseRenderer {
         this.container = document.createElement('div');
         this.container.id = this.containerId;
         this.container.className = 'courses-grid';
-        this.container.style.display = 'none'; // Изначально скрыт
+        this.container.style.display = 'grid'; // Видим по умолчанию
         
-        // Добавляем после контейнера задач, если он есть
-        const tasksContainer = document.getElementById('tasks-container');
-        if (tasksContainer) {
-          tasksContainer.insertAdjacentElement('afterend', this.container);
-        } else {
-          mainContent.appendChild(this.container);
-        }
+        // Добавляем в main-content
+        mainContent.appendChild(this.container);
       }
     }
     

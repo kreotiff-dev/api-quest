@@ -17,38 +17,48 @@ export function showApiResponse(response) {
     // Получаем информацию о текущем источнике API
     const sourceInfo = getCurrentSourceInfo();
     
-    document.getElementById('response-meta').innerHTML = `
-        <span class="response-status ${statusClass}">${responseStatus}</span>
-        <span class="response-time">Время: ${Math.floor(Math.random() * 200 + 100)} мс</span>
-        <span class="response-source" title="${sourceInfo.description}">Источник: ${sourceInfo.name}</span>
-    `;
+    const responseMeta = document.getElementById('response-meta');
+    if (responseMeta) {
+        responseMeta.innerHTML = `
+            <span class="response-status ${statusClass}">${responseStatus}</span>
+            <span class="response-time">Время: ${Math.floor(Math.random() * 200 + 100)} мс</span>
+            <span class="response-source" title="${sourceInfo.description}">Источник: ${sourceInfo.name}</span>
+        `;
+    }
     
     // Заголовки ответа
-    if (response.headers) {
+    const responseHeaders = document.getElementById('response-headers');
+    if (responseHeaders && response.headers) {
         let headersText = '';
         
         for (const [key, value] of Object.entries(response.headers)) {
             headersText += `${key}: ${value}\n`;
         }
         
-        document.getElementById('response-headers').textContent = headersText;
+        responseHeaders.textContent = headersText;
     }
     
     // Тело ответа
-    if (response.body !== null && response.body !== undefined) {
-        try {
-            const formattedJson = JSON.stringify(response.body, null, 2);
-            document.getElementById('response-body').textContent = formattedJson;
-            highlightSyntax('response-body');
-        } catch (e) {
-            document.getElementById('response-body').textContent = String(response.body);
+    const responseBody = document.getElementById('response-body');
+    if (responseBody) {
+        if (response.body !== null && response.body !== undefined) {
+            try {
+                const formattedJson = JSON.stringify(response.body, null, 2);
+                responseBody.textContent = formattedJson;
+                highlightSyntax('response-body');
+            } catch (e) {
+                responseBody.textContent = String(response.body);
+            }
+        } else {
+            responseBody.textContent = '[Нет содержимого]';
         }
-    } else {
-        document.getElementById('response-body').textContent = '[Нет содержимого]';
     }
     
     // Активируем таб с телом ответа
-    document.querySelector('.response-tab[data-tab="body"]')?.click();
+    const bodyTab = document.querySelector('.response-tab[data-tab="body"]');
+    if (bodyTab) {
+        bodyTab.click();
+    }
 }
 
 /**

@@ -1,0 +1,47 @@
+{
+  "title": "Проверка соответствия API документации и фактического ответа",
+  "description": "Вашей задачей является отправить GET запрос на эндпоинт /api/users/{id}, где {id} - это целочисленный ID пользователя. Сравните ожидаемый ответ и фактический ответ API. Найдите несоответствие типа 'missing_field'.",
+  "solution": {
+    "method": "GET",
+    "url": "/api/users/1",
+    "headers": {},
+    "body": null
+  },
+  "mockResponse": {
+    "status": 200,
+    "headers": {},
+    "body": {
+      "id": 1,
+      "name": "John Doe",
+      "email": "john@example.com"
+    }
+  },
+  "verificationQuestion": "Какое поле отсутствует в фактическом ответе API по сравнению с ожидаемым ответом из документации?",
+  "verificationOptions": [
+    {
+      "value": "id",
+      "label": "Поле 'id'"
+    },
+    {
+      "value": "name",
+      "label": "Поле 'name'"
+    },
+    {
+      "value": "email",
+      "label": "Поле 'email'"
+    },
+    {
+      "value": "role",
+      "label": "Поле 'role'"
+    }
+  ],
+  "verification_answers": {
+    "beginnerAnswers": [
+      "role"
+    ],
+    "advancedAnswerKeywords": [
+      "отсутствует",
+      "role"
+    ]
+  }
+}

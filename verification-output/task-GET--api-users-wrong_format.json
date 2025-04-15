@@ -1,0 +1,62 @@
+{
+  "title": "Тестирование API /api/users",
+  "description": "В данном задании вам необходимо протестировать API эндпоинт /api/users, провести тестирование соответствия API документации и фактических ответов API. После выполнения запроса, сравните полученный ответ с ожидаемым результатом, указанным в документации. Внимательно проанализируйте ответ и найдите несоответствие.",
+  "solution": {
+    "method": "GET",
+    "url": "http://localhost/api/users",
+    "headers": {},
+    "body": null
+  },
+  "mockResponse": {
+    "status": 200,
+    "headers": {
+      "content-type": "application/json"
+    },
+    "body": {
+      "status": 200,
+      "body": {
+        "users": [
+          {
+            "id": "1",
+            "name": "John Doe",
+            "email": "john@example.com",
+            "role": "admin"
+          }
+        ]
+      }
+    }
+  },
+  "verificationQuestion": "Какое несоответствие вы нашли между документацией и фактическим ответом API?",
+  "verificationOptions": [
+    {
+      "value": "wrong_id_type",
+      "label": "Тип данных поля 'id' не соответствует документации"
+    },
+    {
+      "value": "wrong_status_code",
+      "label": "Статус-код ответа не соответствует ожидаемому"
+    },
+    {
+      "value": "missing_field",
+      "label": "В ответе отсутствует ожидаемое поле"
+    },
+    {
+      "value": "no_error",
+      "label": "Несоответствий не найдено"
+    },
+    {
+      "value": "extra_field",
+      "label": "В ответе присутствует дополнительное поле, которого быть не должно"
+    }
+  ],
+  "verification_answers": {
+    "beginnerAnswers": [
+      "wrong_id_type"
+    ],
+    "advancedAnswerKeywords": [
+      "тип данных",
+      "id",
+      "не соответствует"
+    ]
+  }
+}

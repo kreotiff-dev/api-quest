@@ -89,18 +89,59 @@ export function switchSection(section) {
     
     // Обрабатываем переключение контента в зависимости от раздела
     switch (section) {
-        case 'tasks':
-            // Показываем экран заданий
+        case 'dashboard':
+            // Показываем экран заданий (дашборд на этом экране)
             switchScreen('tasks');
             // Обновляем заголовок
-            document.querySelector('.content-header h2').textContent = 'Задания по API';
-            // Показываем контейнер заданий
-            document.getElementById('tasks-container').style.display = 'grid';
+            document.querySelector('.content-header h2').textContent = 'Мой дашборд';
+            
+            // Показываем дашборд, скрываем старые задания
+            const dashboardContainer = document.getElementById('dashboard-container');
+            const tasksLegacyUi = document.getElementById('tasks-legacy-ui');
+            
+            if (dashboardContainer) dashboardContainer.style.display = 'flex';
+            if (tasksLegacyUi) tasksLegacyUi.style.display = 'none';
             
             // Скрываем другие контейнеры
             hideContainer('courses-container');
             hideContainer('course-details-container');
+            hideContainer('module-details-container');
+            
+            // Инициализируем дашборд, если он еще не инициализирован
+            import('../dashboard/index.js').then(module => {
+                module.default.initDashboard();
+            });
+            
+            // Генерируем событие о смене раздела
+            emit('sectionChanged', 'dashboard');
             break;
+            
+        case 'tasks-legacy':
+            // Показываем экран заданий со старым интерфейсом
+            switchScreen('tasks');
+            // Обновляем заголовок
+            document.querySelector('.content-header h2').textContent = 'Задания по API (устаревшее)';
+            
+            // Скрываем дашборд, показываем старые задания
+            const dashboardContainerLegacy = document.getElementById('dashboard-container');
+            const tasksLegacyUiLegacy = document.getElementById('tasks-legacy-ui');
+            
+            if (dashboardContainerLegacy) dashboardContainerLegacy.style.display = 'none';
+            if (tasksLegacyUiLegacy) tasksLegacyUiLegacy.style.display = 'block';
+            
+            // Скрываем другие контейнеры
+            hideContainer('courses-container');
+            hideContainer('course-details-container');
+            hideContainer('module-details-container');
+            
+            // Генерируем событие о смене раздела
+            emit('sectionChanged', 'tasks-legacy');
+            break;
+            
+        case 'tasks':
+            // Для обратной совместимости - теперь это дашборд
+            switchSection('dashboard');
+            return; // Важно вернуться, чтобы избежать бесконечного цикла
             
         case 'courses':
             // Показываем экран заданий (так как курсы будут на том же экране)
@@ -109,8 +150,10 @@ export function switchSection(section) {
             document.querySelector('.content-header h2').textContent = 'Курсы';
             
             // Скрываем другие контейнеры
-            hideContainer('tasks-container');
+            hideContainer('dashboard-container');
+            hideContainer('tasks-legacy-ui');
             hideContainer('course-details-container');
+            hideContainer('module-details-container');
             
             // Показываем контейнер курсов, создаем его если не существует
             let coursesContainer = document.getElementById('courses-container');
@@ -119,14 +162,17 @@ export function switchSection(section) {
                 coursesContainer.id = 'courses-container';
                 coursesContainer.className = 'courses-grid';
                 
-                // Добавляем контейнер после контейнера заданий
-                document.getElementById('tasks-container').insertAdjacentElement('afterend', coursesContainer);
+                // Добавляем контейнер в main-content
+                document.querySelector('.main-content').appendChild(coursesContainer);
             }
             
             coursesContainer.style.display = 'grid';
             
             // Генерируем событие о смене раздела
             emit('sectionChanged', 'courses');
+            
+            // Генерируем событие для загрузки курсов
+            emit('coursesTabActivated');
             break;
             
         case 'course-details':
@@ -406,39 +452,113 @@ function setupEventListeners() {
  * Настройка UI элементов
  */
 function setupUI() {
-    // Добавляем пункт "Курсы" в боковое меню
-    const mainNav = document.querySelector('.main-nav ul');
+    // Не добавляем дополнительные пункты меню, так как они уже есть в HTML
     
-    if (mainNav) {
-        // Ищем элемент, перед которым нужно вставить новый пункт
-        const progessMenuItem = mainNav.querySelector('li a[href="#"]');
-        
-        if (progessMenuItem) {
-            // Создаем новый пункт меню для курсов
-            const coursesMenuItem = document.createElement('li');
-            coursesMenuItem.innerHTML = '<a href="#" data-section="courses"><i class="fas fa-graduation-cap"></i> Курсы</a>';
+    // Добавляем обработчики для приветственного экрана для неавторизованных пользователей
+    setupWelcomeScreen();
+}
+
+/**
+ * Настройка приветственного экрана для неавторизованных пользователей
+ */
+function setupWelcomeScreen() {
+    // Создаем контент для неавторизованных пользователей
+    const dashboardContainer = document.getElementById('dashboard-container');
+    if (dashboardContainer) {
+        // Мы отобразим приветственный экран, если пользователь не авторизован
+        if (!localStorage.getItem('token')) {
+            dashboardContainer.innerHTML = `
+                <div class="welcome-screen">
+                    <h1>Добро пожаловать в API Практикум!</h1>
+                    <div class="welcome-content">
+                        <div class="welcome-image">
+                            <i class="fas fa-code fa-5x"></i>
+                        </div>
+                        <div class="welcome-text">
+                            <p>Изучайте и практикуйтесь в работе с различными API.</p>
+                            <p>Благодаря нашей платформе вы сможете:</p>
+                            <ul>
+                                <li>Изучить основы работы с REST API</li>
+                                <li>Выполнять практические задания</li>
+                                <li>Получить мгновенную обратную связь</li>
+                                <li>Отслеживать свой прогресс</li>
+                            </ul>
+                            <p>Авторизуйтесь, чтобы начать обучение!</p>
+                        </div>
+                    </div>
+                </div>
+            `;
             
-            // Вставляем после пункта "Задания"
-            const tasksMenuItem = mainNav.querySelector('li:first-child');
-            tasksMenuItem.after(coursesMenuItem);
-            
-            // Добавляем атрибут data-section для существующих пунктов
-            mainNav.querySelector('li:first-child a').setAttribute('data-section', 'tasks');
-            progessMenuItem.setAttribute('data-section', 'progress');
-            
-            // Ищем и настраиваем остальные пункты меню
-            const theoryMenuItem = mainNav.querySelector('li:nth-child(4) a');
-            if (theoryMenuItem) {
-                theoryMenuItem.setAttribute('data-section', 'theory');
-            }
-            
-            const helpMenuItem = mainNav.querySelector('li:last-child a');
-            if (helpMenuItem) {
-                helpMenuItem.setAttribute('data-section', 'help');
-            }
+            // Добавляем стили для welcome-screen
+            const style = document.createElement('style');
+            style.textContent = `
+                .welcome-screen {
+                    background-color: var(--color-card-bg);
+                    border-radius: var(--border-radius);
+                    padding: 2rem;
+                    box-shadow: var(--box-shadow-light);
+                    text-align: center;
+                    max-width: 800px;
+                    margin: 0 auto;
+                }
+                
+                .welcome-screen h1 {
+                    margin-bottom: 2rem;
+                    color: var(--color-primary);
+                }
+                
+                .welcome-content {
+                    display: flex;
+                    flex-direction: column;
+                    align-items: center;
+                    gap: 2rem;
+                }
+                
+                @media (min-width: 768px) {
+                    .welcome-content {
+                        flex-direction: row;
+                        text-align: left;
+                    }
+                }
+                
+                .welcome-image {
+                    display: flex;
+                    justify-content: center;
+                    align-items: center;
+                    padding: 2rem;
+                    background-color: var(--color-bg-light);
+                    border-radius: 50%;
+                    color: var(--color-primary);
+                }
+                
+                .welcome-text {
+                    flex: 1;
+                }
+                
+                .welcome-text ul {
+                    list-style: none;
+                    padding-left: 0;
+                    margin: 1rem 0;
+                }
+                
+                .welcome-text ul li {
+                    position: relative;
+                    padding-left: 1.5rem;
+                    margin-bottom: 0.5rem;
+                }
+                
+                .welcome-text ul li:before {
+                    content: "✓";
+                    color: var(--color-success);
+                    position: absolute;
+                    left: 0;
+                    font-weight: bold;
+                }
+            `;
+            document.head.appendChild(style);
         }
     }
 }
 
 // Реэкспорт функций из подмодулей для удобства использования
-export { showNotification, toggleLoadingIndicator };
+export { showNotification, toggleLoadingIndicator, hideContainer };

@@ -1,0 +1,58 @@
+{
+  "title": "Проверка соответствия API документации",
+  "description": "Вам предстоит проверить, соответствует ли ответ API его документации. Вы должны отправить GET запрос на эндпоинт /api/users и сравнить ответ с ожидаемым. Обратите внимание на тип ошибки/несоответствия: 'extra_field'.",
+  "solution": {
+    "method": "GET",
+    "url": "/api/users",
+    "headers": {},
+    "body": null
+  },
+  "mockResponse": {
+    "status": 200,
+    "headers": {},
+    "body": {
+      "users": [
+        {
+          "id": 1,
+          "name": "John Doe",
+          "email": "john@example.com",
+          "role": "admin",
+          "age": 30
+        }
+      ]
+    }
+  },
+  "verificationQuestion": "Какое несоответствие вы обнаружили между ответом API и его документацией?",
+  "verificationOptions": [
+    {
+      "value": "wrong_status",
+      "label": "Статус ответа не соответствует документации"
+    },
+    {
+      "value": "extra_field",
+      "label": "В ответе присутствует дополнительное поле, которого не было в документации"
+    },
+    {
+      "value": "missing_field",
+      "label": "В ответе отсутствует поле, которое было в документации"
+    },
+    {
+      "value": "wrong_data_type",
+      "label": "Тип данных одного из полей не соответствует документации"
+    },
+    {
+      "value": "no_error",
+      "label": "Ответ полностью соответствует документации"
+    }
+  ],
+  "verification_answers": {
+    "beginnerAnswers": [
+      "extra_field"
+    ],
+    "advancedAnswerKeywords": [
+      "extra",
+      "field",
+      "age"
+    ]
+  }
+}

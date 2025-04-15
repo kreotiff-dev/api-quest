@@ -3,12 +3,13 @@
  * @module core/tasks
  */
 import taskList from '../tasks/index.js';
-import { tasks as tasksData } from '../data/tasks.js';
+import { loadTasks as loadTasksFromAPI } from '../data/tasks.js';
 import eventBus from './events.js';
 import * as taskListUI from './task-list.js';
 import { getUserProgress, markTaskAsCompleted } from '../data/user-progress.js';
 import { sendRequest, getCurrentSourceInfo } from '../api/sources/index.js';
 import { showNotification } from '../ui/notifications.js';
+import { addHeaderRow } from '../api/client/ui.js';
 
 /**
  * Получение текущего задания
@@ -24,9 +25,12 @@ export function getCurrentTask() {
  */
 export async function loadTasks() {
   try {
-    // Загружаем задания из модуля данных
-    taskList.loadTasks(tasksData);
-    console.log(`Загружено ${tasksData.length} заданий`);
+    // Загружаем задания из БД через API
+    const tasks = await loadTasksFromAPI();
+    
+    // Загружаем задания в модуль
+    taskList.loadTasks(tasks);
+    console.log(`Загружено ${tasks.length} заданий из БД`);
     
     // Подписываемся на событие загрузки заданий для их отображения
     eventBus.on('tasksLoaded', (tasks) => {
@@ -613,23 +617,139 @@ export async function updateTaskProgress(taskId, progressData) {
  */
 export async function loadTaskWorkspace(task) {
   try {
+    console.log('Загрузка рабочей области для задания:', task);
+    
     // Обновляем заголовок задания
-    const taskTitle = document.querySelector('#workspace-screen .workspace-title');
+    const taskTitle = document.querySelector('.workspace-title');
     if (taskTitle) {
       taskTitle.textContent = task.title;
+    } else {
+      console.warn('Элемент заголовка задания не найден');
     }
     
     // Обновляем описание задания
-    const taskDescription = document.querySelector('#workspace-screen .workspace-description');
+    const taskDescription = document.querySelector('.workspace-description');
     if (taskDescription) {
-      taskDescription.innerHTML = task.description;
+      taskDescription.innerHTML = task.description || 'Описание задания отсутствует';
+    } else {
+      console.warn('Элемент описания задания не найден');
+    }
+    
+    // Обновляем полное описание задания на вкладке "Описание"
+    const taskDocumentation = document.querySelector('.task-documentation');
+    if (taskDocumentation) {
+      taskDocumentation.innerHTML = task.fullDescription || task.description || 'Полное описание задания отсутствует';
+    }
+    
+    // Отображаем примеры запросов, если они есть
+    const examplesContainer = document.querySelector('.examples-container');
+    if (examplesContainer && task.examples && task.examples.length > 0) {
+      let examplesHTML = '';
+      
+      task.examples.forEach((example, index) => {
+        examplesHTML += `
+          <div class="example-item">
+            <h5>Пример ${index + 1}</h5>
+            <div class="example-request">
+              <div class="example-header">
+                <span class="example-method">${example.method || 'GET'}</span>
+                <span class="example-url">${example.url || ''}</span>
+              </div>
+              ${example.body ? `
+                <pre class="example-body">${JSON.stringify(example.body, null, 2)}</pre>
+              ` : ''}
+            </div>
+            ${example.response ? `
+              <div class="example-response">
+                <div class="example-header">
+                  <span class="example-status">Статус: ${example.response.status || 200}</span>
+                </div>
+                <pre class="example-body">${JSON.stringify(example.response.body, null, 2)}</pre>
+              </div>
+            ` : ''}
+          </div>
+        `;
+      });
+      
+      examplesContainer.innerHTML = examplesHTML;
+    }
+    
+    // Настраиваем вкладку проверки, если есть верификационные данные
+    const verificationIframe = document.getElementById('verification-iframe');
+    if (verificationIframe && task.verification) {
+      // Устанавливаем src для iframe или загружаем контент динамически
+      if (task.verification.url) {
+        verificationIframe.src = task.verification.url;
+      }
     }
     
     // Настраиваем API клиент
-    // Например, заполняем значения по умолчанию
+    if (task.initialRequest) {
+      // Устанавливаем начальные значения для запроса, если они указаны в задании
+      const { method, url, headers, body } = task.initialRequest;
+      
+      // Устанавливаем метод
+      const methodSelect = document.getElementById('request-method');
+      if (methodSelect && method) {
+        methodSelect.value = method;
+      }
+      
+      // Устанавливаем URL
+      const urlInput = document.getElementById('request-url');
+      if (urlInput && url) {
+        urlInput.value = url;
+      }
+      
+      // Очищаем и добавляем заголовки
+      const headersContainer = document.getElementById('headers-container');
+      if (headersContainer) {
+        headersContainer.innerHTML = '';
+        
+        if (headers && typeof headers === 'object') {
+          for (const [key, value] of Object.entries(headers)) {
+            addHeaderRow(key, value);
+          }
+        }
+        
+        // Добавляем пустую строку для новых заголовков
+        addHeaderRow();
+      }
+      
+      // Устанавливаем тело запроса
+      const bodyTextarea = document.getElementById('request-body');
+      if (bodyTextarea && body) {
+        try {
+          bodyTextarea.value = JSON.stringify(body, null, 2);
+        } catch (e) {
+          bodyTextarea.value = '';
+          console.warn('Ошибка при форматировании тела запроса:', e);
+        }
+      }
+    } else {
+      // Если начальные значения не указаны, просто добавляем пустую строку для заголовков
+      const headersContainer = document.getElementById('headers-container');
+      if (headersContainer) {
+        headersContainer.innerHTML = '';
+        addHeaderRow();
+      }
+    }
+    
+    // Инициализируем вкладку проверки
+    try {
+      // Динамически импортируем модуль verification
+      import('../verification/index.js').then(verification => {
+        verification.default.initVerificationTab();
+        console.log('Вкладка "Проверка" инициализирована при загрузке задания');
+      }).catch(error => {
+        console.error('Ошибка при инициализации вкладки "Проверка":', error);
+      });
+    } catch (error) {
+      console.warn('Не удалось инициализировать вкладку "Проверка":', error);
+    }
     
     // Генерируем событие загрузки рабочей области
     eventBus.emit('workspaceLoaded', { task });
+    eventBus.emit('workspaceSetup', task);
     
     return Promise.resolve();
   } catch (error) {

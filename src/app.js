@@ -23,6 +23,9 @@ import * as config from './core/config.js';
 import * as tasks from './core/tasks.js';
 import * as taskList from './core/task-list.js';
 
+// Импорт модуля дашборда
+import dashboard from './dashboard/index.js';
+
 // Импорт модулей курсов
 import courseList from './courses/index.js';
 import courseRenderer from './courses/renderer.js';
@@ -103,6 +106,9 @@ function setupEventListeners() {
     
     // Кнопка проверки задания
     document.getElementById('check-solution')?.addEventListener('click', tasks.checkTaskCompletion);
+    
+    // Кнопка проверки ответа на вкладке "Проверка"
+    document.getElementById('submit-verification')?.addEventListener('click', verification.checkAnswer);
     
     // Кнопка запроса подсказки
     document.getElementById('open-hints')?.addEventListener('click', tasks.getHint);
@@ -460,19 +466,25 @@ export async function init() {
         // Загрузка задач и прогресса
         await tasks.loadTasks();
         
-        // Загрузка курсов
+        // Загрузка курсов и инициализация дашборда
         events.on('auth:authenticated', () => {
+            // Инициализируем дашборд
+            dashboard.initDashboard();
+            
             // Загружаем курсы после авторизации
             loadCourses();
         });
         
+        // Добавляем отображение welcome-screen для неавторизованных пользователей
+        if (!auth.isAuthenticated()) {
+            ui.switchSection('dashboard');
+        }
+        
         // Загружаем курсы при активации вкладки курсов
         events.on('coursesTabActivated', () => {
             console.log('Обработка события активации вкладки курсов');
-            // Перезагружаем курсы при необходимости
-            if (courseList.courses.length === 0) {
-                loadCourses();
-            }
+            // Всегда перезагружаем курсы при активации вкладки
+            loadCourses();
             
             // Показываем контейнер с курсами
             const coursesContainer = document.getElementById('courses-container');
@@ -550,12 +562,14 @@ export async function init() {
         // Инициализация фильтров списка заданий
         taskList.initFilters();
         
-        // Ручной вызов отрисовки списка заданий
-        taskList.renderTaskList();
-        
         // Проверка состояния авторизации теперь безопасна,
         // т.к. мы дождались результата auth.initAuth()
         checkAuthState();
+        
+        // Если пользователь авторизован, инициализируем дашборд
+        if (auth.isAuthenticated()) {
+            dashboard.initDashboard();
+        }
         
         // Отображаем информацию о приложении в консоли
         console.log('API-Quest инициализирован', {
@@ -565,13 +579,13 @@ export async function init() {
             авторизация: auth.isAuthenticated() ? 'выполнена' : 'не выполнена'
         });
 
-        // Инициализация вкладки проверки временно отключена
-        // setTimeout(() => {
-        //     const success = verification.initVerificationTab();
-        //     if (!success) {
-        //         console.warn('Вкладка "Проверка" не инициализирована при старте приложения, будет инициализирована при переходе в задание');
-        //     }
-        // }, 500);
+        // Инициализация вкладки проверки
+        setTimeout(() => {
+            const success = verification.initVerificationTab();
+            if (!success) {
+                console.warn('Вкладка "Проверка" не инициализирована при старте приложения, будет инициализирована при переходе в задание');
+            }
+        }, 500);
         
         // Генерируем событие инициализации
         events.emit('appInitialized');

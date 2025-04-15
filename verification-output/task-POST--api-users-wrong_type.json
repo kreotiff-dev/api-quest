@@ -1,0 +1,61 @@
+{
+  "title": "Тестирование API: Проверка соответствия документации и ответов API",
+  "description": "Ваша задача - выполнить POST запрос на эндпоинт '/api/users' для создания нового пользователя. Проверьте соответствие ответа API его документации. В ответе API внедрена ошибка типа 'wrong_type'. Определите, в чем заключается эта ошибка.",
+  "solution": {
+    "method": "POST",
+    "url": "/api/users",
+    "headers": {
+      "Content-Type": "application/json"
+    },
+    "body": {
+      "name": "John Doe",
+      "email": "john@example.com",
+      "password": "secret123",
+      "role": "user"
+    }
+  },
+  "mockResponse": {
+    "status": 201,
+    "headers": {},
+    "body": {
+      "id": "2",
+      "name": "John Doe",
+      "email": "john@example.com",
+      "role": "user"
+    }
+  },
+  "verificationQuestion": "В чем заключается ошибка 'wrong_type' в ответе API?",
+  "verificationOptions": [
+    {
+      "value": "wrong_method",
+      "label": "Использован неправильный метод запроса"
+    },
+    {
+      "value": "wrong_endpoint",
+      "label": "Неправильный эндпоинт"
+    },
+    {
+      "value": "wrong_id_type",
+      "label": "Тип 'id' в ответе должен быть числом, а не строкой"
+    },
+    {
+      "value": "missing_parameter",
+      "label": "Отсутствует обязательный параметр в запросе"
+    },
+    {
+      "value": "extra_parameter",
+      "label": "В запросе присутствует лишний параметр"
+    }
+  ],
+  "verification_answers": {
+    "beginnerAnswers": [
+      "wrong_id_type"
+    ],
+    "advancedAnswerKeywords": [
+      "id",
+      "тип",
+      "строка",
+      "число"
+    ]
+  }
+}

@@ -191,6 +191,24 @@ const TaskSchema = new mongoose.Schema({
     timeInMinutes: Number, // время в минутах, после которого станет доступна подсказка
     hintIndex: Number // индекс подсказки, которая станет доступна
   }],
+  // Поля для верификации
+  verificationType: {
+    type: String,
+    enum: ['multiple-choice', 'free-form'],
+    default: 'multiple-choice'
+  },
+  verificationQuestion: {
+    type: String,
+    default: 'Какие проблемы или нарушения спецификации вы видите в ответе API?'
+  },
+  verificationOptions: [{
+    value: String,
+    label: String
+  }],
+  verification_answers: {
+    beginnerAnswers: [String],
+    advancedAnswerKeywords: [String]
+  },
   createdAt: {
     type: Date,
     default: Date.now

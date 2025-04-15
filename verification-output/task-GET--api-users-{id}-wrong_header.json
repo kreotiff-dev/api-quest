@@ -1,0 +1,55 @@
+{
+  "title": "Проверка соответствия API документации",
+  "description": "Согласно документации, эндпоинт /api/users/{id} должен возвращать данные пользователя по его ID. Ваша задача - отправить запрос на этот эндпоинт и сравнить фактический ответ с ожидаемым. Ответ должен содержать информацию о пользователе с указанным ID, но в нем внедрена ошибка 'wrong_header'. Найдите несоответствие между документацией и фактическим ответом.",
+  "solution": {
+    "method": "GET",
+    "url": "/api/users/1",
+    "headers": {},
+    "body": null
+  },
+  "mockResponse": {
+    "status": 200,
+    "headers": {
+      "content-type": "application/xml"
+    },
+    "body": {
+      "id": 1,
+      "name": "John Doe",
+      "email": "john@example.com",
+      "role": "admin"
+    }
+  },
+  "verificationQuestion": "Какое несоответствие между документацией и фактическим ответом вы обнаружили?",
+  "verificationOptions": [
+    {
+      "value": "wrong_status",
+      "label": "Статус ответа отличается от ожидаемого"
+    },
+    {
+      "value": "missing_field",
+      "label": "Ответ не содержит всех необходимых полей"
+    },
+    {
+      "value": "extra_field",
+      "label": "Ответ содержит дополнительные поля, не указанные в документации"
+    },
+    {
+      "value": "wrong_header",
+      "label": "Заголовок ответа не соответствует ожидаемому"
+    },
+    {
+      "value": "wrong_id",
+      "label": "ID пользователя в ответе не соответствует запрашиваемому"
+    }
+  ],
+  "verification_answers": {
+    "beginnerAnswers": [
+      "wrong_header"
+    ],
+    "advancedAnswerKeywords": [
+      "заголовок",
+      "header",
+      "content-type"
+    ]
+  }
+}

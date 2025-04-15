@@ -60,9 +60,13 @@ export async function sendApiRequest() {
     };
     
     // Добавляем индикатор загрузки
-    document.getElementById('response-meta').innerHTML = '<div class="loading-spinner"></div>';
-    document.getElementById('response-body').textContent = 'Загрузка...';
-    document.getElementById('response-headers').textContent = '';
+    const responseMeta = document.getElementById('response-meta');
+    const responseBody = document.getElementById('response-body');
+    const responseHeaders = document.getElementById('response-headers');
+    
+    if (responseMeta) responseMeta.innerHTML = '<div class="loading-spinner"></div>';
+    if (responseBody) responseBody.textContent = 'Загрузка...';
+    if (responseHeaders) responseHeaders.textContent = '';
     
     try {
         // Отправляем запрос через ApiSourceManager

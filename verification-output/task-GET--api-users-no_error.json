@@ -1,0 +1,58 @@
+{
+  "title": "Проверка соответствия ответа API документации",
+  "description": "Ваша задача - отправить GET запрос на эндпоинт /api/users и сравнить полученный ответ с ожидаемым, описанным в документации. Обратите внимание на структуру и содержание ответа. Соответствует ли он документации?",
+  "solution": {
+    "method": "GET",
+    "url": "/api/users",
+    "headers": {},
+    "body": null
+  },
+  "mockResponse": {
+    "status": 200,
+    "headers": {
+      "Content-Type": "application/json"
+    },
+    "body": {
+      "status": 200,
+      "body": {
+        "users": [
+          {
+            "id": 1,
+            "name": "John Doe",
+            "email": "john@example.com",
+            "role": "admin"
+          }
+        ]
+      }
+    }
+  },
+  "verificationQuestion": "Соответствует ли ответ API документации?",
+  "verificationOptions": [
+    {
+      "value": "match",
+      "label": "Да, ответ полностью соответствует документации"
+    },
+    {
+      "value": "no_match",
+      "label": "Нет, ответ не соответствует документации"
+    },
+    {
+      "value": "partial_match",
+      "label": "Частично, некоторые поля не соответствуют документации"
+    },
+    {
+      "value": "no_response",
+      "label": "Нет, не получен никакой ответ от API"
+    }
+  ],
+  "verification_answers": {
+    "beginnerAnswers": [
+      "match"
+    ],
+    "advancedAnswerKeywords": [
+      "соответствует",
+      "документация",
+      "ответ"
+    ]
+  }
+}
