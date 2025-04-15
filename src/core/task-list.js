@@ -258,15 +258,15 @@ function addWorkspaceContainer(parentElement, task) {
         <!-- API Клиент (теперь на всю ширину) -->
         <div class="api-client-panel api-client-full-width">
             <div class="api-client-tabs">
-                <div class="api-tab active" data-tab="description">Описание задания</div>
-                <div class="api-tab" data-tab="request">Запрос</div>
+                <div class="api-tab" data-tab="description">Описание задания</div>
+                <div class="api-tab active" data-tab="request">Запрос</div>
                 <div class="api-tab" data-tab="verification">Проверка</div>
                 <div class="api-tab" data-tab="collection">Коллекция</div>
                 <div class="api-tab" data-tab="tests">Тесты</div>
             </div>
             
-            <!-- ВКЛАДКА: Описание задания (активна по умолчанию) -->
-            <div class="api-client-tab-content active" id="description-tab">
+            <!-- ВКЛАДКА: Описание задания -->
+            <div class="api-client-tab-content" id="description-tab">
                 <div class="task-subtitle" id="task-subtitle">${task.subtitle}</div>
                 
                 <div class="task-meta">
@@ -294,7 +294,7 @@ function addWorkspaceContainer(parentElement, task) {
                 </div>
             </div>
             
-            <div class="api-client-tab-content" id="request-tab">
+            <div class="api-client-tab-content active" id="request-tab">
                 <div class="form-group">
                     <label for="request-url">URL</label>
                     <input type="text" id="request-url" class="form-control" placeholder="Введите URL запроса">

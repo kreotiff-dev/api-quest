@@ -310,8 +310,8 @@
                             </div>
                         </div>
                         <div class="ai-input-area">
-                            <textarea id="ai-input" class="ai-input" placeholder="Опишите вашу проблему или задайте вопрос..."></textarea>
-                            <button id="send-to-ai" class="btn btn-primary">
+                            <textarea id="ai-input" class="ai-input" placeholder="Опишите вашу проблему или задайте вопрос..." onkeydown="if(event.key === 'Enter' && !event.shiftKey) { event.preventDefault(); window.aiAssistantSendQuestion(); return false; }"></textarea>
+                            <button id="send-to-ai" class="btn btn-primary" onclick="window.aiAssistantSendQuestion()">
                                 <i class="fas fa-paper-plane"></i> Отправить
                             </button>
                         </div>
@@ -326,5 +326,19 @@
     <!-- Контейнер уведомлений -->
     <div id="notifications-container"></div>
     <script type="module" src="main.js"></script>
+    <script type="module">
+        // Инициализация AI ассистента при загрузке страницы
+        import { initAiAssistant } from './src/ai/assistant.js';
+        document.addEventListener('DOMContentLoaded', () => {
+            setTimeout(() => {
+                try {
+                    console.log('Запуск инициализации AI ассистента из index.html');
+                    initAiAssistant();
+                } catch (error) {
+                    console.error('Ошибка при инициализации AI ассистента:', error);
+                }
+            }, 1000);
+        });
+    </script>
 </body>
 </html>

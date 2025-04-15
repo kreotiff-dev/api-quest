@@ -27,20 +27,30 @@ on('screenChanged', (screenName) => {
  * Инициализация AI-ассистента
  */
 export function initAiAssistant() {
-    if (initialized) return;
+    console.log('Вызвана функция инициализации AI-ассистента');
+    
+    if (initialized) {
+        console.log('AI-ассистент уже инициализирован, пропускаем повторную инициализацию');
+        return;
+    }
     
     // Проверяем старый интерфейс
     messageContainer = document.getElementById('ai-feedback-content');
+    console.log('Результат поиска ai-feedback-content:', messageContainer ? 'найден' : 'не найден');
     
     // Если старый интерфейс не найден, проверяем новый
     if (!messageContainer) {
         messageContainer = document.getElementById('ai-messages');
+        console.log('Результат поиска ai-messages:', messageContainer ? 'найден' : 'не найден');
     }
     
     if (!messageContainer) {
         console.error('Не найден контейнер для сообщений AI-ассистента');
+        alert('Ошибка: Не найден контейнер для сообщений AI-ассистента');
         return;
     }
+    
+    console.log('Используется контейнер с id:', messageContainer.id);
     
     // Добавляем приветственное сообщение
     addAiMessage(getResponse('welcome'));
@@ -59,7 +69,12 @@ export function initAiAssistant() {
 
 // Объявление функции handleKeyPress для использования с addEventListener/removeEventListener
 function handleKeyPress(e) {
-    if (e.key === 'Enter') {
+    // Для textarea отправляем сообщение только если нажата клавиша Enter без Shift
+    if (e.key === 'Enter' && !e.shiftKey) {
+        // Предотвращаем добавление новой строки для textarea
+        if (e.target.tagName.toLowerCase() === 'textarea') {
+            e.preventDefault();
+        }
         sendQuestion();
     }
 }
@@ -79,8 +94,23 @@ function setupEventListeners() {
     document.getElementById('ai-question-input')?.addEventListener('keypress', handleKeyPress);
     
     // Обработчики для нового интерфейса в index.html
-    document.getElementById('send-to-ai')?.addEventListener('click', sendQuestion);
-    document.getElementById('ai-input')?.addEventListener('keypress', handleKeyPress);
+    // Прямой доступ к кнопке отправки в новом интерфейсе
+    const sendButton = document.getElementById('send-to-ai');
+    if (sendButton) {
+        sendButton.addEventListener('click', sendQuestion);
+        console.log('Обработчик send-to-ai добавлен');
+    } else {
+        console.warn('Элемент send-to-ai не найден');
+    }
+    
+    // Прямой доступ к текстовому полю в новом интерфейсе
+    const aiInput = document.getElementById('ai-input');
+    if (aiInput) {
+        aiInput.addEventListener('keypress', handleKeyPress);
+        console.log('Обработчик ai-input добавлен');
+    } else {
+        console.warn('Элемент ai-input не найден');
+    }
 }
 
 /**
@@ -485,18 +515,24 @@ function processStandardAnalysis(task, method, url, headers, requestBody, bodyVa
  * Обработка пользовательского вопроса
  */
 export async function sendQuestion() {
+    console.log('Функция sendQuestion вызвана');
+    
     // Проверяем старый интерфейс
     let inputField = document.getElementById('ai-question-input');
     
     // Если не найден, проверяем новый интерфейс в index.html
     if (!inputField) {
+        console.log('Поле ai-question-input не найдено, пробуем найти ai-input');
         inputField = document.getElementById('ai-input');
     }
     
     if (!inputField) {
-        console.error('Не найдено поле ввода ассистента');
+        console.error('Не найдено поле ввода ассистента (ни ai-question-input, ни ai-input)');
+        alert('Ошибка: Не найдено поле ввода ассистента');
         return;
     }
+    
+    console.log('Найдено поле ввода:', inputField.id);
     
     const question = inputField.value.trim();
     
@@ -635,8 +671,16 @@ function addTypingIndicator() {
  * @param {HTMLElement} indicator - Элемент индикатора
  */
 function removeTypingIndicator(indicator) {
-    if (indicator && indicator.parentNode) {
+    if (!indicator) {
+        console.warn('Попытка удалить несуществующий индикатор печатания');
+        return;
+    }
+    
+    if (indicator.parentNode) {
+        console.log('Удаление индикатора печатания');
         indicator.parentNode.removeChild(indicator);
+    } else {
+        console.warn('Не найден родительский элемент индикатора печатания');
     }
 }
 
@@ -755,6 +799,9 @@ function getAvailableSources() {
     // Временное решение - в будущем будет заменено на импорт из модуля источников API
     return window.ApiSourceManager?.getAvailableSources() || [];
 }
+
+// Добавляем функцию в глобальную область видимости для прямого вызова из HTML
+window.aiAssistantSendQuestion = sendQuestion;
 
 // Экспортируем публичный API модуля
 export default {

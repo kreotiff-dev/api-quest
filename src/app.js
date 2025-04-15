@@ -587,6 +587,16 @@ export async function init() {
             }
         }, 500);
         
+        // Инициализация AI ассистента
+        setTimeout(() => {
+            import('./ai/assistant.js').then(module => {
+                module.initAiAssistant();
+                console.log('AI-ассистент инициализирован при старте приложения');
+            }).catch(error => {
+                console.error('Ошибка при инициализации AI-ассистента:', error);
+            });
+        }, 800);
+        
         // Генерируем событие инициализации
         events.emit('appInitialized');
 
