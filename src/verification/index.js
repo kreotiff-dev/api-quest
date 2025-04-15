@@ -60,7 +60,8 @@ export function initVerificationTab() {
         currentMode = 'multiple-choice';
     }
     
-    // Отображаем соответствующий блок вопросов
+    // Отображаем соответствующий блок вопросов, но не меняем видимость вкладки
+    // Это важно, чтобы не активировать вкладку "Проверка" при загрузке
     multipleChoiceContainer.style.display = currentMode === 'multiple-choice' ? 'block' : 'none';
     freeFormContainer.style.display = currentMode === 'free-form' ? 'block' : 'none';
     
@@ -84,10 +85,12 @@ export function initVerificationTab() {
             currentMode = 'multiple-choice';
         }
         
-        // Отображаем соответствующий блок вопросов
+        // Отображаем соответствующий блок вопросов (без переключения на вкладку "Проверка")
         if (document.getElementById('multiple-choice-questions') && document.getElementById('free-form-questions')) {
             document.getElementById('multiple-choice-questions').style.display = currentMode === 'multiple-choice' ? 'block' : 'none';
             document.getElementById('free-form-questions').style.display = currentMode === 'free-form' ? 'block' : 'none';
+            
+            console.log('Подготовлены блоки вопросов для вкладки "Проверка" без активации вкладки');
         }
     });
     
