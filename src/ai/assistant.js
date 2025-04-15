@@ -29,7 +29,14 @@ on('screenChanged', (screenName) => {
 export function initAiAssistant() {
     if (initialized) return;
     
+    // Проверяем старый интерфейс
     messageContainer = document.getElementById('ai-feedback-content');
+    
+    // Если старый интерфейс не найден, проверяем новый
+    if (!messageContainer) {
+        messageContainer = document.getElementById('ai-messages');
+    }
+    
     if (!messageContainer) {
         console.error('Не найден контейнер для сообщений AI-ассистента');
         return;
@@ -67,11 +74,13 @@ function setupEventListeners() {
     // Обработчик для кнопки "Анализировать"
     document.getElementById('ai-analyze-btn')?.addEventListener('click', analyzeRequest);
     
-    // Обработчик для кнопки отправки вопроса
+    // Обработчики для кнопки отправки вопроса в старом интерфейсе
     document.getElementById('ai-question-send')?.addEventListener('click', sendQuestion);
-    
-    // Обработчик для поля ввода (отправка по Enter)
     document.getElementById('ai-question-input')?.addEventListener('keypress', handleKeyPress);
+    
+    // Обработчики для нового интерфейса в index.html
+    document.getElementById('send-to-ai')?.addEventListener('click', sendQuestion);
+    document.getElementById('ai-input')?.addEventListener('keypress', handleKeyPress);
 }
 
 /**
@@ -79,16 +88,42 @@ function setupEventListeners() {
  * @param {string} message - Текст сообщения
  */
 export function addAiMessage(message) {
+    // Проверяем старый интерфейс
     if (!messageContainer) {
         messageContainer = document.getElementById('ai-feedback-content');
-        if (!messageContainer) return;
+        
+        // Если старый интерфейс не найден, проверяем новый
+        if (!messageContainer) {
+            messageContainer = document.getElementById('ai-messages');
+        }
+        
+        if (!messageContainer) {
+            console.error('Не найден контейнер для сообщений AI-ассистента');
+            return;
+        }
     }
     
-    const messageElement = document.createElement('div');
-    messageElement.className = 'ai-message';
-    messageElement.innerHTML = `<p>${message}</p>`;
+    // Создаем элемент сообщения в зависимости от интерфейса
+    const isNewInterface = messageContainer.id === 'ai-messages';
     
-    messageContainer.appendChild(messageElement);
+    if (isNewInterface) {
+        // Новый интерфейс (index.html)
+        const messageElement = document.createElement('div');
+        messageElement.className = 'ai-message system';
+        messageElement.innerHTML = `
+            <div class="ai-message-content">
+                ${message}
+            </div>
+            <div class="ai-message-time">сейчас</div>
+        `;
+        messageContainer.appendChild(messageElement);
+    } else {
+        // Старый интерфейс
+        const messageElement = document.createElement('div');
+        messageElement.className = 'ai-message';
+        messageElement.innerHTML = `<p>${message}</p>`;
+        messageContainer.appendChild(messageElement);
+    }
     
     // Прокрутка к последнему сообщению
     messageContainer.scrollTop = messageContainer.scrollHeight;
@@ -102,16 +137,42 @@ export function addAiMessage(message) {
  * @param {string} message - Текст сообщения
  */
 export function addUserMessage(message) {
+    // Проверяем старый интерфейс
     if (!messageContainer) {
         messageContainer = document.getElementById('ai-feedback-content');
-        if (!messageContainer) return;
+        
+        // Если старый интерфейс не найден, проверяем новый
+        if (!messageContainer) {
+            messageContainer = document.getElementById('ai-messages');
+        }
+        
+        if (!messageContainer) {
+            console.error('Не найден контейнер для сообщений AI-ассистента');
+            return;
+        }
     }
     
-    const messageElement = document.createElement('div');
-    messageElement.className = 'user-message';
-    messageElement.innerHTML = `<p>${message}</p>`;
+    // Создаем элемент сообщения в зависимости от интерфейса
+    const isNewInterface = messageContainer.id === 'ai-messages';
     
-    messageContainer.appendChild(messageElement);
+    if (isNewInterface) {
+        // Новый интерфейс (index.html)
+        const messageElement = document.createElement('div');
+        messageElement.className = 'ai-message user';
+        messageElement.innerHTML = `
+            <div class="ai-message-content">
+                <p>${message}</p>
+            </div>
+            <div class="ai-message-time">сейчас</div>
+        `;
+        messageContainer.appendChild(messageElement);
+    } else {
+        // Старый интерфейс
+        const messageElement = document.createElement('div');
+        messageElement.className = 'user-message';
+        messageElement.innerHTML = `<p>${message}</p>`;
+        messageContainer.appendChild(messageElement);
+    }
     
     // Прокрутка к последнему сообщению
     messageContainer.scrollTop = messageContainer.scrollHeight;
@@ -129,17 +190,22 @@ export function resetAiAssistant() {
     initialized = false;
     messageContainer = null;
 
+    // Удаляем обработчики старого интерфейса
     document.getElementById('ai-help-btn')?.removeEventListener('click', askHelp);
     document.getElementById('ai-analyze-btn')?.removeEventListener('click', analyzeRequest);
     document.getElementById('ai-question-send')?.removeEventListener('click', sendQuestion);
     
-    const inputElement = document.getElementById('ai-question-input');
-    if (inputElement) {
-        inputElement.removeEventListener('keypress', (e) => {
-            if (e.key === 'Enter') {
-                sendQuestion();
-            }
-        });
+    const oldInputElement = document.getElementById('ai-question-input');
+    if (oldInputElement) {
+        oldInputElement.removeEventListener('keypress', handleKeyPress);
+    }
+    
+    // Удаляем обработчики нового интерфейса
+    document.getElementById('send-to-ai')?.removeEventListener('click', sendQuestion);
+    
+    const newInputElement = document.getElementById('ai-input');
+    if (newInputElement) {
+        newInputElement.removeEventListener('keypress', handleKeyPress);
     }
     
     console.log('AI-ассистент сброшен');
@@ -419,8 +485,18 @@ function processStandardAnalysis(task, method, url, headers, requestBody, bodyVa
  * Обработка пользовательского вопроса
  */
 export async function sendQuestion() {
-    const inputField = document.getElementById('ai-question-input');
-    if (!inputField) return;
+    // Проверяем старый интерфейс
+    let inputField = document.getElementById('ai-question-input');
+    
+    // Если не найден, проверяем новый интерфейс в index.html
+    if (!inputField) {
+        inputField = document.getElementById('ai-input');
+    }
+    
+    if (!inputField) {
+        console.error('Не найдено поле ввода ассистента');
+        return;
+    }
     
     const question = inputField.value.trim();
     
@@ -513,14 +589,38 @@ function isRelevantQuestion(question) {
  * @returns {HTMLElement} Элемент индикатора
  */
 function addTypingIndicator() {
+    // Проверяем старый интерфейс
     if (!messageContainer) {
         messageContainer = document.getElementById('ai-feedback-content');
-        if (!messageContainer) return null;
+        
+        // Если старый интерфейс не найден, проверяем новый
+        if (!messageContainer) {
+            messageContainer = document.getElementById('ai-messages');
+        }
+        
+        if (!messageContainer) {
+            console.error('Не найден контейнер для индикатора печатания');
+            return null;
+        }
     }
     
+    // Создаем элемент индикатора в зависимости от интерфейса
+    const isNewInterface = messageContainer.id === 'ai-messages';
     const indicatorElement = document.createElement('div');
-    indicatorElement.className = 'ai-message typing-indicator';
-    indicatorElement.innerHTML = `<p><span class="dot"></span><span class="dot"></span><span class="dot"></span></p>`;
+    
+    if (isNewInterface) {
+        // Новый интерфейс (index.html)
+        indicatorElement.className = 'ai-message system typing-indicator';
+        indicatorElement.innerHTML = `
+            <div class="ai-message-content">
+                <p><span class="dot"></span><span class="dot"></span><span class="dot"></span></p>
+            </div>
+        `;
+    } else {
+        // Старый интерфейс
+        indicatorElement.className = 'ai-message typing-indicator';
+        indicatorElement.innerHTML = `<p><span class="dot"></span><span class="dot"></span><span class="dot"></span></p>`;
+    }
     
     messageContainer.appendChild(indicatorElement);
     
