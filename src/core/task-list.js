@@ -145,6 +145,23 @@ export function loadTask(taskId) {
     
     console.log('Задание найдено:', task);
     
+    // Проверяем текущую активную вкладку перед загрузкой нового задания
+    let activeTab = null;
+    try {
+        // Если в данный момент активна вкладка "Проверка", переключимся на "Запрос" для нового задания
+        const currentActiveTab = document.querySelector('.api-tab.active');
+        if (currentActiveTab && currentActiveTab.getAttribute('data-tab') === 'verification') {
+            console.log('Обнаружена активная вкладка "Проверка", будет выполнено переключение на "Запрос"');
+            activeTab = 'request';
+        } else if (currentActiveTab) {
+            // Сохраняем текущую активную вкладку, если это не "Проверка"
+            activeTab = currentActiveTab.getAttribute('data-tab');
+            console.log('Сохранена текущая активная вкладка:', activeTab);
+        }
+    } catch (e) {
+        console.log('Не удалось определить текущую вкладку:', e);
+    }
+    
     // Устанавливаем текущую задачу в глобальном контексте
     setCurrentTask(task);
     
@@ -153,14 +170,14 @@ export function loadTask(taskId) {
     switchScreen('workspace');
     setCurrentScreen('workspace');
     
-    // Заполняем содержимым страницу
+    // Заполняем содержимым страницу и передаем информацию о сохраненной вкладке
     setTimeout(() => {
-        fillWorkspaceContent(task);
+        fillWorkspaceContent(task, activeTab);
     }, 50);
 }
 
-function fillWorkspaceContent(task) {
-    console.log('Заполнение содержимого рабочей области');
+function fillWorkspaceContent(task, activeTab = 'request') {
+    console.log('Заполнение содержимого рабочей области, сохраненная вкладка:', activeTab);
     
     // Находим workspaceScreen
     const workspaceScreen = document.getElementById('workspace-screen');
@@ -218,6 +235,27 @@ function fillWorkspaceContent(task) {
             const success = module.default.initVerificationTab();
             if (success) {
                 console.log('Вкладка "Проверка" успешно инициализирована при загрузке задания');
+                
+                // Активируем нужную вкладку после инициализации всех компонентов
+                setTimeout(() => {
+                    // Находим нужную вкладку по сохраненному значению или используем "request" по умолчанию
+                    // Но всегда используем "request" вместо "verification" при загрузке нового задания
+                    const tabToActivate = activeTab === 'verification' ? 'request' : activeTab;
+                    console.log('Активация вкладки после инициализации:', tabToActivate);
+                    
+                    const tabElement = document.querySelector(`.api-tab[data-tab="${tabToActivate}"]`);
+                    if (tabElement) {
+                        console.log('Активируем вкладку:', tabToActivate);
+                        tabElement.click();
+                    } else {
+                        // Если не нашли нужную вкладку, активируем "Запрос" как запасной вариант
+                        const requestTab = document.querySelector('.api-tab[data-tab="request"]');
+                        if (requestTab) {
+                            console.log('Не найдена сохраненная вкладка, активируем "Запрос"');
+                            requestTab.click();
+                        }
+                    }
+                }, 50);
             } else {
                 console.warn('Не удалось инициализировать вкладку "Проверка" при загрузке задания, DOM не готов');
             }
